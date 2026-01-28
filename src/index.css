@@ -1,0 +1,82 @@
+@import "tailwindcss";
+
+
+/* @theme {
+  --color-primary: #3f1acc;
+  --color-primary-hover: #7e22ce;
+} */
+/* * {
+  font-family: Geist, "Geist Fallback", sans-serif;
+} */
+.primary-font {
+  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+   font-weight: 600;
+}
+
+.secondary-font {
+  font-family: 'Inter', 'Outfit', system-ui, sans-serif;
+  font-weight: 600;
+}
+.light-font {
+  font-family: 'Inter', 'Outfit', system-ui, sans-serif;
+  font-weight: 400;
+}
+
+.input-field {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  background-color: transparent;
+  font-size: 1rem;
+  color: #111827;
+  outline: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.input-field::placeholder {
+  color: #9ca3af;
+  font-size: 0.95rem;
+}
+
+.input-field:focus {
+  box-shadow: 0 0 0 2px oklch(56.002% 0.28846 302.399 / 0.544);
+}
+
+.input-field:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.input-label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  color: #374151;
+  font-size: 1rem;
+  line-height: 1.5;
+  letter-spacing: 0.015em;
+}
+
+.input-label.inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hide-scrollbar {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE 10+ */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.flex-tab {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
