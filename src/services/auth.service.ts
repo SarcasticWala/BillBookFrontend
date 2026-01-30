@@ -10,9 +10,15 @@ let recaptchaVerifier: RecaptchaVerifier | null = null;
 
 export const sendOtpFirebase = async (mobile: string) => {
   if (!recaptchaVerifier) {
+    const container = document.getElementById("recaptcha-container");
+
+    if (!container) {
+      throw new Error("reCAPTCHA container not found in DOM");
+    }
+
     recaptchaVerifier = new RecaptchaVerifier(
       auth,
-      "recaptcha-container",
+      container,
       {
         size: "invisible",
       }
@@ -28,7 +34,8 @@ export const sendOtpFirebase = async (mobile: string) => {
 
 export const verifyOtpFirebase = async (otp: string) => {
   if (!confirmationResult) {
-    throw new Error("OTP not sent");
+    throw new Error("OTP not sent yet");
   }
+
   return confirmationResult.confirm(otp);
 };
