@@ -6,6 +6,7 @@ import { LuScanLine } from "react-icons/lu";
 import { useFormik } from "formik";
 import { Button } from "../components/UI/Button";
 
+import { useAuth } from "../hooks/useAuth";
 
 const countryCodes = [
   { code: "+91", name: "India", flag: "🇮🇳" },
@@ -18,38 +19,56 @@ export default function AuthPage() {
   const [showOtpFlow, setShowOtpFlow] = useState(false);
   const [otpTimer, setOtpTimer] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
+  const { sendOtp, verifyOtp } = useAuth();
 
 
   const formik = useFormik({
-    initialValues: {
-      mobile: "",
-      otp: "",
-    },
-    onSubmit: async (values) => {
-      if (showOtpFlow) {
-        if (values.otp.length < 4) return;
-        setIsLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsLoading(false);
-        navigate("/parties");
-      } else {
-        if (values.mobile.trim() === "" || values.mobile.length < 6) return;
-        setIsLoading(true);
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsLoading(false);
+  initialValues: {
+    mobile: "",
+    otp: "",
+  },
+  onSubmit: async (values) => {
+    try {
+      setIsLoading(true);
+
+      if (!showOtpFlow) {
+        // SEND OTP
+        await sendOtp(values.mobile);
         setShowOtpFlow(true);
         setOtpTimer(30);
+      } else {
+        // VERIFY OTP
+        const user = await verifyOtp(values.otp);
+        console.log("Logged in user:", user);
+        navigate("/parties");
       }
-    },
-  });
+    } catch (error: any) {
+      alert(error.message || "Something went wrong");
+    } finally {
+      setIsLoading(false);
+    }
+  },
+});
 
-  const handleResendOtp = () => {
+
+const handleResendOtp = async () => {
+  try {
+    setIsLoading(true);
+    await sendOtp(formik.values.mobile);
     setOtpTimer(30);
-  };
+  } catch (err: any) {
+    alert(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50  secondary-font">
       <main className="max-w-6xl mx-auto px-6 py-12 grid lg:grid-cols-2 gap-12 items-center">
+       <div id="recaptcha-container"></div>
+
         <section className="space-y-10">
           <h2 className="text-5xl primary-font text-gray-900 leading-tight">
             Power Your{" "}
