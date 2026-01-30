@@ -2,7 +2,7 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const saleApi = createApi({
   reducerPath: "saleApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://billbook-backend-dar1.onrender.com/api/sale" }),
+  baseQuery: fetchBaseQuery({ baseUrl: "" }),
   tagTypes: ["Sale"],
   endpoints: (builder) => ({
     createSale: builder.mutation({
