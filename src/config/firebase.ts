@@ -1,5 +1,5 @@
-import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
-import { type Auth, getAuth } from "firebase/auth";
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -10,14 +10,5 @@ const firebaseConfig = {
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
-// Initialize Firebase only once - prevent duplicate initialization
-let app: FirebaseApp;
-const existingApps = getApps();
-if (existingApps.length === 0) {
-  app = initializeApp(firebaseConfig);
-} else {
-  app = existingApps[0];
-}
-
-export { app };
-export const auth: Auth = getAuth(app);
+export const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
