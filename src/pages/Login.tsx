@@ -65,10 +65,12 @@ const handleResendOtp = async () => {
 
 
   return (
+    
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50  secondary-font">
-      <main className="max-w-6xl mx-auto px-6 py-12 grid lg:grid-cols-2 gap-12 items-center">
-       <div id="recaptcha-container"></div>
+      <div id="recaptcha-container"></div>
 
+      <main className="max-w-6xl mx-auto px-6 py-12 grid lg:grid-cols-2 gap-12 items-center">
+       
         <section className="space-y-10">
           <h2 className="text-5xl primary-font text-gray-900 leading-tight">
             Power Your{" "}
