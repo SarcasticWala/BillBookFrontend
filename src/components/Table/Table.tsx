@@ -30,28 +30,27 @@ export function Table<T>({
   return (
     <div className="mt-6 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden secondary-font">
       <div className="overflow-x-auto max-h-[calc(100vh-300px)] ">
-        <table className="w-full table-auto text-sm text-left text-black secondary-font">
-          <thead className="bg-gray-50">
+        <table className="w-full table-auto text-sm text-left text-gray-700 secondary-font">
+          <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
             <tr>
               {columns.map((col, idx) => (
                 <th
                   key={idx}
-                  className={`px-4 py-3 text-[0.9rem] text-gray-900 uppercase secondary-font ${
+                  className={`px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${
                     isInvoicePage ? "text-center" : ""
                   }`}
-                  style={{ fontFamily: "Outfit, sans-serif", fontWeight: 500 }}
                 >
                   {col.header}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-gray-200 secondary-font">
+          <tbody className="bg-white divide-y divide-gray-100 secondary-font">
             {data.length === 0 ? (
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="text-center py-6 text-gray-400 secondary-font"
+                  className="text-center py-10 text-gray-400 secondary-font"
                 >
                   {emptyMessage}
                 </td>
@@ -60,13 +59,13 @@ export function Table<T>({
               data.map((row, rowIndex) => (
                 <tr
                   key={rowIndex}
-                  className="hover:bg-gray-50 cursor-pointer"
+                  className="hover:bg-blue-50/40 cursor-pointer transition-colors"
                   onClick={() => rowClick?.(rowIndex, row)}
                 >
                   {columns.map((col, colIndex) => (
                     <td
                       key={colIndex}
-                      className="px-6 py-4 whitespace-nowrap secondary-font"
+                      className="px-6 py-3.5 whitespace-nowrap secondary-font"
                     >
                       {col.render
                         ? col.render(

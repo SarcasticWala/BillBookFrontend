@@ -128,7 +128,14 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
       <h2 className="text-lg font-semibold mb-4">Inventory List</h2>
 
       {isLoading ? (
-        <div className="space-y-4">{/* Loading skeleton */}</div>
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-12 w-full bg-gray-100 rounded-md animate-pulse"
+            />
+          ))}
+        </div>
       ) : isError ? (
         <p className="text-center text-red-500 py-4">Failed to load items.</p>
       ) : items.length === 0 ? (

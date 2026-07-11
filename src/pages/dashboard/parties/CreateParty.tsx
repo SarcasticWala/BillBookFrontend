@@ -133,7 +133,7 @@ const CreateParty: React.FC = () => {
   }, [partyData]);
 
   return (
-    <div className="p-6 mx-auto secondary-font">
+    <div className="p-6 max-w-6xl mx-auto secondary-font">
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-2 text-gray-800">
@@ -233,14 +233,7 @@ const CreateParty: React.FC = () => {
                       selected === "TO_PAY" ? "TO_PAY" : "TO_COLLECT"
                     );
                   }}
-                  style={{
-                    border: "none",
-                    backgroundColor: "#d9d9d9",
-                    height: "41.6px",
-                    borderBottomLeftRadius: 0,
-                    borderTopLeftRadius: 0,
-                  }}
-                  className="input-field w-full border border-gray-300 rounded px-3 py-2 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="input-field w-full !rounded-l-none bg-gray-100 text-gray-700"
                 >
                   <option value="TO_COLLECT">To Collect</option>
                   <option value="TO_PAY">To Pay</option>
@@ -395,6 +388,9 @@ const CreateParty: React.FC = () => {
           isOpen={!!showModalFor}
           onClose={() => setShowModalFor(null)}
           onSave={handleAddressSave}
+          initial={
+            showModalFor === "shipping" ? shippingAddressData : billingAddressData
+          }
         />
 
         <hr className="border-gray-300" />

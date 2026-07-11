@@ -92,7 +92,7 @@ const Sidebar = () => {
       key={key}
       onClick={() => handleActive(label)}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === label
-        ? "bg-blue-600 text-white font-medium shadow-md"
+        ? "bg-primary text-white font-medium shadow-md"
         : "text-gray-300 hover:bg-slate-700 hover:text-white"
         }`}
     >
@@ -174,7 +174,7 @@ const Sidebar = () => {
             </div>
           </div>
 
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer">
+          <button className="w-full bg-primary hover:bg-primary-hover text-white text-sm font-medium py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer">
             + Create Sales Invoice
           </button>
 
@@ -188,7 +188,7 @@ const Sidebar = () => {
               <div
                 onClick={() => setOpenItems(!openItems)}
                 className={`flex justify-between items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === "Items"
-                  ? "bg-blue-600 text-white font-medium shadow-md"
+                  ? "bg-primary text-white font-medium shadow-md"
                   : "text-gray-300 hover:bg-slate-700 hover:text-white"
                   }`}
               >
@@ -215,7 +215,7 @@ const Sidebar = () => {
               <div
                 onClick={() => setOpenSales(!openSales)}
                 className={`flex justify-between items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === "Sales"
-                  ? "bg-blue-600 text-white font-medium shadow-md"
+                  ? "bg-primary text-white font-medium shadow-md"
                   : "text-gray-300 hover:bg-slate-700 hover:text-white"
                   }`}
               >
@@ -254,7 +254,7 @@ const Sidebar = () => {
               <div
                 onClick={() => setOpenPurchases(!openPurchases)}
                 className={`flex justify-between items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === "Purchases"
-                  ? "bg-blue-600 text-white font-medium shadow-md"
+                  ? "bg-primary text-white font-medium shadow-md"
                   : "text-gray-300 hover:bg-slate-700 hover:text-white"
                   }`}
               >
@@ -303,7 +303,7 @@ const Sidebar = () => {
               <div
                 onClick={() => setOpenAccounting(!openAccounting)}
                 className={`flex justify-between items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === "Accounting"
-                  ? "bg-blue-600 text-white font-medium shadow-md"
+                  ? "bg-primary text-white font-medium shadow-md"
                   : "text-gray-300 hover:bg-slate-700 hover:text-white"
                   }`}
               >
@@ -346,7 +346,7 @@ const Sidebar = () => {
                 }}
                 className={`flex items-center justify-between px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 relative ${
                   active === label
-                    ? "bg-blue-600 text-white font-medium shadow-md"
+                    ? "bg-primary text-white font-medium shadow-md"
                     : "text-gray-300 hover:bg-slate-700 hover:text-white"
                 }`}
               >

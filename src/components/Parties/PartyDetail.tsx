@@ -8,25 +8,37 @@ export default function PartyDetail() {
   const { id } = useParams();
   const { data, isLoading, isError } = useGetPartyByIdQuery(id || "");
 
-  if (isLoading) return <div>Loading...</div>;
-  if (isError || !data?.data) return <div>Error loading party</div>;
+  if (isLoading)
+    return <div className="p-6 text-gray-500">Loading party…</div>;
+  if (isError || !data?.data)
+    return (
+      <div className="p-6 text-center text-red-500">Error loading party</div>
+    );
 
   const party = data.data;
 
-  console.log(party);
-
-  if (isLoading) return <p>Loading...</p>;
-  if (isError || !party) return <p>Party not found.</p>;
+  // Tolerant readers — API may return the write shape (partyName/gstNumber/
+  // billingAddressData) or a mapped read shape (name/gstin/billingAddress).
+  const name = party.partyName || party.name || "-";
+  const mobile = party.mobileNo || party.mobileNumber;
+  const gstin = party.gstNumber || party.gstin;
+  const categoryName =
+    party.partyCatagory?.catagory ||
+    party.partyCatagory?.name ||
+    (typeof party.partyCatagory === "string" ? party.partyCatagory : undefined);
 
   const formatAddress = (addr: any) => {
-    if (!addr?.miscData) return "-";
-    const { ad, st, pin } = addr.miscData;
-    return `${ad}, ${st}, ${pin}`;
+    const a = addr?.miscData || addr;
+    if (!a || (!a.ad && !a.st && !a.pin)) return "-";
+    return [a.ad, a.st, a.city, a.pin].filter(Boolean).join(", ");
   };
 
+  const billing = party.billingAddress || party.billingAddressData;
+  const shipping = party.shippingAddress || party.shippingAddressData;
   const isSameAddress =
-    party.billingAddress?.id === party.shippingAddress?.id ||
-    party.billingAddress?.type === "BOTH";
+    party.isSameAddress ??
+    (party.billingAddress?.id === party.shippingAddress?.id ||
+      party.billingAddress?.type === "BOTH");
 
   return (
     <div className="p-6 max-w-6xl mx-auto">
@@ -39,7 +51,7 @@ export default function PartyDetail() {
           >
             <FaArrowLeft className="mr-2" />
           </button>
-          <h2 className="text-xl font-semibold ml-4">{party.name}</h2>
+          <h2 className="text-xl primary-font ml-4">{name}</h2>
         </div>
         <button
           onClick={() => navigate(`/parties/create-party/${party.id}`)}
@@ -68,17 +80,14 @@ export default function PartyDetail() {
         {/* General Details */}
         <div className="bg-gray-50 border border-gray-200 rounded p-4">
           <h3 className="font-semibold text-gray-700 mb-3">General Details</h3>
-          <DetailRow label="Party Name" value={party.name} />
+          <DetailRow label="Party Name" value={name} />
           <DetailRow
             label="Party Type"
             value={party.partyType === "CUSTOMER" ? "Customer" : "Supplier"}
           />
-          <DetailRow label="Mobile Number" value={party.mobileNumber} />
+          <DetailRow label="Mobile Number" value={mobile} />
 
-          <DetailRow
-            label="Party Category"
-            value={party.partyCatagory?.catagory}
-          />
+          <DetailRow label="Party Category" value={categoryName} />
           <DetailRow label="Email" value={party.email} />
           <DetailRow
             label="Opening Balance"
@@ -89,23 +98,23 @@ export default function PartyDetail() {
         {/* Business Details */}
         <div className="bg-gray-50 border border-gray-200 rounded p-4">
           <h3 className="font-semibold text-gray-700 mb-3">Business Details</h3>
-          <DetailRow label="GSTIN" value={party.gstin} />
+          <DetailRow label="GSTIN" value={gstin} />
           <DetailRow label="PAN Number" value={party.panNumber} />
 
           {isSameAddress ? (
             <DetailRow
               label="Billing & Shipping Address"
-              value={formatAddress(party.billingAddress)}
+              value={formatAddress(billing)}
             />
           ) : (
             <>
               <DetailRow
                 label="Billing Address"
-                value={formatAddress(party.billingAddress)}
+                value={formatAddress(billing)}
               />
               <DetailRow
                 label="Shipping Address"
-                value={formatAddress(party.shippingAddress)}
+                value={formatAddress(shipping)}
               />
             </>
           )}

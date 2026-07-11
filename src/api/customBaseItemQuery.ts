@@ -1,15 +1,16 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_BASE_URL, withAuth, authHeader } from "../config/api";
 
-const baseUrl = "https://billbook-backend-dar1.onrender.com/api/item/";
+const baseUrl = `${API_BASE_URL}/api/item/`;
 
 const defaultBaseQuery = fetchBaseQuery({
   baseUrl,
   prepareHeaders: (headers, { endpoint }) => {
-    // Skip setting JSON Content-Type for file uploads
-    if (endpoint !== "bulkCreateitems" && endpoint !== "createItemWithImage") {
+    // Skip setting JSON Content-Type for multipart file uploads
+    if (endpoint !== "bulkCreateItems" && endpoint !== "createItem") {
       headers.set("Content-Type", "application/json");
     }
-    return headers;
+    return withAuth(headers);
   },
 });
 
@@ -24,6 +25,7 @@ export const customItemBaseQuery = async (
     try {
       const res = await fetch(baseUrl + args.url, {
         method: args.method || "POST",
+        headers: authHeader(), // don't set Content-Type; browser sets multipart boundary
         body: args.body,
       });
 

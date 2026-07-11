@@ -15,11 +15,15 @@ import BulkUploadModal from "../UI/BulkUploadModal";
 interface Props {
   selectedCategories: string[];
   setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
+  searchTerm: string;
+  setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const PartiesHeader: React.FC<Props> = ({
   selectedCategories,
   setSelectedCategories,
+  searchTerm,
+  setSearchTerm,
 }) => {
   const navigate = useNavigate();
   const { data: partiesDataRaw, isLoading } = useGetPartiesQuery(undefined);
@@ -88,7 +92,7 @@ export const PartiesHeader: React.FC<Props> = ({
       </div> */}
       <div className="flex flex-wrap gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1 min-w-[200px] cursor-pointer transition-all duration-200 hover:border-blue-500">
-          <div className="flex items-center secondary-fon  gap-1 text-blue-400 mb-1">
+          <div className="flex items-center secondary-font gap-1 text-blue-400 mb-1">
             <MdBarChart className="text-base" />
             <p className="text-sm secondary-font">All Parties</p>
           </div>
@@ -136,7 +140,9 @@ export const PartiesHeader: React.FC<Props> = ({
           type="text"
           name="parties-search"
           placeholder="Search Party"
-          className="w-full sm:w-[200px] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full sm:w-[200px] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
         />
 
         <CategorySelector

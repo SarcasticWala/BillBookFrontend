@@ -13,29 +13,44 @@ interface Party {
 
 interface PartiesTableProps {
   selectedCategories: string[];
+  searchTerm?: string;
 }
+
+// Tolerant field readers — the API may return either the write shape
+// (partyName/mobileNo) or a mapped read shape (name/mobileNumber).
+const partyName = (p: any): string => p.partyName || p.name || "";
+const partyMobile = (p: any): string => p.mobileNo || p.mobileNumber || "";
+const partyCategoryName = (p: any): string =>
+  p.partyCatagory?.catagory || p.partyCatagory?.name || (typeof p.partyCatagory === "string" ? p.partyCatagory : "") || "";
 
 export const PartiesTable: React.FC<PartiesTableProps> = ({
   selectedCategories,
+  searchTerm = "",
 }) => {
   const navigate = useNavigate();
   const { data, isLoading, isError } = useGetPartiesQuery(undefined);
   const partiesData = data?.data || [];
 
-  const filteredParties = selectedCategories.length
-    ? partiesData.filter((p: any) =>
-        selectedCategories.includes(p.partyCatagory?.id)
-      )
-    : partiesData;
+  const query = searchTerm.trim().toLowerCase();
+  const filteredParties = partiesData.filter((p: any) => {
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(p.partyCatagory?.id ?? p.partyCatagory);
+    const matchesSearch =
+      !query ||
+      partyName(p).toLowerCase().includes(query) ||
+      partyMobile(p).toLowerCase().includes(query);
+    return matchesCategory && matchesSearch;
+  });
 
   const parties: Party[] = filteredParties.map((party: any) => ({
-    name: party.name || "-",
-    category: party.partyCatagory?.catagory || "-",
-    mobile: party.mobileNumber || "-",
+    name: partyName(party) || "-",
+    category: partyCategoryName(party) || "-",
+    mobile: partyMobile(party) || "-",
     type: party.partyType === "CUSTOMER" ? "Customer" : "Supplier",
-    balance: `${party.openingBalanceType === "TO_COLLECT" ? "+" : "-"} ₹${
+    balance: `${party.openingBalanceType === "TO_COLLECT" ? "+" : "-"} ₹${(
       party.openingBalance || 0
-    }`,
+    ).toLocaleString("en-IN")}`,
   }));
 
   const columns: Column<Party>[] = [

@@ -5,12 +5,17 @@ interface SearchDateFilterProps {
   filterValue: string;
   onFilterChange: (value: string) => void;
   placeholder?: string;
+  /** Optional controlled search text. When provided, the search input is wired. */
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
 }
 
 export const SearchDateFilter: React.FC<SearchDateFilterProps> = ({
   filterValue,
   onFilterChange,
   placeholder = 'Search',
+  searchValue,
+  onSearchChange,
 }) => {
   return (
     <div className="flex flex-col sm:flex-row gap-3 w-full light-font">
@@ -21,7 +26,9 @@ export const SearchDateFilter: React.FC<SearchDateFilterProps> = ({
           type="text"
           name="search"
           placeholder={placeholder}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none"
+          value={searchValue ?? ''}
+          onChange={(e) => onSearchChange?.(e.target.value)}
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
         />
       </div>
 
@@ -31,7 +38,7 @@ export const SearchDateFilter: React.FC<SearchDateFilterProps> = ({
         <select
           value={filterValue}
           onChange={(e) => onFilterChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none"
+          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
         >
           <option>Today</option>
           <option>Yesterday</option>

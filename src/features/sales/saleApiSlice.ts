@@ -1,8 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_BASE_URL, withAuth } from "../../config/api";
 
 export const saleApi = createApi({
   reducerPath: "saleApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${API_BASE_URL}/api/sale`,
+    prepareHeaders: (headers) => withAuth(headers),
+  }),
   tagTypes: ["Sale"],
   endpoints: (builder) => ({
     createSale: builder.mutation({

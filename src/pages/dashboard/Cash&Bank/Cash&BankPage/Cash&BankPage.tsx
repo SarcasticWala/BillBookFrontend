@@ -74,7 +74,7 @@ const CashAndBankPage = () => {
         <div className="lg:col-span-3  bg-white p-4 rounded-md shadow-sm border border-gray-200  ">
           {/* Tab and Filter */}
           <div className="flex items-center  justify-between mb-6">
-            <div className="text-sm font-semibold text-[#5c27fe] border-b-2 border-[#5c27fe] pb-1">
+            <div className="text-sm font-semibold text-accent border-b-2 border-accent pb-1">
               Transactions
             </div>
              <div className="w-full lg:w-1/2">

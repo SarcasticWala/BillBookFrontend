@@ -60,6 +60,7 @@ const CreatePurchaseForm: React.FC = () => {
       partyId: Yup.string().required("Supplier is required"),
       invioceNo: Yup.string().required("Invoice number is required"),
       invioceDate: Yup.date().required("Invoice date is required"),
+      itemDetails: Yup.array().min(1, "Add at least one item"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
@@ -291,41 +292,19 @@ const handleTaxChange = (index: number, value: string) => {
         isOpen={isItemModalOpen}
         onClose={() => setItemModalOpen(false)}
         onSelect={(items) => {
-          console.log("[DEBUG] Items selected from modal:", items);
-
           const newRows = items.map((it) => {
-            const isPreowned = it.itemProductType === "OLD" ? true : false;
             const taxRate = it.taxPercentage || 0;
-            const purchasePrice = it.purchasePrice || 0;
-            let pricePerItem = it.salePrice;
-            let taxAmount = 0;
-            let totalAmount = 0;
-            // let discountBeforeTaxTemp = 0;
-
-            if (isPreowned) {
-              const profit = Math.max(pricePerItem - purchasePrice, 0);
-
-              taxAmount = parseFloat(((profit * taxRate) / 100).toFixed(2));
-              totalAmount = pricePerItem + taxAmount;
-            } else {
-              if (it.isSaleTaxApplicable) {
-                const taxablePrice = parseFloat(
-                  ((pricePerItem * 100) / (100 + taxRate)).toFixed(2)
-                );
-                taxAmount = parseFloat(
-                  ((taxablePrice * taxRate) / 100).toFixed(2)
-                );
-                totalAmount = taxablePrice + taxAmount;
-                pricePerItem = taxablePrice;
-              } else {
-                taxAmount = pricePerItem * (taxRate / 100);
-                totalAmount = pricePerItem + taxAmount;
-              }
-            }
+            // Purchases are priced at the purchase price (not sale price);
+            // GST is added on top of it.
+            const pricePerItem = it.purchasePrice || 0;
+            const taxAmount = parseFloat(
+              ((pricePerItem * taxRate) / 100).toFixed(2)
+            );
+            const totalAmount = pricePerItem + taxAmount;
 
             return {
               itemId: it.id,
-              hasSerialization: it.hasSerialization || false,
+              hasSerialization: it.hasSerialization ?? it.hasSerialNo ?? false,
               serialNos: it.serialNos || [],
               hsnCode: it.hsnCode || "",
               quantity: it.quantity || 1,
@@ -334,11 +313,9 @@ const handleTaxChange = (index: number, value: string) => {
               discountBeforeTax: 0,
               taxAmount,
               taxPercentage: taxRate,
-              totalAmount: totalAmount * it.quantity,
+              totalAmount: totalAmount * (it.quantity || 1),
               itemName: it.name,
-              isSaleTaxApplicable: Boolean(it.isSaleTaxApplicable),
-              isPreowned,
-              purchasePrice,
+              purchasePrice: pricePerItem,
             };
           });
 
@@ -355,7 +332,7 @@ const handleTaxChange = (index: number, value: string) => {
           <div className="flex items-center gap-2 text-gray-800">
             <FaArrowLeft
               className="cursor-pointer text-lg"
-              onClick={() => navigate("/purchases/invoices")}
+              onClick={() => navigate("/purchases/purchaseInvoice")}
             />
             <h1 className="text-xl">Create Purchase Invoice</h1>
           </div>

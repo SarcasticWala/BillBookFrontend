@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { FiShield } from "react-icons/fi";
 import { BsClock } from "react-icons/bs";
 import { LuScanLine } from "react-icons/lu";
 import { useFormik } from "formik";
+import { toast } from "react-toastify";
 import { Button } from "../components/UI/Button";
 
 import { useAuth } from "../hooks/useAuth";
@@ -14,12 +15,18 @@ const countryCodes = [
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const [showCountryCodes, setShowCountryCodes] = useState(false);
   const [selectedCountry] = useState(countryCodes[0]);
   const [showOtpFlow, setShowOtpFlow] = useState(false);
   const [otpTimer, setOtpTimer] = useState(30);
   const [isLoading, setIsLoading] = useState(false);
   const { sendOtp, verifyOtp } = useAuth();
+
+  // Count the resend timer down once the OTP step is shown.
+  useEffect(() => {
+    if (!showOtpFlow || otpTimer <= 0) return;
+    const id = setInterval(() => setOtpTimer((t) => (t > 0 ? t - 1 : 0)), 1000);
+    return () => clearInterval(id);
+  }, [showOtpFlow, otpTimer]);
 
 
   const formik = useFormik({
@@ -43,7 +50,7 @@ export default function AuthPage() {
         navigate("/parties");
       }
     } catch (error: any) {
-      alert(error.message || "Something went wrong");
+      toast.error(error?.message || "Something went wrong");
     } finally {
       setIsLoading(false);
     }
@@ -57,7 +64,7 @@ const handleResendOtp = async () => {
     await sendOtp(formik.values.mobile);
     setOtpTimer(30);
   } catch (err: any) {
-    alert(err.message);
+    toast.error(err?.message || "Failed to resend OTP");
   } finally {
     setIsLoading(false);
   }
@@ -115,13 +122,10 @@ const handleResendOtp = async () => {
                 <label htmlFor="mobile" className="text-sm font-medium text-gray-700 mb-1 block">Mobile Number</label>
                 <div className="flex border rounded-lg overflow-hidden shadow-sm">
                   <div className="relative">
-                    <button
-                      onClick={() => setShowCountryCodes(!showCountryCodes)}
-                      type="button"
-                      className="px-4 py-3 border-r bg-gray-100 text-sm font-medium"
-                    >
+                    {/* Only +91 is supported today; shown as a static prefix. */}
+                    <span className="flex items-center px-4 py-3 border-r bg-gray-100 text-sm font-medium">
                       {selectedCountry.flag} {selectedCountry.code}
-                    </button>
+                    </span>
                   </div>
 
                   <input
@@ -138,7 +142,7 @@ const handleResendOtp = async () => {
 
                 <Button
                   type="submit"
-                  disabled={!formik.values.mobile || formik.values.mobile.length < 6 || isLoading}
+                  disabled={formik.values.mobile.length !== 10 || isLoading}
                   className="mt-5 w-full"
                 >
                   {isLoading ? "Sending..." : "Send OTP"}
@@ -155,7 +159,7 @@ const handleResendOtp = async () => {
 
                 <Button
                   type="button"
-                  onClick={() => console.log("QR Code login clicked")}
+                  onClick={() => toast.info("QR code login is coming soon")}
                   className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900"
                 >
                   <LuScanLine className="w-5 h-5" />

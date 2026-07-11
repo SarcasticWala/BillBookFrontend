@@ -1,6 +1,7 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_BASE_URL, withAuth, authHeader } from "../config/api";
 
-const baseUrl = "https://billbook-backend-dar1.onrender.com/api/party/";
+const baseUrl = `${API_BASE_URL}/api/party/`;
 
 const defaultBaseQuery = fetchBaseQuery({
   baseUrl,
@@ -8,7 +9,7 @@ const defaultBaseQuery = fetchBaseQuery({
     if (endpoint !== "bulkCreateParties") {
       headers.set("Content-Type", "application/json");
     }
-    return headers;
+    return withAuth(headers);
   },
 });
 
@@ -18,6 +19,7 @@ export const customBaseQuery = async (args: any, api: any, extraOptions: any) =>
     try {
       const res = await fetch(baseUrl + args.url, {
         method: args.method || "POST",
+        headers: authHeader(), // browser sets multipart Content-Type/boundary
         body: args.body,
       });
 

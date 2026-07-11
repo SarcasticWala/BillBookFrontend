@@ -53,7 +53,7 @@ const PurchaseOrder = () => {
       </div>
 
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
-        <div className="flex items-center text-[#5c27fe] font-medium text-sm gap-2 border-b-2 border-[#5c27fe] pb-1">
+        <div className="flex items-center text-accent font-medium text-sm gap-2 border-b-2 border-accent pb-1">
           <span>●</span>
           <span className="secondary-font">Purchase Orders</span>
         </div>

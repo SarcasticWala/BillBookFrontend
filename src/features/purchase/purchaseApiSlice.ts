@@ -1,8 +1,12 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { API_BASE_URL, withAuth } from "../../config/api";
 
 export const purchaseApi = createApi({
   reducerPath: "purchaseApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://billbook-backend-dar1.onrender.com/api/purchase" }),
+  baseQuery: fetchBaseQuery({
+    baseUrl: `${API_BASE_URL}/api/purchase`,
+    prepareHeaders: (headers) => withAuth(headers),
+  }),
   tagTypes: ["Purchase"],
   endpoints: (builder) => ({
     // Create purchase invoice

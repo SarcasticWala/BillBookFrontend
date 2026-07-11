@@ -1,16 +1,22 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Select from "react-select";
+import { toast } from "react-toastify";
 import { useGetLocationsQuery } from "../../features/party/partyApiSlice";
+import { Button } from "./Button";
+
+interface AddressData {
+  ad: string;
+  st: string;
+  city: string;
+  pin: string;
+}
 
 interface AddressModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (address: {
-    ad: string;
-    st: string;
-    city: string;
-    pin: string;
-  }) => void;
+  onSave: (address: AddressData) => void;
+  /** Existing address to prefill (edit mode / re-open). */
+  initial?: AddressData | null;
 }
 
 interface CityDto {
@@ -26,11 +32,23 @@ const AddressModal: React.FC<AddressModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  initial,
 }) => {
   const [street, setStreet] = useState("");
   const [state, setState] = useState<string | null>(null);
   const [city, setCity] = useState<string | null>(null);
   const [pincode, setPincode] = useState("");
+
+  // Seed from the existing address each time the modal opens; clear otherwise
+  // so stale billing values don't leak into the shipping form.
+  useEffect(() => {
+    if (isOpen) {
+      setStreet(initial?.ad || "");
+      setState(initial?.st || null);
+      setCity(initial?.city || null);
+      setPincode(initial?.pin || "");
+    }
+  }, [isOpen, initial]);
 
   const { data, isLoading } = useGetLocationsQuery(undefined, {
     skip: !isOpen,
@@ -51,8 +69,12 @@ const AddressModal: React.FC<AddressModalProps> = ({
   }));
 
   const handleSave = () => {
+    if (!street.trim()) {
+      toast.error("Street address is required");
+      return;
+    }
     onSave({
-      ad: street,
+      ad: street.trim(),
       st: state || "",
       city: city || "",
       pin: pincode,
@@ -139,18 +161,12 @@ const AddressModal: React.FC<AddressModalProps> = ({
 
         {/* Buttons */}
         <div className="flex justify-end gap-2 mt-6">
-          <button
-            onClick={onClose}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded cursor-pointer"
-          >
+          <Button variant="outline" onClick={onClose}>
             Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            className="bg-blue-600 text-white px-4 py-2 rounded cursor-pointer"
-          >
+          </Button>
+          <Button variant="primary" onClick={handleSave}>
             Save
-          </button>
+          </Button>
         </div>
       </div>
     </div>

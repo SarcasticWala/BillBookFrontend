@@ -1,16 +1,16 @@
-import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import godownImg from "../../../public/assets/godwon.jpg";
+import { Button } from "../UI/Button";
 
 const Godown = () => {
-  const navigate = useNavigate();
-
   const handleEnableClick = () => {
-    navigate("/godown/enable"); 
+    // Godown/warehouse management is not yet available (needs backend support).
+    toast.info("Godown management is coming soon");
   };
 
   return (
-    <div className="p-6 bg-white min-h-screen">
-      <h1 className="text-2xl font-bold text-gray-800 mb-8">Godown Management</h1>
+    <div className="p-6 bg-white">
+      <h1 className="text-2xl primary-font text-gray-800 mb-8">Godown Management</h1>
 
       <div className="flex flex-col items-center justify-center text-center mt-10">
         <img
@@ -24,12 +24,9 @@ const Godown = () => {
         <p className="text-gray-600 text-sm max-w-xl mb-6">
           You can easily monitor and track your inventory across various Godowns and Store locations
         </p>
-        <button
-          onClick={handleEnableClick}
-          className="bg-primary hover:bg-primary-hover text-white px-6 py-2 rounded-md shadow-sm transition"
-        >
+        <Button variant="primary" size="lg" onClick={handleEnableClick}>
           Enable Godown
-        </button>
+        </Button>
       </div>
     </div>
   );

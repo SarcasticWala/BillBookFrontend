@@ -1,5 +1,5 @@
 import { MdAutoGraph } from "react-icons/md";
-import { FaBoxOpen, FaRupeeSign, FaTimes } from "react-icons/fa";
+import { FaBoxOpen, FaRupeeSign, FaTimes, FaFileExcel } from "react-icons/fa";
 import { CategorySelector } from "../Category/CategorySelector";
 import { Button } from "../UI/Button";
 import { useEffect, useState } from "react";
@@ -88,12 +88,12 @@ const Inventory = () => {
   }, [searchQuery]);
 
   return (
-    <div className="p-6 min-h-screen">
-      <h1 className="text-xl primary-font mb-6 text-gray-800">Items</h1>
+    <div className="p-6">
+      <h1 className="text-2xl primary-font mb-6 text-gray-800">Items</h1>
 
       {/* Stat Cards */}
       <div className="flex flex-col md:flex-row gap-4 mb-4">
-        <div className="w-full md:w-1/2 bg-white p-4 rounded-md shadow-sm border border-gray-200 hover:border-blue-500 transition-all cursor-pointer">
+        <div className="w-full md:w-1/2 bg-white p-4 rounded-md shadow-sm border border-gray-200">
           <div className="flex items-center gap-1 text-blue-600 mb-1">
             <MdAutoGraph className="text-base" />
             <p className="text-sm secondary-font">Stock Value</p>
@@ -103,12 +103,12 @@ const Inventory = () => {
             {isLoading ? (
               <StatSkeleton />
             ) : (
-              <span>{stockValue.toLocaleString()}</span>
+              <span>{stockValue.toLocaleString("en-IN")}</span>
             )}
           </div>
         </div>
 
-        <div className="w-full md:w-1/2 bg-white p-4 rounded-md shadow-sm border border-gray-200 hover:border-yellow-500 transition-all cursor-pointer">
+        <div className="w-full md:w-1/2 bg-white p-4 rounded-md shadow-sm border border-gray-200">
           <div className="flex items-center gap-1 text-yellow-500 mb-1">
             <FaBoxOpen className="text-base" />
             <p className="text-sm secondary-font">Low Stock</p>
@@ -176,15 +176,14 @@ const Inventory = () => {
         </button>
 
         <div className="ml-auto flex gap-2">
-          {/* Bulk Upload Button */}
-          {/******************************  Bulk Upload Button ADD IN FUTURE *********************************/}
-          {/* <button
+          {/* Bulk Upload trigger */}
+          <button
             onClick={() => setIsBulkModalOpen(true)}
-            className="border border-gray-300 rounded px-3 py-2 bg-white text-gray-700 shadow-sm hover:bg-gray-100 flex gap-1 items-center cursor-pointer"
+            className="border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-700 shadow-sm hover:bg-gray-50 flex gap-1 items-center cursor-pointer"
           >
             <FaFileExcel />
             <span className="light-font">Bulk Add Items</span>
-          </button> */}
+          </button>
 
           <BulkUploadModal
             isOpen={isBulkModalOpen}

@@ -102,6 +102,11 @@ export const ItemSelectorModal: React.FC<{
             salePrice: item.salePrice || 0,
             hsnCode: item.hsnCode || "",
             taxPercentage: item.gstRate?.value || 0,
+            // Carry tax/pricing flags so downstream tax calc works for
+            // non-serialized items too (parity with the serialized path).
+            isSaleTaxApplicable: item.isSaleTaxApplicable,
+            itemProductType: item.itemProductType,
+            purchasePrice: item.purchasePrice || 0,
           },
         ]);
       }

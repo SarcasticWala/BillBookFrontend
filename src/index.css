@@ -1,21 +1,39 @@
 @import "tailwindcss";
 
+/* Design tokens — single source of truth for brand colors.
+   Primary = blue-600 (the dominant existing pattern); accent = the purple
+   used for active tabs/section headers. These generate Tailwind utilities:
+   bg-primary, text-primary, hover:bg-primary-hover, text-accent, border-accent. */
+@theme {
+  --color-primary: #2563eb;        /* blue-600 */
+  --color-primary-hover: #1d4ed8;  /* blue-700 */
+  --color-accent: #5c27fe;         /* tab / section-header accent */
+}
 
-/* @theme {
-  --color-primary: #3f1acc;
-  --color-primary-hover: #7e22ce;
-} */
-/* * {
-  font-family: Geist, "Geist Fallback", sans-serif;
-} */
+/* Professional base: crisp text rendering + consistent body color/background. */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  color: #1f2937;            /* gray-800 */
+  background-color: #f8fafc; /* slate-50 — soft app canvas behind white cards */
+  font-family: 'Inter', 'Outfit', system-ui, sans-serif;
+}
+
 .primary-font {
   font-family: 'Outfit', 'Inter', system-ui, sans-serif;
    font-weight: 600;
+   letter-spacing: -0.01em; /* tighter headings read more polished */
 }
 
+/* secondary-font = medium weight for labels/sub-headers, so it sits below
+   the 600-weight primary-font headings and restores type hierarchy. */
 .secondary-font {
   font-family: 'Inter', 'Outfit', system-ui, sans-serif;
-  font-weight: 600;
+  font-weight: 500;
 }
 .light-font {
   font-family: 'Inter', 'Outfit', system-ui, sans-serif;
@@ -26,23 +44,27 @@
   width: 100%;
   min-width: 0;
   border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 8px;
   padding: 0.5rem 0.75rem;
-  background-color: transparent;
-  font-size: 1rem;
+  background-color: #ffffff;
+  font-size: 0.95rem;
   color: #111827;
   outline: none;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
 .input-field::placeholder {
   color: #9ca3af;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+}
+
+.input-field:hover:not(:disabled):not(:focus) {
+  border-color: #9ca3af; /* gray-400 — subtle hover affordance */
 }
 
 .input-field:focus {
-  box-shadow: 0 0 0 2px oklch(56.002% 0.28846 302.399 / 0.544);
+  border-color: #2563eb; /* blue-600 */
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
 }
 
 .input-field:disabled {

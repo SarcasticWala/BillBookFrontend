@@ -68,6 +68,7 @@ export const CreateSalesForm: React.FC = () => {
       partyId: Yup.string().required("Party is required"),
       invioceNo: Yup.string().required("Invoice number is required"),
       invioceDate: Yup.date().required("Invoice date is required"),
+      itemDetails: Yup.array().min(1, "Add at least one item"),
     }),
     onSubmit: async (values, { setSubmitting }) => {
       const errors = await formik.validateForm();
@@ -889,13 +890,11 @@ const handleTaxPercentChange = (index: number, val: string) => {
         {/* Summary */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6">
           <div>
-            <label
-              className="text-sm cursor-pointer text-blue-600"
-              onClick={() => formik.setFieldValue("notes", formik.values.notes)}
-            >
-              + Add Notes
+            <label htmlFor="sale-notes" className="text-sm text-gray-700 input-label">
+              Notes
             </label>
             <textarea
+              id="sale-notes"
               name="notes"
               value={formik.values.notes}
               onChange={formik.handleChange}
