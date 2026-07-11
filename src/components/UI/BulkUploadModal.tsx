@@ -76,7 +76,7 @@ const BulkUploadModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-[#00000070] bg-opacity-40 z-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
         <button
           className="absolute top-3 right-4 text-gray-600 text-xl hover:text-gray-900"

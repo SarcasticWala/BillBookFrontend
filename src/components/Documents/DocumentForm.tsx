@@ -1,0 +1,342 @@
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
+import { FaArrowLeft } from "react-icons/fa";
+import { FiPlus, FiTrash2 } from "react-icons/fi";
+import { Card } from "../UI/Card";
+import { Input } from "../UI/Input";
+import { Select } from "../UI/Select";
+import { Textarea } from "../UI/Textarea";
+import { Button } from "../UI/Button";
+import { useGetPartiesQuery } from "../../features/party/partyApiSlice";
+import { useGetItemsQuery } from "../../features/item/itemApiSlice";
+import { useCreateDocumentMutation } from "../../features/document/documentApiSlice";
+
+interface Row {
+  itemId: string;
+  name: string;
+  quantity: number;
+  price: number;
+  taxRate: number;
+}
+
+interface DocumentFormProps {
+  type: string; // e.g. "QUOTATION"
+  title: string; // e.g. "Quotation"
+  backTo: string; // list route
+  numberPrefix: string; // e.g. "QUO"
+  partyLabel?: string; // "Customer" | "Supplier"
+}
+
+const emptyRow: Row = { itemId: "", name: "", quantity: 1, price: 0, taxRate: 0 };
+const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
+const today = () => new Date().toISOString().slice(0, 10);
+
+const DocumentForm: React.FC<DocumentFormProps> = ({
+  type,
+  title,
+  backTo,
+  numberPrefix,
+  partyLabel = "Party",
+}) => {
+  const navigate = useNavigate();
+  const { data: partiesRes } = useGetPartiesQuery(undefined);
+  const { data: itemsRes } = useGetItemsQuery();
+  const [createDocument, { isLoading }] = useCreateDocumentMutation();
+
+  const parties: any[] = partiesRes?.data || [];
+  const items: any[] = itemsRes?.data || [];
+
+  const [partyId, setPartyId] = useState("");
+  const [docNo, setDocNo] = useState(`${numberPrefix}-${today().replace(/-/g, "").slice(2)}`);
+  const [docDate, setDocDate] = useState(today());
+  const [rows, setRows] = useState<Row[]>([{ ...emptyRow }]);
+  const [notes, setNotes] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const partyOptions = parties.map((p) => ({
+    value: p.id,
+    label: p.partyName || p.name || "(unnamed)",
+  }));
+  const itemOptions = items.map((it) => ({
+    value: it.id,
+    label: it.itemName || it.serviceName || "(item)",
+  }));
+
+  const updateRow = (idx: number, patch: Partial<Row>) =>
+    setRows((prev) => prev.map((r, i) => (i === idx ? { ...r, ...patch } : r)));
+
+  const onSelectItem = (idx: number, itemId: string) => {
+    const it = items.find((x) => x.id === itemId);
+    if (!it) return updateRow(idx, { itemId: "", name: "" });
+    updateRow(idx, {
+      itemId,
+      name: it.itemName || it.serviceName || "",
+      price: Number(it.salePrice) || 0,
+      taxRate: Number(it.gstRate?.value) || 0,
+    });
+  };
+
+  const addRow = () => setRows((prev) => [...prev, { ...emptyRow }]);
+  const removeRow = (idx: number) =>
+    setRows((prev) => (prev.length > 1 ? prev.filter((_, i) => i !== idx) : prev));
+
+  const totals = useMemo(() => {
+    let subTotal = 0;
+    let totalTax = 0;
+    rows.forEach((r) => {
+      const amount = round2(r.quantity * r.price);
+      subTotal += amount;
+      totalTax += round2((amount * r.taxRate) / 100);
+    });
+    subTotal = round2(subTotal);
+    totalTax = round2(totalTax);
+    return { subTotal, totalTax, grandTotal: round2(subTotal + totalTax) };
+  }, [rows]);
+
+  const validate = () => {
+    const e: Record<string, string> = {};
+    if (!partyId) e.partyId = `${partyLabel} is required`;
+    if (!docNo.trim()) e.docNo = "Number is required";
+    if (!docDate) e.docDate = "Date is required";
+    const validRows = rows.filter((r) => r.name.trim() && r.quantity > 0);
+    if (!validRows.length) e.items = "Add at least one item with a quantity";
+    setErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleSubmit = async (ev: React.FormEvent) => {
+    ev.preventDefault();
+    if (!validate()) {
+      toast.error("Please fix the highlighted fields");
+      return;
+    }
+    try {
+      await createDocument({
+        type,
+        docNo: docNo.trim(),
+        docDate,
+        partyId,
+        notes: notes.trim(),
+        items: rows
+          .filter((r) => r.name.trim() && r.quantity > 0)
+          .map((r) => ({
+            itemId: r.itemId || null,
+            name: r.name.trim(),
+            quantity: r.quantity,
+            price: r.price,
+            taxRate: r.taxRate,
+          })),
+      }).unwrap();
+      toast.success(`${title} created successfully`);
+      navigate(backTo);
+    } catch (err: any) {
+      toast.error(err?.data?.message || `Failed to create ${title.toLowerCase()}`);
+    }
+  };
+
+  return (
+    <div className="p-6 max-w-5xl mx-auto">
+      <button
+        type="button"
+        onClick={() => navigate(backTo)}
+        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mb-4"
+      >
+        <FaArrowLeft />
+        <span>Back</span>
+      </button>
+
+      <h1 className="text-2xl primary-font text-gray-800 mb-1">Create {title}</h1>
+      <p className="text-sm light-font text-gray-500 mb-6">
+        Fill in the details below
+      </p>
+
+      <form onSubmit={handleSubmit} noValidate className="space-y-6">
+        {/* Header details */}
+        <Card className="p-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-5">
+            <Select
+              label={partyLabel}
+              value={partyId}
+              onChange={(e) => {
+                setPartyId(e.target.value);
+                setErrors((p) => ({ ...p, partyId: "" }));
+              }}
+              options={partyOptions}
+              placeholder={`Select ${partyLabel.toLowerCase()}`}
+              error={errors.partyId}
+              required
+            />
+            <Input
+              label={`${title} Number`}
+              value={docNo}
+              onChange={(e) => setDocNo(e.target.value)}
+              error={errors.docNo}
+              required
+            />
+            <Input
+              label="Date"
+              type="date"
+              value={docDate}
+              onChange={(e) => setDocDate(e.target.value)}
+              error={errors.docDate}
+              required
+            />
+          </div>
+        </Card>
+
+        {/* Items */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg primary-font text-gray-800">Items</h2>
+            <Button type="button" variant="outline" size="sm" onClick={addRow}>
+              <FiPlus /> Add Item
+            </Button>
+          </div>
+
+          {errors.items && (
+            <p className="mb-3 text-sm text-red-500">{errors.items}</p>
+          )}
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 border-b border-gray-200">
+                  <th className="py-2 pr-2 min-w-[220px]">Item</th>
+                  <th className="py-2 px-2 w-20">Qty</th>
+                  <th className="py-2 px-2 w-28">Price</th>
+                  <th className="py-2 px-2 w-24">Tax %</th>
+                  <th className="py-2 px-2 w-28 text-right">Amount</th>
+                  <th className="py-2 pl-2 w-10"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r, idx) => {
+                  const amount = round2(
+                    r.quantity * r.price * (1 + r.taxRate / 100)
+                  );
+                  return (
+                    <tr key={idx} className="border-b border-gray-100 align-top">
+                      <td className="py-2 pr-2">
+                        <select
+                          value={r.itemId}
+                          onChange={(e) => onSelectItem(idx, e.target.value)}
+                          className="input-field bg-white mb-1"
+                        >
+                          <option value="">Select item (optional)</option>
+                          {itemOptions.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          value={r.name}
+                          onChange={(e) => updateRow(idx, { name: e.target.value })}
+                          placeholder="Item name"
+                          className="input-field"
+                        />
+                      </td>
+                      <td className="py-2 px-2">
+                        <input
+                          type="number"
+                          min={0}
+                          value={r.quantity}
+                          onChange={(e) =>
+                            updateRow(idx, { quantity: Number(e.target.value) })
+                          }
+                          className="input-field text-right"
+                        />
+                      </td>
+                      <td className="py-2 px-2">
+                        <input
+                          type="number"
+                          min={0}
+                          value={r.price}
+                          onChange={(e) =>
+                            updateRow(idx, { price: Number(e.target.value) })
+                          }
+                          className="input-field text-right"
+                        />
+                      </td>
+                      <td className="py-2 px-2">
+                        <input
+                          type="number"
+                          min={0}
+                          value={r.taxRate}
+                          onChange={(e) =>
+                            updateRow(idx, { taxRate: Number(e.target.value) })
+                          }
+                          className="input-field text-right"
+                        />
+                      </td>
+                      <td className="py-2 px-2 text-right font-medium text-gray-800">
+                        ₹{amount.toLocaleString("en-IN")}
+                      </td>
+                      <td className="py-2 pl-2 text-center">
+                        <button
+                          type="button"
+                          onClick={() => removeRow(idx)}
+                          className="text-gray-400 hover:text-red-500 transition"
+                          title="Remove"
+                        >
+                          <FiTrash2 />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Totals */}
+          <div className="flex justify-end mt-4">
+            <div className="w-full max-w-xs space-y-1.5 text-sm">
+              <div className="flex justify-between text-gray-600">
+                <span>Sub Total</span>
+                <span>₹{totals.subTotal.toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex justify-between text-gray-600">
+                <span>Tax</span>
+                <span>₹{totals.totalTax.toLocaleString("en-IN")}</span>
+              </div>
+              <div className="flex justify-between pt-2 border-t border-gray-200 text-base primary-font text-gray-900">
+                <span>Grand Total</span>
+                <span>₹{totals.grandTotal.toLocaleString("en-IN")}</span>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Notes */}
+        <Card className="p-6">
+          <Textarea
+            label="Notes"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            rows={3}
+            placeholder="Optional notes / terms"
+            maxLength={500}
+          />
+        </Card>
+
+        <div className="flex justify-end gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate(backTo)}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isLoading}>
+            {isLoading ? "Saving..." : `Save ${title}`}
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default DocumentForm;

@@ -28,7 +28,7 @@ const CreateCategory: React.FC<Props> = ({ isOpen, onClose, onAddCategory }) => 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-white bg-opacity-40 flex items-center justify-center z-30">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-30">
       <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Create New Category</h2>

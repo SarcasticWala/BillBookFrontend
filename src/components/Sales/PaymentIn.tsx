@@ -4,6 +4,8 @@ import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Table } from "../Table/Table";
 import type { Column } from "../Table/Table";
 import { Button } from "../UI/Button";
+import { useNavigate } from "react-router-dom";
+import { useGetPaymentsQuery } from "../../features/payment/paymentApiSlice";
 
 type Payment = {
   date: string;
@@ -13,8 +15,16 @@ type Payment = {
 };
 
 const PaymentIn = () => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("Last 365 Days");
-  const data: Payment[] = [];
+
+  const { data: res } = useGetPaymentsQuery("PAYMENT_IN");
+  const data: Payment[] = (res?.data || []).map((p: any) => ({
+    date: p.paymentDate ? new Date(p.paymentDate).toLocaleDateString("en-IN") : "-",
+    paymentNumber: p.paymentNo,
+    partyName: p.partyName || "-",
+    amount: `₹${(p.amount || 0).toLocaleString("en-IN")}`,
+  }));
 
   const columns: Column<Payment>[] = [
     { header: "Date", accessor: "date" },
@@ -27,8 +37,12 @@ const PaymentIn = () => {
     <div className="bg-[#f9fafc] min-h-screen px-2 py-2 md:px-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1  className="text-xl primary-font  text-gray-800">Payment In</h1>
-        <Button className="w-full primary-font sm:w-auto cursor-pointer"
-      >Create Payment In</Button>
+        <Button
+          className="w-full sm:w-auto cursor-pointer"
+          onClick={() => navigate("/sales/paymentin/create")}
+        >
+          Create Payment In
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">

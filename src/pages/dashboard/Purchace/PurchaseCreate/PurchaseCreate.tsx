@@ -240,7 +240,7 @@ const handleTaxChange = (index: number, value: string) => {
           type="number"
           value={row.pricePerItem}
           onChange={(e) => handleValueChange(index, "pricePerItem", e.target.value)}
-          className="w-24 rounded px-1 py-0.5 text-right bg-pink-50 border-none focus:outline-none text-[13px]"
+          className="w-24 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
         />
       ),
     },
@@ -251,7 +251,7 @@ const handleTaxChange = (index: number, value: string) => {
           type="number"
           value={row.taxPercentage}
           onChange={(e) => handleTaxChange(index, e.target.value)}
-          className="w-20 rounded px-1 py-0.5 text-right bg-pink-50 border-none focus:outline-none text-[13px]"
+          className="w-20 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
         />
       ),
     },
@@ -282,7 +282,7 @@ const handleTaxChange = (index: number, value: string) => {
   ];
 
   return (
-    <div className="p-6 mx-auto max-w-7xl">
+    <div className="p-6 max-w-5xl mx-auto">
       <PartySelectorModal
         isOpen={isPartyModalOpen}
         onClose={() => setPartyModalOpen(false)}
@@ -328,20 +328,21 @@ const handleTaxChange = (index: number, value: string) => {
 
       <form onSubmit={formik.handleSubmit} className="space-y-8">
         {/* header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 text-gray-800">
-            <FaArrowLeft
-              className="cursor-pointer text-lg"
-              onClick={() => navigate("/purchases/purchaseInvoice")}
-            />
-            <h1 className="text-xl">Create Purchase Invoice</h1>
-          </div>
+        <div>
           <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            type="button"
+            onClick={() => navigate("/purchases/purchaseInvoice")}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mb-4"
           >
-            Save Purchase Invoice
+            <FaArrowLeft />
+            <span>Back</span>
           </button>
+          <h1 className="text-2xl primary-font text-gray-800 mb-1">
+            Create Purchase Invoice
+          </h1>
+          <p className="text-sm light-font text-gray-500">
+            Fill in the details below
+          </p>
         </div>
 
         {/* supplier selection */}
@@ -519,6 +520,17 @@ const handleTaxChange = (index: number, value: string) => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="flex justify-end gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate("/purchases/purchaseInvoice")}
+          >
+            Cancel
+          </Button>
+          <Button type="submit">Save Purchase Invoice</Button>
         </div>
       </form>
     </div>

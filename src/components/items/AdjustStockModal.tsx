@@ -158,15 +158,15 @@ const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
       onClose={() => setOpen(false)}
       className="relative z-50"
     >
-      <div className="fixed inset-0 bg-black/20" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-xl max-h-[80vh] overflow-y-auto">
+        <Dialog.Panel className="bg-white rounded-lg shadow-lg p-6 w-full max-w-xl max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
-            <Dialog.Title className="text-lg font-bold">
+            <Dialog.Title className="text-lg primary-font text-gray-900">
               Adjust Stock Quantity
             </Dialog.Title>
             <FaTimes
-              className="cursor-pointer"
+              className="cursor-pointer text-gray-400 hover:text-gray-600"
               onClick={() => setOpen(false)}
             />
           </div>

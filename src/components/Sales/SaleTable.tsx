@@ -1,5 +1,6 @@
 import { useGetSaleInvoicesQuery } from "../../features/sales/saleApiSlice";
 import { Table } from "../Table/Table";
+import { Badge } from "../UI/Badge";
 import type { Column } from "../Table/Table";
 import { format } from "date-fns";
 import { MdOutlineFileCopy } from "react-icons/md";
@@ -52,20 +53,10 @@ export const SaleTable = () => {
       header: "Status",
       accessor: "status",
       render: (value) => {
-        const color =
-          value === "Paid"
-            ? "bg-green-100 text-green-700"
-            : value === "Unpaid"
-            ? "bg-yellow-100 text-yellow-700"
-            : "bg-red-100 text-red-700";
+        const variant =
+          value === "Paid" ? "success" : value === "Unpaid" ? "warning" : "danger";
 
-        return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-semibold ${color}`}
-          >
-            {value}
-          </span>
-        );
+        return <Badge variant={variant}>{value}</Badge>;
       },
     },
     {

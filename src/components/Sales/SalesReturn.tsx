@@ -2,8 +2,11 @@ import { useState } from "react";
 import { MdOutlineFileCopy } from "react-icons/md";
 import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Button } from "../UI/Button";
+import { Badge } from "../UI/Badge";
 import { Table } from '../Table/Table';
 import type { Column } from '../Table/Table';
+import { useNavigate } from "react-router-dom";
+import { useGetDocumentsQuery } from "../../features/document/documentApiSlice";
 
 type SalesReturnEntry = {
   date: string;
@@ -16,8 +19,19 @@ type SalesReturnEntry = {
 };
 
 const SalesReturn = () => {
-  const data: SalesReturnEntry[] = [];
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('Last 365 Days');
+
+  const { data: res } = useGetDocumentsQuery("SALES_RETURN");
+  const data: SalesReturnEntry[] = (res?.data || []).map((d: any) => ({
+    date: d.docDate ? new Date(d.docDate).toLocaleDateString("en-IN") : "-",
+    returnNumber: d.docNo,
+    partyName: d.partyName || "-",
+    dueIn: "-",
+    invoiceNo: "-",
+    amount: `₹${(d.grandTotal || 0).toLocaleString("en-IN")}`,
+    status: d.status || "Open",
+  }));
 
   const columns: Column<SalesReturnEntry>[] = [
     { header: 'Date', accessor: 'date' },
@@ -30,17 +44,9 @@ const SalesReturn = () => {
       header: 'Status',
       accessor: 'status',
       render: (value: SalesReturnEntry['status']) => {
-        const statusColor =
-          value === 'Completed'
-            ? 'bg-green-100 text-green-700'
-            : value === 'Cancelled'
-            ? 'bg-red-100 text-red-700'
-            : 'bg-yellow-100 text-yellow-700';
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColor}`}>
-            {value}
-          </span>
-        );
+        const variant =
+          value === 'Completed' ? 'success' : value === 'Cancelled' ? 'danger' : 'warning';
+        return <Badge variant={variant}>{value}</Badge>;
       },
     },
   ];
@@ -49,8 +55,12 @@ const SalesReturn = () => {
     <div className="bg-[#f9fafc] min-h-screen px-2 py-2 md:px-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="primary-font  text-xl text-gray-800">Sales Return</h1>
-        <Button className="w-full primary-font  sm:w-auto cursor-pointer"
-      >Create Sales Return</Button>
+        <Button
+          className="w-full sm:w-auto cursor-pointer"
+          onClick={() => navigate("/sales/return/create")}
+        >
+          Create Sales Return
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">

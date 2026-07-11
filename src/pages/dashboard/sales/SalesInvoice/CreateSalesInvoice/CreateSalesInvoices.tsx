@@ -8,6 +8,8 @@ import { useGetPartyByIdQuery } from "../../../../../features/party/partyApiSlic
 import { useGetItemByIdQuery } from "../../../../../features/item/itemApiSlice";
 import { useCreateSaleMutation } from "../../../../../features/sales/saleApiSlice";
 import { Button } from "../../../../../components/UI/Button";
+import { Card } from "../../../../../components/UI/Card";
+import { FiPlus } from "react-icons/fi";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { toast } from "react-toastify";
 import { Table, type Column } from "../../../../../components/Table/Table";
@@ -555,7 +557,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
           value={row.pricePerItem}
           data-actual-value={row.actualPricePerItem}
           onChange={(e) => handlePriceChange(index, e.target.value)}
-          className="w-24 rounded px-1 py-0.5 text-right bg-pink-50 border-none focus:outline-none text-[13px]"
+          className="w-24 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
         />
       ),
     },
@@ -571,7 +573,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               type="number"
               value={row.discountBeforeTax}
               onChange={(e) => handleDiscountValueChange(index, e.target.value)}
-              className="w-full rounded px-4 py-0.5 text-right bg-pink-50 border-none focus:outline-none text-[13px]"
+              className="w-full rounded px-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
               placeholder="0"
             />
           </div>
@@ -582,7 +584,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               onChange={(e) =>
                 handleDiscountPercentChange(index, e.target.value)
               }
-              className="w-full rounded pr-4 py-0.5 text-right bg-pink-50 border-none focus:outline-none text-[13px]"
+              className="w-full rounded pr-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
               placeholder="0"
             />
             <span className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500">
@@ -604,7 +606,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               type="number"
               value={row.taxAmount}
               onChange={(e) => handleTaxValueChange(index, e.target.value)}
-              className="w-full rounded px-4 py-0.5 text-right bg-pink-50 border-none focus:outline-none text-[13px]"
+              className="w-full rounded px-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
               placeholder="0"
             />
           </div>
@@ -613,7 +615,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               type="number"
               value={row.taxPercentage}
               onChange={(e) => handleTaxPercentChange(index, e.target.value)}
-              className="w-full rounded pr-4 py-0.5 text-right bg-pink-50 border-none focus:outline-none text-[13px]"
+              className="w-full rounded pr-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
               placeholder="0"
             />
             <span className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500">
@@ -650,7 +652,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
   ];
 
   return (
-    <div className="p-6 mx-auto max-w-7xl secondary-font">
+    <div className="p-6 max-w-5xl mx-auto secondary-font">
       <PartySelectorModal
         isOpen={isPartyModalOpen}
         onClose={() => setPartyModalOpen(false)}
@@ -733,26 +735,28 @@ const handleTaxPercentChange = (index: number, val: string) => {
           }
           formik.handleSubmit(e);
         }}
-        className="space-y-8"
+        className="space-y-6"
       >
         {/* header & navigation */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 text-gray-800">
-            <FaArrowLeft
-              className="cursor-pointer text-lg"
-              onClick={() => navigate("/sales/invoices")}
-            />
-            <h1 className="text-xl primary-font">Create Sales Invoice</h1>
-          </div>
+        <div>
           <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
+            type="button"
+            onClick={() => navigate("/sales/invoices")}
+            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mb-4"
           >
-            Save Sales Invoice
+            <FaArrowLeft />
+            <span>Back</span>
           </button>
+          <h1 className="text-2xl primary-font text-gray-800 mb-1">
+            Create Sales Invoice
+          </h1>
+          <p className="text-sm light-font text-gray-500">
+            Fill in the details below
+          </p>
         </div>
 
         {/* Party Selection */}
+        <Card className="p-6">
         {!selectedPartyId ? (
           <div className="border border-dashed border-blue-400 p-4 rounded-md text-center bg-blue-50">
             <p
@@ -822,8 +826,10 @@ const handleTaxPercentChange = (index: number, val: string) => {
             </div>
           </div>
         )}
+        </Card>
 
         {/* Invoice details */}
+        <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="input-label">Invoice No*</label>
@@ -866,28 +872,32 @@ const handleTaxPercentChange = (index: number, val: string) => {
             />
           </div>
         </div>
+        </Card>
 
         {/* Items */}
-        <div className="border border-dashed border-blue-400 p-4 rounded-md text-center bg-blue-50">
-          <p
-            className="font-medium text-primary cursor-pointer"
-            onClick={() => setItemModalOpen(true)}
-          >
-            + Add Item
-          </p>
-        </div>
-
-        {/* Render item rows */}
-        {/* Render item rows */}
-        {formik.values.itemDetails.length > 0 && (
-          <Table
-            columns={columns}
-            data={formik.values.itemDetails}
-            emptyMessage="No items added"
-          />
-        )}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-lg primary-font text-gray-800">Items</h2>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setItemModalOpen(true)}
+            >
+              <FiPlus /> Add Item
+            </Button>
+          </div>
+          <div className="overflow-x-auto">
+            <Table
+              columns={columns}
+              data={formik.values.itemDetails}
+              emptyMessage="No items added yet — click “Add Item” to get started"
+            />
+          </div>
+        </Card>
 
         {/* Summary */}
+        <Card className="p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6">
           <div>
             <label htmlFor="sale-notes" className="text-sm text-gray-700 input-label">
@@ -1014,6 +1024,18 @@ const handleTaxPercentChange = (index: number, val: string) => {
               </div>
             </div>
           </div>
+        </div>
+        </Card>
+
+        <div className="flex justify-end gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate("/sales/invoices")}
+          >
+            Cancel
+          </Button>
+          <Button type="submit">Save Sales Invoice</Button>
         </div>
       </form>
     </div>

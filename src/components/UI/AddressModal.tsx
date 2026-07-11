@@ -85,13 +85,13 @@ const AddressModal: React.FC<AddressModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-[#00000070] flex justify-center items-center z-50">
+    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-bold">Enter Address</h2>
+          <h2 className="text-lg primary-font text-gray-900">Enter Address</h2>
           <button
             onClick={onClose}
-            className="text-xl font-bold text-gray-600 cursor-pointer"
+            className="text-xl text-gray-400 hover:text-gray-600 cursor-pointer"
           >
             ×
           </button>
@@ -104,7 +104,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
               Street Address <span className="text-red-500">*</span>
             </label>
             <textarea
-              className="input-field w-full border px-3 py-2 rounded"
+              className="input-field w-full"
               placeholder="Enter street address"
               value={street}
               onChange={(e) => setStreet(e.target.value)}
@@ -150,7 +150,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
           <div>
             <label className="input-label">Pincode</label>
             <input
-              className="input-field w-full border px-3 py-2 rounded"
+              className="input-field w-full"
               placeholder="Enter pincode"
               value={pincode}
               onChange={(e) => setPincode(e.target.value)}

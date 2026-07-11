@@ -12,7 +12,7 @@ const DashboardPage = () => {
   return (
     <div className="min-h-screen px-2 py-2 lg:px-2 md:py-2 bg-gray-50">
       {/* HEADER */}
-      <div className="flex justify-between items-center bg-white border border-gray-200 rounded-md p-4 mb-6">
+      <div className="flex justify-between items-center bg-white border border-gray-200 rounded-lg shadow-sm p-4 mb-6">
         <h1 className="text-xl primary-font text-gray-800">Dashboard</h1>
 
         <div className="flex items-center gap-4">
@@ -21,75 +21,73 @@ const DashboardPage = () => {
           <MdCardGiftcard className="text-xl text-gray-500 cursor-pointer" />
           <MdPeopleAlt className="text-xl text-gray-500 cursor-pointer" />
 
-          <Button className="primary-font px-4 py-2">
-            Book Demo
-          </Button>
+          <Button>Book Demo</Button>
         </div>
       </div>
 
       {/* BOOK FREE DEMO */}
-      <div className="bg-[#f4eee6] border border-gray-200 rounded-md p-6 mb-6 flex justify-between items-center">
+      <div className="bg-blue-50 border border-gray-200 rounded-lg shadow-sm p-6 mb-6 flex justify-between items-center">
         <div>
           <p className="text-lg primary-font text-gray-800">
             Book Free Demo
           </p>
-          <p className="text-sm secondary-font text-gray-600 mt-1">
+          <p className="text-sm light-font text-gray-600 mt-1">
             Get a personalised tour from our solution expert
           </p>
 
-          <button className="flex items-center gap-1 mt-3 text-sm secondary-font text-gray-800 cursor-pointer">
+          <button className="inline-flex items-center gap-1 mt-3 text-sm font-medium text-primary hover:text-primary-hover cursor-pointer">
             Book Demo Now <FiArrowUpRight />
           </button>
         </div>
 
         <div className="hidden md:block">
-          <div className="w-32 h-20 bg-white border rounded-md flex items-center justify-center text-xs text-gray-400">
+          <div className="w-32 h-20 bg-white border border-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-400">
             Preview
           </div>
         </div>
       </div>
 
       {/* BUSINESS OVERVIEW */}
-      <div className="bg-white border border-gray-200 rounded-md p-5 mb-6">
+      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 mb-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="primary-font text-gray-800">
+          <h2 className="text-lg primary-font text-gray-800">
             Business Overview
           </h2>
-          <p className="text-xs secondary-font text-gray-500">
+          <p className="text-xs light-font text-gray-500">
             Last Update: 28 Jan 2026 | 09:01 PM
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* TO COLLECT */}
-          <div className="bg-green-50 border border-gray-200 rounded-md p-4 hover:border-green-500 transition cursor-pointer">
+          <div className="bg-green-50 border border-gray-200 rounded-lg p-4 hover:border-green-500 transition cursor-pointer">
             <p className="text-sm secondary-font text-green-700">
               ↓ To Collect
             </p>
-            <p className="text-lg secondary-font mt-2">
+            <p className="text-lg primary-font mt-2">
               ₹ 0
             </p>
           </div>
 
           {/* TO PAY */}
-          <div className="bg-red-50 border border-gray-200 rounded-md p-4 hover:border-red-500 transition cursor-pointer">
+          <div className="bg-red-50 border border-gray-200 rounded-lg p-4 hover:border-red-500 transition cursor-pointer">
             <p className="text-sm secondary-font text-red-600">
               ↑ To Pay
             </p>
-            <p className="text-lg secondary-font mt-2">
+            <p className="text-lg primary-font mt-2">
               ₹ 0
             </p>
           </div>
 
           {/* CASH + BANK */}
-          <div className="bg-blue-50 border border-gray-200 rounded-md p-4 hover:border-blue-500 transition cursor-pointer">
+          <div className="bg-blue-50 border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition cursor-pointer">
             <div className="flex items-center gap-2 text-blue-700">
               <MdAccountBalanceWallet />
               <p className="text-sm secondary-font">
                 Total Cash + Bank Balance
               </p>
             </div>
-            <p className="text-lg secondary-font mt-2">
+            <p className="text-lg primary-font mt-2">
               ₹ 0
             </p>
           </div>
@@ -99,29 +97,29 @@ const DashboardPage = () => {
       {/* BOTTOM SECTION */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* LATEST TRANSACTIONS */}
-        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-md p-4">
-          <h2 className="primary-font text-gray-800 mb-4">
+        <div className="lg:col-span-2 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+          <h2 className="text-lg primary-font text-gray-800 mb-4">
             Latest Transactions
           </h2>
 
-          <div className="border border-gray-200 rounded-md overflow-hidden">
-            <div className="grid grid-cols-5 bg-gray-100 text-xs secondary-font text-gray-600 px-3 py-2">
-              <span>DATE</span>
-              <span>TYPE</span>
-              <span>TXN NO</span>
-              <span>PARTY NAME</span>
-              <span>AMOUNT</span>
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="grid grid-cols-5 bg-gray-50 border-b border-gray-200 text-xs font-semibold uppercase tracking-wider text-gray-500 px-4 py-3">
+              <span>Date</span>
+              <span>Type</span>
+              <span>Txn No</span>
+              <span>Party Name</span>
+              <span>Amount</span>
             </div>
 
-            <div className="flex items-center justify-center py-12 text-sm secondary-font text-gray-400">
+            <div className="flex items-center justify-center py-12 text-sm light-font text-gray-400">
               No transactions made yet!
             </div>
           </div>
         </div>
 
         {/* TODAY CHECKLIST */}
-        <div className="bg-white border border-gray-200 rounded-md p-4 flex flex-col items-center justify-center">
-          <h2 className="primary-font text-gray-800 mb-4">
+        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-4 flex flex-col items-center justify-center">
+          <h2 className="text-lg primary-font text-gray-800 mb-4">
             Today's Checklist
           </h2>
 

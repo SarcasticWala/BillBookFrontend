@@ -1,9 +1,12 @@
 import { useState } from 'react';
 import { Button } from '../UI/Button';
+import { Badge } from '../UI/Badge';
 import { LuShoppingCart } from 'react-icons/lu';
 import { SearchDateFilter } from '../Filter/SearchDateFilter';
 import { Table } from '../Table/Table';
 import type { Column } from '../Table/Table';
+import { useNavigate } from "react-router-dom";
+import { useGetDocumentsQuery } from "../../features/document/documentApiSlice";
 
 type DebitNoteEntry = {
   date: string;
@@ -15,8 +18,18 @@ type DebitNoteEntry = {
 };
 
 const DebitNote = () => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('Last 365 Days');
-  const data: DebitNoteEntry[] = [];
+
+  const { data: res } = useGetDocumentsQuery("DEBIT_NOTE");
+  const data: DebitNoteEntry[] = (res?.data || []).map((d: any) => ({
+    date: d.docDate ? new Date(d.docDate).toLocaleDateString("en-IN") : "-",
+    debitNoteNumber: d.docNo,
+    partyName: d.partyName || "-",
+    purchaseNo: "-",
+    amount: `₹${(d.grandTotal || 0).toLocaleString("en-IN")}`,
+    status: d.status || "Open",
+  }));
 
   const columns: Column<DebitNoteEntry>[] = [
     { header: 'Date', accessor: 'date' },
@@ -28,17 +41,9 @@ const DebitNote = () => {
       header: 'Status',
       accessor: 'status',
       render: (value: DebitNoteEntry['status']) => {
-        const color =
-          value === 'Closed'
-            ? 'bg-green-100 text-green-700'
-            : value === 'Cancelled'
-              ? 'bg-red-100 text-red-700'
-              : 'bg-yellow-100 text-yellow-700';
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${color}`}>
-            {value}
-          </span>
-        );
+        const variant =
+          value === 'Closed' ? 'success' : value === 'Cancelled' ? 'danger' : 'warning';
+        return <Badge variant={variant}>{value}</Badge>;
       },
     },
   ];
@@ -48,8 +53,12 @@ const DebitNote = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 
           className="text-xl primary-font text-gray-800">Debit Note</h1>
-        <Button className="w-full primary-font sm:w-auto cursor-pointer"
-      >Create Debit Note</Button>
+        <Button
+          className="w-full sm:w-auto cursor-pointer"
+          onClick={() => navigate("/purchases/debitnote/create")}
+        >
+          Create Debit Note
+        </Button>
       </div>
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
         <div className="flex items-center text-accent font-medium text-sm gap-2 border-b-2 border-accent pb-1">

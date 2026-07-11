@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { MdOutlineFileCopy } from 'react-icons/md';
 import { Button } from '../UI/Button';
+import { Badge } from '../UI/Badge';
 import { SearchDateFilter } from '../Filter/SearchDateFilter';
 import { Table } from '../Table/Table';
 import type { Column } from '../Table/Table';
+import { useNavigate } from "react-router-dom";
+import { useGetDocumentsQuery } from "../../features/document/documentApiSlice";
 
 type CreditNoteEntry = {
   date: string;
@@ -15,8 +18,18 @@ type CreditNoteEntry = {
 };
 
 const CreditNote = () => {
-  const data: CreditNoteEntry[] = [];
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('Last 365 Days');
+
+  const { data: res } = useGetDocumentsQuery("CREDIT_NOTE");
+  const data: CreditNoteEntry[] = (res?.data || []).map((d: any) => ({
+    date: d.docDate ? new Date(d.docDate).toLocaleDateString("en-IN") : "-",
+    creditNoteNumber: d.docNo,
+    partyName: d.partyName || "-",
+    invoiceNo: "-",
+    amount: `₹${(d.grandTotal || 0).toLocaleString("en-IN")}`,
+    status: d.status || "Open",
+  }));
 
   const columns: Column<CreditNoteEntry>[] = [
     { header: 'Date', accessor: 'date' },
@@ -28,17 +41,9 @@ const CreditNote = () => {
       header: 'Status',
       accessor: 'status',
       render: (value: CreditNoteEntry['status']) => {
-        const color =
-          value === 'Closed'
-            ? 'bg-green-100 text-green-700'
-            : value === 'Cancelled'
-            ? 'bg-red-100 text-red-700'
-            : 'bg-yellow-100 text-yellow-700';
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${color}`}>
-            {value}
-          </span>
-        );
+        const variant =
+          value === 'Closed' ? 'success' : value === 'Cancelled' ? 'danger' : 'warning';
+        return <Badge variant={variant}>{value}</Badge>;
       }
     }
   ];
@@ -47,8 +52,12 @@ const CreditNote = () => {
     <div className='bg-[#f9fafc] min-h-screen px-2 py-2 md:px-2'>
       <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4'>
         <h1 className="text-xl primary-font  text-gray-800">Credit Notes</h1>
-        <Button className="w-full primary-font sm:w-auto cursor-pointer"
-      >Create Credit Note</Button>
+        <Button
+          className="w-full sm:w-auto cursor-pointer"
+          onClick={() => navigate("/sales/creditnote/create")}
+        >
+          Create Credit Note
+        </Button>
       </div>
 
       <div className='flex flex-col md:flex-row items-start md:items-center gap-4 mb-6'>

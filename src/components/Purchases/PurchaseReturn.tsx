@@ -2,8 +2,11 @@ import { useState } from "react";
 import { MdOutlineFileCopy } from "react-icons/md";
 import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Button } from "../UI/Button";
+import { Badge } from "../UI/Badge";
 import { Table } from "../Table/Table";
 import type { Column } from "../Table/Table";
+import { useNavigate } from "react-router-dom";
+import { useGetDocumentsQuery } from "../../features/document/documentApiSlice";
 
 type PurchaseReturnEntry = {
   date: string;
@@ -16,8 +19,19 @@ type PurchaseReturnEntry = {
 };
 
 const PurchaseReturn = () => {
-  const data: PurchaseReturnEntry[] = [];
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('Last 365 Days');
+
+  const { data: res } = useGetDocumentsQuery("PURCHASE_RETURN");
+  const data: PurchaseReturnEntry[] = (res?.data || []).map((d: any) => ({
+    date: d.docDate ? new Date(d.docDate).toLocaleDateString("en-IN") : "-",
+    returnNumber: d.docNo,
+    partyName: d.partyName || "-",
+    dueIn: "-",
+    purchaseNo: "-",
+    amount: `₹${(d.grandTotal || 0).toLocaleString("en-IN")}`,
+    status: d.status || "Open",
+  }));
 
   const columns: Column<PurchaseReturnEntry>[] = [
     { header: 'Date', accessor: 'date' },
@@ -30,17 +44,9 @@ const PurchaseReturn = () => {
       header: 'Status',
       accessor: 'status',
       render: (value: PurchaseReturnEntry['status']) => {
-        const statusColor =
-          value === 'Closed'
-            ? 'bg-green-100 text-green-700'
-            : value === 'Cancelled'
-            ? 'bg-red-100 text-red-700'
-            : 'bg-yellow-100 text-yellow-700';
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${statusColor}`}>
-            {value}
-          </span>
-        );
+        const variant =
+          value === 'Closed' ? 'success' : value === 'Cancelled' ? 'danger' : 'warning';
+        return <Badge variant={variant}>{value}</Badge>;
       },
     },
   ];
@@ -51,9 +57,12 @@ const PurchaseReturn = () => {
         <h1  
           className="text-xl primary-font text-gray-800"
         >Purchase Return</h1>
-        <Button  className="w-full primary-font sm:w-auto cursor-pointer"
-         
-          >Create Purchase Return</Button>
+        <Button
+          className="w-full sm:w-auto cursor-pointer"
+          onClick={() => navigate("/purchases/purchaseReturn/create")}
+        >
+          Create Purchase Return
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">

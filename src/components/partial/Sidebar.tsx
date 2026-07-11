@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, } from "react-router-dom";
+import BusinessInfo from "./BusinessInfo";
 import {
   MdDashboard,
   MdGroups,
@@ -159,24 +160,16 @@ const Sidebar = () => {
           renderSkeleton()
         ) : (
         <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 hide-scrollbar">
-          {/* Business Info Section */}
-          <div className="space-y-3 pb-4 border-b border-slate-700">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-slate-800 text-lg font-bold">
-                B
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  Business Name
-                </p>
-                <p className="text-xs text-gray-400">9800054895</p>
-              </div>
-            </div>
-          </div>
+          {/* Business Info Section — links to profile settings */}
+          <BusinessInfo onNavigate={() => handleActive("Settings")} />
 
-          <button className="w-full bg-primary hover:bg-primary-hover text-white text-sm font-medium py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer">
+          <Link
+            to="/sales/create-invoice"
+            onClick={closeMobile}
+            className="block text-center w-full bg-primary hover:bg-primary-hover text-white text-sm font-medium py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+          >
             + Create Sales Invoice
-          </button>
+          </Link>
 
           {/* General Section */}
           <div className="space-y-2">

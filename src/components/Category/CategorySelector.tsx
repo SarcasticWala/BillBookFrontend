@@ -46,7 +46,7 @@ export const CategorySelector = ({
           }
           onChange(selected);
         }}
-        className="input-field w-full border px-3 py-2 rounded"
+        className="input-field w-full"
       >
         <option value="">{placeholder}</option>
         {options.map((opt) => (
@@ -54,15 +54,7 @@ export const CategorySelector = ({
             {opt.catagory}
           </option>
         ))}
-        <option
-          value="__create__"
-          className="text-blue-600 font-medium"
-          style={{
-            borderTop: "1px dotted #ccc",
-            marginTop: "4px",
-            paddingTop: "8px",
-          }}
-        >
+        <option value="__create__" className="text-primary font-medium">
           {createLabel}
         </option>
       </select>

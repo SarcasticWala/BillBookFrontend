@@ -6,6 +6,7 @@ import { LuScanLine } from "react-icons/lu";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import { Button } from "../components/UI/Button";
+import { Card } from "../components/UI/Card";
 
 import { useAuth } from "../hooks/useAuth";
 
@@ -89,37 +90,37 @@ const handleResendOtp = async () => {
             Secure your access. Simplify your operations. Built for modern billing environments.
           </p>
           <div className="grid grid-cols-2 gap-6">
-            <div className="bg-white border shadow-sm p-5 rounded-2xl">
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-3">
-                <FiShield className="text-blue-600 w-6 h-6" />
+            <Card>
+              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+                <FiShield className="text-primary w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">Military Grade Security</h3>
-              <p className="text-sm text-gray-600">End-to-end encryption with zero-trust policies</p>
-            </div>
-            <div className="bg-white border shadow-sm p-5 rounded-2xl">
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center mb-3">
+              <h3 className="text-lg primary-font text-gray-800 mb-1">Military Grade Security</h3>
+              <p className="text-sm light-font text-gray-600">End-to-end encryption with zero-trust policies</p>
+            </Card>
+            <Card>
+              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-3">
                 <BsClock className="text-green-600 w-6 h-6" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">Lightning Fast Login</h3>
-              <p className="text-sm text-gray-600">Access your dashboard in seconds</p>
-            </div>
+              <h3 className="text-lg primary-font text-gray-800 mb-1">Lightning Fast Login</h3>
+              <p className="text-sm light-font text-gray-600">Access your dashboard in seconds</p>
+            </Card>
           </div>
         </section>
 
-        <section className="bg-white p-8 rounded-3xl shadow-2xl border max-w-md w-full mx-auto">
+        <section className="bg-white p-8 rounded-lg shadow-lg border border-gray-200 max-w-md w-full mx-auto">
           <form onSubmit={formik.handleSubmit}>
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
+              <h2 className="text-2xl primary-font text-gray-900">
                 {showOtpFlow ? "Verify Number" : "Login with OTP"}
               </h2>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm light-font text-gray-600 mt-1">
                 {showOtpFlow ? `OTP sent to ${selectedCountry.code} ${formik.values.mobile}` : "Enter mobile to get started"}
               </p>
             </div>
 
             {!showOtpFlow ? (
               <>
-                <label htmlFor="mobile" className="text-sm font-medium text-gray-700 mb-1 block">Mobile Number</label>
+                <label htmlFor="mobile" className="input-label">Mobile Number</label>
                 <div className="flex border rounded-lg overflow-hidden shadow-sm">
                   <div className="relative">
                     {/* Only +91 is supported today; shown as a static prefix. */}
@@ -159,8 +160,9 @@ const handleResendOtp = async () => {
 
                 <Button
                   type="button"
+                  variant="outline"
+                  fullWidth
                   onClick={() => toast.info("QR code login is coming soon")}
-                  className="w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-900"
                 >
                   <LuScanLine className="w-5 h-5" />
                   <span>Login by scanning QR Code</span>
@@ -168,7 +170,7 @@ const handleResendOtp = async () => {
               </>
             ) : (
               <>
-                <label htmlFor="otp" className="text-sm font-medium text-gray-700 mb-1 block">OTP Code</label>
+                <label htmlFor="otp" className="input-label">OTP Code</label>
                 <input
                   id="otp"
                   name="otp"
@@ -176,28 +178,28 @@ const handleResendOtp = async () => {
                   value={formik.values.otp}
                   onChange={(e) => formik.setFieldValue("otp", e.target.value.replace(/\D/g, "").slice(0, 6))}
                   placeholder="Enter 6-digit OTP"
-                  className="w-full text-center text-xl font-mono px-4 py-3 border rounded-lg tracking-widest"
+                  className="input-field text-center text-xl font-mono tracking-widest"
                 />
 
-                <div className="mt-2 flex justify-between text-sm text-gray-600">
+                <div className="mt-2 flex justify-between items-center text-sm light-font text-gray-600">
                   {otpTimer > 0 ? (
-                    <span><BsClock className="inline mr-1" /> Resend in {otpTimer}s</span>
+                    <span className="inline-flex items-center gap-1"><BsClock /> Resend in {otpTimer}s</span>
                   ) : (
-                    <Button
+                    <button
                       type="button"
-                      
                       onClick={handleResendOtp}
-                      className="text-blue-600 p-0 h-auto text-sm"
+                      className="text-primary hover:text-primary-hover font-medium"
                     >
                       Resend OTP
-                    </Button>
+                    </button>
                   )}
                 </div>
 
                 <Button
                   type="submit"
+                  fullWidth
                   disabled={formik.values.otp.length < 6 || isLoading}
-                  className="mt-5 w-full bg-green-600 hover:bg-green-700"
+                  className="mt-5"
                 >
                   {isLoading ? "Verifying..." : "Verify & Continue"}
                 </Button>

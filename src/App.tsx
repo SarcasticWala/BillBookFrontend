@@ -37,6 +37,7 @@ const Footer = lazy(() => import("./components/Footer/Footer"));
 const CreatePurchaseForm = lazy(() => import("./pages/dashboard/Purchace/PurchaseCreate/PurchaseCreate"));
 const CreateSalesForm = lazy(() => import("./pages/dashboard/sales/SalesInvoice/CreateSalesInvoice/CreateSalesInvoices"));
 const ExpensesPage = lazy(() => import("./pages/dashboard/Expenss/ExpensesPage"));
+const SettingsPage = lazy(() => import("./pages/dashboard/Settings/Settings"));
 function App() {
   return (
     <Router>
@@ -66,6 +67,7 @@ function App() {
                     <Route path="e-invoicing" element={<EInvoicingPage />} />
                      <Route path="automated-bills" element={<AutomatedBillsPage />} />
                      <Route path="expenses" element={<ExpensesPage />} />
+                    <Route path="settings" element={<SettingsPage />} />
                     <Route
                       path="create-category"
                       element={<CreateCategory />}

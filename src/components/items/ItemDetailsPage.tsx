@@ -8,6 +8,7 @@ import {
   FaEllipsisH,
   FaAlignLeft,
 } from "react-icons/fa";
+import { Badge } from "../UI/Badge";
 
 export const ItemDetailsPage = () => {
   const { id } = useParams();
@@ -54,12 +55,10 @@ export const ItemDetailsPage = () => {
 
       {/* Title */}
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-gray-800">
+        <h1 className="text-2xl primary-font text-gray-800">
           {item.itemName || item.serviceName}
         </h1>
-        <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700">
-          {itemType || "PRODUCT"}
-        </span>
+        <Badge variant="info">{itemType || "PRODUCT"}</Badge>
       </div>
 
       {/* Images */}
@@ -178,10 +177,10 @@ const DetailSection = ({
   icon: React.ReactNode;
   children: React.ReactNode;
 }) => (
-  <div className="bg-white rounded-xl shadow-md p-5 space-y-3">
+  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 space-y-3">
     <div className="flex items-center gap-2">
       {icon}
-      <h3 className="text-lg font-semibold text-gray-800">{title}</h3>
+      <h3 className="text-lg primary-font text-gray-800">{title}</h3>
     </div>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6 text-sm">
       {children}

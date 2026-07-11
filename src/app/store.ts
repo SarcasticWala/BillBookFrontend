@@ -4,6 +4,9 @@ import { itemApi } from "../features/item/itemApiSlice";
 import { setupListeners } from "@reduxjs/toolkit/query";
 import { saleApi } from "../features/sales/saleApiSlice";
 import { purchaseApi } from "../features/purchase/purchaseApiSlice";
+import { authApi } from "../features/auth/authApiSlice";
+import { documentApi } from "../features/document/documentApiSlice";
+import { paymentApi } from "../features/payment/paymentApiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -11,6 +14,9 @@ export const store = configureStore({
     [itemApi.reducerPath]: itemApi.reducer,
     [saleApi.reducerPath]: saleApi.reducer,
     [purchaseApi.reducerPath]: purchaseApi.reducer,
+    [authApi.reducerPath]: authApi.reducer,
+    [documentApi.reducerPath]: documentApi.reducer,
+    [paymentApi.reducerPath]: paymentApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -18,6 +24,9 @@ export const store = configureStore({
       itemApi.middleware,
       saleApi.middleware,
       purchaseApi.middleware,
+      authApi.middleware,
+      documentApi.middleware,
+      paymentApi.middleware,
     ),
 });
 

@@ -2,8 +2,11 @@ import { useState } from "react";
 import { MdOutlineFileCopy } from "react-icons/md";
 import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Button } from "../UI/Button";
+import { Badge } from "../UI/Badge";
 import { Table } from "../Table/Table";
 import type { Column } from "../Table/Table";
+import { useNavigate } from "react-router-dom";
+import { useGetDocumentsQuery } from "../../features/document/documentApiSlice";
 
 type PurchaseOrderEntry = {
   date: string;
@@ -15,8 +18,18 @@ type PurchaseOrderEntry = {
 };
 
 const PurchaseOrder = () => {
-  const data: PurchaseOrderEntry[] = [];
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("Last 365 Days");
+
+  const { data: res } = useGetDocumentsQuery("PURCHASE_ORDER");
+  const data: PurchaseOrderEntry[] = (res?.data || []).map((d: any) => ({
+    date: d.docDate ? new Date(d.docDate).toLocaleDateString("en-IN") : "-",
+    orderNumber: d.docNo,
+    partyName: d.partyName || "-",
+    validTill: d.dueDate ? new Date(d.dueDate).toLocaleDateString("en-IN") : "-",
+    amount: `₹${(d.grandTotal || 0).toLocaleString("en-IN")}`,
+    status: d.status || "Open",
+  }));
 
   const columns: Column<PurchaseOrderEntry>[] = [
     { header: "Date", accessor: "date" },
@@ -28,17 +41,9 @@ const PurchaseOrder = () => {
       header: "Status",
       accessor: "status",
       render: (value: PurchaseOrderEntry["status"]) => {
-        const color =
-          value === "Closed"
-            ? "bg-green-100 text-green-700"
-            : value === "Cancelled"
-            ? "bg-red-100 text-red-700"
-            : "bg-yellow-100 text-yellow-700";
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs primary-font ${color}`}>
-            {value}
-          </span>
-        );
+        const variant =
+          value === "Closed" ? "success" : value === "Cancelled" ? "danger" : "warning";
+        return <Badge variant={variant}>{value}</Badge>;
       },
     },
   ];
@@ -48,8 +53,12 @@ const PurchaseOrder = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 
           className="text-xl primary-font text-gray-800">Purchase Orders</h1>
-        <Button className="w-full primary-font sm:w-auto cursor-pointer"
-      >Create Purchase Order</Button>
+        <Button
+          className="w-full sm:w-auto cursor-pointer"
+          onClick={() => navigate("/purchases/purchaseorder/create")}
+        >
+          Create Purchase Order
+        </Button>
       </div>
 
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">

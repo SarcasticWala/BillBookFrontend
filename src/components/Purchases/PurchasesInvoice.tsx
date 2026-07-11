@@ -9,6 +9,7 @@ import {
 } from "react-icons/md";
 import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Table, type Column } from "../Table/Table";
+import { Badge } from "../UI/Badge";
 import { Button } from "../UI/Button";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
@@ -81,20 +82,10 @@ const PurchasesInvoice = () => {
       header: "Status",
       accessor: "status",
       render: (value: PurchaseInvoice["status"]) => {
-        const color =
-          value === "Paid"
-            ? "bg-green-100 text-green-700"
-            : value === "Unpaid"
-              ? "bg-yellow-100 text-yellow-700"
-              : "bg-red-100 text-red-700";
+        const variant =
+          value === "Paid" ? "success" : value === "Unpaid" ? "warning" : "danger";
 
-        return (
-          <span
-            className={`px-2 py-1 rounded-full text-xs font-semibold ${color}`}
-          >
-            {value}
-          </span>
-        );
+        return <Badge variant={variant}>{value}</Badge>;
       },
     },
     {

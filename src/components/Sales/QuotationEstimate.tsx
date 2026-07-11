@@ -3,8 +3,11 @@ import { MdFilterList, MdOutlineFileCopy } from "react-icons/md";
 import { IoIosArrowDown } from "react-icons/io";
 import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Table } from "../Table/Table";
+import { Badge } from "../UI/Badge";
 import type { Column } from "../Table/Table";
 import { Button } from "../UI/Button";
+import { useNavigate } from "react-router-dom";
+import { useGetDocumentsQuery } from "../../features/document/documentApiSlice";
 
 type Quotation = {
   date: string;
@@ -16,9 +19,18 @@ type Quotation = {
 };
 
 const QuotationEstimate = () => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("Last 365 Days");
 
-  const data: Quotation[] = [];
+  const { data: res } = useGetDocumentsQuery("QUOTATION");
+  const data: Quotation[] = (res?.data || []).map((d: any) => ({
+    date: d.docDate ? new Date(d.docDate).toLocaleDateString("en-IN") : "-",
+    quotationNumber: d.docNo,
+    partyName: d.partyName || "-",
+    dueIn: "-",
+    amount: `₹${(d.grandTotal || 0).toLocaleString("en-IN")}`,
+    status: d.status || "Open",
+  }));
 
   const columns: Column<Quotation>[] = [
     { header: "Date", accessor: "date" },
@@ -30,17 +42,9 @@ const QuotationEstimate = () => {
       header: "Status",
       accessor: "status",
       render: (value: Quotation["status"]) => {
-        const color =
-          value === "Accepted"
-            ? "bg-green-100 text-green-700"
-            : value === "Rejected"
-            ? "bg-red-100 text-red-700"
-            : "bg-yellow-100 text-yellow-700";
-        return (
-          <span className={`px-2 py-1 rounded-full text-xs font-semibold ${color}`}>
-            {value}
-          </span>
-        );
+        const variant =
+          value === "Accepted" ? "success" : value === "Rejected" ? "danger" : "warning";
+        return <Badge variant={variant}>{value}</Badge>;
       },
     },
   ];
@@ -50,8 +54,12 @@ const QuotationEstimate = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 style={{ fontFamily: 'Outfit, sans-serif',fontWeight: 500}
       } className="text-xl primary-font text-gray-800">Quotation / Estimate</h1>
-        <Button className="w-full primary-font sm:w-auto cursor-pointer"
-       >Create Quotation</Button>
+        <Button
+          className="w-full sm:w-auto cursor-pointer"
+          onClick={() => navigate("/sales/quotation/create")}
+        >
+          Create Quotation
+        </Button>
       </div>
 
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">

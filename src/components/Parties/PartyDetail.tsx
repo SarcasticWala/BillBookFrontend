@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useGetPartyByIdQuery } from "../../features/party/partyApiSlice";
 import { FaArrowLeft } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
+import { Button } from "../UI/Button";
 
 export default function PartyDetail() {
   const navigate = useNavigate();
@@ -53,12 +54,9 @@ export default function PartyDetail() {
           </button>
           <h2 className="text-xl primary-font ml-4">{name}</h2>
         </div>
-        <button
-          onClick={() => navigate(`/parties/create-party/${party.id}`)}
-          className="flex items-center gap-2 text-sm bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition cursor-pointer"
-        >
+        <Button onClick={() => navigate(`/parties/create-party/${party.id}`)}>
           <MdEdit /> Edit party
-        </button>
+        </Button>
       </div>
 
       {/* Tabs (visual only) */}

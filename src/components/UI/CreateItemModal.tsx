@@ -280,7 +280,7 @@ export const CreateItemModal = ({
       onClose={onClose}
       className="fixed inset-0 z-50 overflow-y-auto"
     >
-      <div className="flex items-center justify-center min-h-screen bg-[#00000070] p-4">
+      <div className="flex items-center justify-center min-h-screen bg-black/40 p-4">
         <div className="bg-white w-full max-w-6xl rounded-lg p-6 relative secondary-font">
           {/* Header */}
           <div className="flex justify-between items-center pb-2 mb-4">
@@ -302,7 +302,7 @@ export const CreateItemModal = ({
                   onClick={() => setActiveTab("BASIC")}
                   className={`cursor-pointer flex-tab p-2 ${
                     activeTab === "BASIC"
-                      ? "bg-purple-100 text-purple-800 font-medium rounded-md"
+                      ? "bg-blue-50 text-primary font-medium rounded-md"
                       : "text-gray-700"
                   }`}
                 >
@@ -314,7 +314,7 @@ export const CreateItemModal = ({
                     onClick={() => setActiveTab("OTHER")}
                     className={`cursor-pointer flex-tab p-2 ${
                       activeTab === "OTHER"
-                        ? "bg-purple-100 text-purple-800 font-medium rounded-md"
+                        ? "bg-blue-50 text-primary font-medium rounded-md"
                         : "text-gray-700"
                     }`}
                   >
@@ -327,7 +327,7 @@ export const CreateItemModal = ({
                       onClick={() => setActiveTab("STOCK")}
                       className={`cursor-pointer flex-tab p-2 ${
                         activeTab === "STOCK"
-                          ? "bg-purple-100 text-purple-800 font-medium rounded-md"
+                          ? "bg-blue-50 text-primary font-medium rounded-md"
                           : "text-gray-700"
                       }`}
                     >
@@ -338,7 +338,7 @@ export const CreateItemModal = ({
                       onClick={() => setActiveTab("PRICING")}
                       className={`cursor-pointer flex-tab p-2 ${
                         activeTab === "PRICING"
-                          ? "bg-purple-100 text-purple-800 font-medium rounded-md"
+                          ? "bg-blue-50 text-primary font-medium rounded-md"
                           : "text-gray-700"
                       }`}
                     >

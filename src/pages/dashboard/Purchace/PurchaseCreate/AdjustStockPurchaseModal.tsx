@@ -43,7 +43,7 @@ const AdjustStockPurchaseModal: React.FC<AdjustStockPurchaseModalProps> = ({
 
   return (
     <Dialog open={open} onClose={() => setOpen(false)} className="relative z-50">
-      <div className="fixed inset-0 bg-black/20" aria-hidden="true" />
+      <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-xl">
           <div className="flex justify-between items-center mb-4">
