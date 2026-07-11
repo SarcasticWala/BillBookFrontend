@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import PartyDetail from "./components/Parties/PartyDetail.tsx";
 import { ItemDetailsPage } from "./components/items/ItemDetailsPage.tsx";
 
@@ -40,6 +40,7 @@ const ExpensesPage = lazy(() => import("./pages/dashboard/Expenss/ExpensesPage")
 function App() {
   return (
     <Router>
+      <Suspense fallback={<div className="p-6">Loading...</div>}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="login" element={<Login />} />
@@ -48,7 +49,7 @@ function App() {
           element={
             <div className="flex ">
               <Sidebar />
-              <div className="flex-1 min-h-screen sm:ml-60 flex flex-col bg-white pb-8">
+              <div className="flex-1 min-h-screen sm:ml-60  flex flex-col bg-white pb-8">
                 <div className="flex-grow p-4 w-full max-w-9xl mx-auto">
                   <Routes>
                     <Route path="dashboard" element={<DashboardPage />} />
@@ -79,6 +80,7 @@ function App() {
           }
         />
       </Routes>
+      </Suspense>
     </Router>
   );
 }

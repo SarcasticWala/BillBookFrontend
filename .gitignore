@@ -12,6 +12,7 @@ dist
 dist-ssr
 *.local
 
+.github
 # Environment variables (sensitive)
 .env
 .env.local
