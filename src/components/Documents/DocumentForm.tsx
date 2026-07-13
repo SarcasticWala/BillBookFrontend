@@ -1,13 +1,13 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
-import { FaArrowLeft } from "react-icons/fa";
 import { FiPlus, FiTrash2 } from "react-icons/fi";
-import { Card } from "../UI/Card";
 import { Input } from "../UI/Input";
 import { Select } from "../UI/Select";
 import { Textarea } from "../UI/Textarea";
 import { Button } from "../UI/Button";
+import { PageHeader } from "../UI/PageHeader";
+import { FormSection } from "../UI/FormSection";
 import { useGetPartiesQuery } from "../../features/party/partyApiSlice";
 import { useGetItemsQuery } from "../../features/item/itemApiSlice";
 import { useCreateDocumentMutation } from "../../features/document/documentApiSlice";
@@ -136,25 +136,37 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
   };
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <button
-        type="button"
-        onClick={() => navigate(backTo)}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mb-4"
+    <div className="secondary-font">
+      <PageHeader
+        title={`Create ${title}`}
+        subtitle="Fill in the details below"
+        onBack={() => navigate(backTo)}
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate(backTo)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" form="document-form" disabled={isLoading}>
+              {isLoading ? "Saving..." : `Save ${title}`}
+            </Button>
+          </>
+        }
+      />
+
+      <form
+        id="document-form"
+        onSubmit={handleSubmit}
+        noValidate
+        className="space-y-5 max-w-5xl"
       >
-        <FaArrowLeft />
-        <span>Back</span>
-      </button>
-
-      <h1 className="text-2xl primary-font text-gray-800 mb-1">Create {title}</h1>
-      <p className="text-sm light-font text-gray-500 mb-6">
-        Fill in the details below
-      </p>
-
-      <form onSubmit={handleSubmit} noValidate className="space-y-6">
         {/* Header details */}
-        <Card className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-5">
+        <FormSection title="Document Details" layout="plain">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-5 gap-y-4">
             <Select
               label={partyLabel}
               value={partyId}
@@ -183,17 +195,18 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
               required
             />
           </div>
-        </Card>
+        </FormSection>
 
         {/* Items */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-lg primary-font text-gray-800">Items</h2>
+        <FormSection
+          title="Items"
+          layout="plain"
+          aside={
             <Button type="button" variant="outline" size="sm" onClick={addRow}>
               <FiPlus /> Add Item
             </Button>
-          </div>
-
+          }
+        >
           {errors.items && (
             <p className="mb-3 text-sm text-red-500">{errors.items}</p>
           )}
@@ -277,7 +290,7 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
                         <button
                           type="button"
                           onClick={() => removeRow(idx)}
-                          className="text-gray-400 hover:text-red-500 transition"
+                          className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] p-2 text-gray-400 hover:text-red-500 transition"
                           title="Remove"
                         >
                           <FiTrash2 />
@@ -307,33 +320,18 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
               </div>
             </div>
           </div>
-        </Card>
+        </FormSection>
 
         {/* Notes */}
-        <Card className="p-6">
+        <FormSection title="Notes" layout="plain">
           <Textarea
-            label="Notes"
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Optional notes / terms"
             maxLength={500}
           />
-        </Card>
-
-        <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate(backTo)}
-            disabled={isLoading}
-          >
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Saving..." : `Save ${title}`}
-          </Button>
-        </div>
+        </FormSection>
       </form>
     </div>
   );

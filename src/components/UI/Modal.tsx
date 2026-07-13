@@ -29,7 +29,7 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel
           className={cn(
-            "w-full bg-white rounded-lg shadow-lg p-6 max-h-[90vh] overflow-y-auto",
+            "w-full bg-white rounded-lg shadow-lg p-4 sm:p-6 max-h-[90vh] overflow-y-auto",
             maxWidthClassName
           )}
         >
@@ -43,9 +43,9 @@ export const Modal: React.FC<ModalProps> = ({
               type="button"
               onClick={onClose}
               aria-label="Close"
-              className="ml-auto text-gray-400 hover:text-gray-600 transition"
+              className="ml-auto -mr-2 flex h-11 w-11 items-center justify-center text-gray-400 hover:text-gray-600 transition"
             >
-              <IoClose className="w-5 h-5" />
+              <IoClose className="w-6 h-6 sm:w-5 sm:h-5" />
             </button>
           </div>
           {children}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import { FaArrowLeft, FaTrash, FaExclamationTriangle } from "react-icons/fa";
+import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { PartySelectorModal } from "../../sales/SalesInvoice/CreateSalesInvoice/PartySelectorModal";
 import { ItemSelectorModal } from "../../sales/SalesInvoice/CreateSalesInvoice/ItemSelectorModal";
@@ -11,6 +11,10 @@ import { Button } from "../../../../components/UI/Button";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { toast } from "react-toastify";
 import { Table, type Column } from "../../../../components/Table/Table";
+import { Input } from "../../../../components/UI/Input";
+import { Textarea } from "../../../../components/UI/Textarea";
+import { PageHeader } from "../../../../components/UI/PageHeader";
+import { FormSection } from "../../../../components/UI/FormSection";
 import * as Yup from "yup";
 
 const CreatePurchaseForm: React.FC = () => {
@@ -282,7 +286,7 @@ const handleTaxChange = (index: number, value: string) => {
   ];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="secondary-font">
       <PartySelectorModal
         isOpen={isPartyModalOpen}
         onClose={() => setPartyModalOpen(false)}
@@ -326,212 +330,200 @@ const handleTaxChange = (index: number, value: string) => {
         }}
       />
 
-      <form onSubmit={formik.handleSubmit} className="space-y-8">
-        {/* header */}
-        <div>
-          <button
-            type="button"
-            onClick={() => navigate("/purchases/purchaseInvoice")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mb-4"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-          <h1 className="text-2xl primary-font text-gray-800 mb-1">
-            Create Purchase Invoice
-          </h1>
-          <p className="text-sm light-font text-gray-500">
-            Fill in the details below
-          </p>
-        </div>
-
-        {/* supplier selection */}
-        {!selectedPartyId ? (
-          <div className="border border-dashed border-blue-400 p-4 rounded-md text-center bg-blue-50">
-            <p
-              className="font-medium text-primary cursor-pointer"
-              onClick={() => setPartyModalOpen(true)}
-            >
-              + Select Supplier
-            </p>
-          </div>
-        ) : (
-          <div className="border rounded-md p-3 bg-gray-50 shadow-sm">
-            <p className="text-sm font-medium mb-1">
-              {partyDetails?.name || "Supplier"}
-            </p>
-            <p className="text-xs text-gray-600">
-              {partyDetails?.mobileNumber || ""}
-            </p>
+      <PageHeader
+        title="Create Purchase Invoice"
+        subtitle="Fill in the details below"
+        onBack={() => navigate("/purchases/purchaseInvoice")}
+        actions={
+          <>
             <Button
+              type="button"
               variant="outline"
-              className="mt-2 w-full text-sm"
+              onClick={() => navigate("/purchases/purchaseInvoice")}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" form="create-purchase-form">
+              Save Purchase Invoice
+            </Button>
+          </>
+        }
+      />
+
+      <form
+        id="create-purchase-form"
+        onSubmit={formik.handleSubmit}
+        className="space-y-5 max-w-5xl"
+      >
+        {/* supplier selection */}
+        <FormSection title="Supplier" layout="plain">
+          {!selectedPartyId ? (
+            <button
               type="button"
               onClick={() => setPartyModalOpen(true)}
+              className="w-full border border-dashed border-primary rounded-lg py-4 text-center text-primary font-medium bg-blue-50/60 hover:bg-blue-50 transition-colors cursor-pointer"
             >
-              Change Supplier
-            </Button>
-          </div>
-        )}
+              + Select Supplier
+            </button>
+          ) : (
+            <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+              <div className="min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {partyDetails?.name || "Supplier"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {partyDetails?.mobileNumber || ""}
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={() => setPartyModalOpen(true)}
+              >
+                Change Supplier
+              </Button>
+            </div>
+          )}
+        </FormSection>
 
         {/* invoice fields */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="input-label">Invoice No*</label>
-            <input
-              name="invioceNo"
-              value={formik.values.invioceNo}
-              onChange={formik.handleChange}
-              className="input-field"
-              required
-            />
-          </div>
-          <div>
-            <label className="input-label">Invoice Date*</label>
-            <input
-              type="date"
-              name="invioceDate"
-              value={formik.values.invioceDate}
-              onChange={formik.handleChange}
-              className="input-field"
-              required
-            />
-          </div>
-          <div>
-            <label className="input-label">Payment Terms (days)</label>
-            <input
-              type="number"
-              name="paymentTermDays"
-              value={formik.values.paymentTermDays}
-              onChange={formik.handleChange}
-              className="input-field"
-            />
-            <label className="input-label mt-2">Due Date</label>
-            <input
-              type="date"
-              name="dueDate"
-              value={formik.values.dueDate}
-              onChange={formik.handleChange}
-              className="input-field"
-            />
-          </div>
-        </div>
+        <FormSection title="Invoice Details">
+          <Input
+            label="Invoice No"
+            required
+            name="invioceNo"
+            value={formik.values.invioceNo}
+            onChange={formik.handleChange}
+          />
+          <Input
+            label="Invoice Date"
+            required
+            type="date"
+            name="invioceDate"
+            value={formik.values.invioceDate}
+            onChange={formik.handleChange}
+          />
+          <Input
+            label="Payment Terms (days)"
+            type="number"
+            name="paymentTermDays"
+            value={formik.values.paymentTermDays}
+            onChange={formik.handleChange}
+          />
+          <Input
+            label="Due Date"
+            type="date"
+            name="dueDate"
+            value={formik.values.dueDate}
+            onChange={formik.handleChange}
+          />
+        </FormSection>
 
         {/* items */}
-        <div className="border border-dashed border-blue-400 p-4 rounded-md text-center bg-blue-50">
-          <p
-            className="font-medium text-primary cursor-pointer"
+        <FormSection title="Items" layout="plain">
+          <button
+            type="button"
             onClick={() => setItemModalOpen(true)}
+            className="w-full border border-dashed border-primary rounded-lg py-4 text-center text-primary font-medium bg-blue-50/60 hover:bg-blue-50 transition-colors cursor-pointer"
           >
             + Add Item
-          </p>
-        </div>
-        {formik.values.itemDetails.length > 0 && (
-          <Table
-            columns={columns}
-            data={formik.values.itemDetails}
-            emptyMessage="No items added"
-          />
-        )}
+          </button>
+          {formik.values.itemDetails.length > 0 && (
+            <div className="mt-4">
+              <Table
+                columns={columns}
+                data={formik.values.itemDetails}
+                emptyMessage="No items added"
+              />
+            </div>
+          )}
+        </FormSection>
 
         {/* summary */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6">
-          <div>
-            <label className="input-label">Notes</label>
-            <textarea
-              name="notes"
-              value={formik.values.notes}
-              onChange={formik.handleChange}
-              rows={3}
-              className="input-field resize-none text-sm mt-2"
-            />
-
-            <label className="mt-4 block input-label">Terms & Conditions</label>
-            <textarea
-              name="termsAndConditions"
-              value={formik.values.termsAndConditions}
-              onChange={formik.handleChange}
-              rows={3}
-              className="input-field text-xs mt-1"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <label className="mt-4 block input-label">Additional Charges</label>
-            <input
-              type="number"
-              name="additionalCharges"
-              value={formik.values.additionalCharges}
-              onChange={formik.handleChange}
-              className="input-field"
-            />
-
-            <label className="mt-4 block input-label">Discount After Tax</label>
-            <input
-              type="number"
-              name="discountAfterTax"
-              value={formik.values.discountAfterTax}
-              onChange={formik.handleChange}
-              className="input-field"
-            />
-
-            <div className="text-sm">
-              <div className="flex justify-between">
-                <span>Taxable Amount</span>
-                <span>
-                  ₹{formik.values.totalTaxablePurchaseAmount.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex justify-between mt-1">
-                <span>Total Amount</span>
-                <span>₹{formik.values.totalPurchaseAmount.toFixed(2)}</span>
-              </div>
+        <FormSection title="Notes & Payment" layout="plain">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-4">
+            <div className="space-y-4">
+              <Textarea
+                label="Notes"
+                name="notes"
+                value={formik.values.notes}
+                onChange={formik.handleChange}
+                rows={3}
+                className="resize-none"
+              />
+              <Textarea
+                label="Terms & Conditions"
+                name="termsAndConditions"
+                value={formik.values.termsAndConditions}
+                onChange={formik.handleChange}
+                rows={3}
+                className="resize-none"
+              />
             </div>
 
-            <div className="flex items-center mt-2 gap-2">
-              <input
-                type="checkbox"
-                name="isFullyPaid"
-                checked={formik.values.isFullyPaid}
+            <div className="space-y-4">
+              <Input
+                label="Additional Charges"
+                type="number"
+                name="additionalCharges"
+                value={formik.values.additionalCharges}
                 onChange={formik.handleChange}
               />
-              <span className="text-sm">Mark as Fully Paid</span>
-            </div>
+              <Input
+                label="Discount After Tax"
+                type="number"
+                name="discountAfterTax"
+                value={formik.values.discountAfterTax}
+                onChange={formik.handleChange}
+              />
 
-            <label className="mt-4 block input-label">Paid Amount</label>
-            <input
-              type="number"
-              name="paidAmount"
-              value={formik.values.paidAmount}
-              onChange={formik.handleChange}
-              className="input-field mt-2"
-            />
-            {warningText && (
-              <div className="flex items-center gap-1 mt-1 text-yellow-600 text-sm">
-                <FaExclamationTriangle />
-                <span>{warningText}</span>
+              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+                <div className="flex justify-between">
+                  <span>Taxable Amount</span>
+                  <span className="font-medium">
+                    ₹{formik.values.totalTaxablePurchaseAmount.toFixed(2)}
+                  </span>
+                </div>
+                <div className="flex justify-between mt-1">
+                  <span>Total Amount</span>
+                  <span className="font-medium">
+                    ₹{formik.values.totalPurchaseAmount.toFixed(2)}
+                  </span>
+                </div>
               </div>
-            )}
 
-            <div className="text-sm text-green-600 font-semibold mt-2">
-              <div className="flex justify-between">
+              <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="isFullyPaid"
+                  checked={formik.values.isFullyPaid}
+                  onChange={formik.handleChange}
+                />
+                Mark as Fully Paid
+              </label>
+
+              <Input
+                label="Paid Amount"
+                type="number"
+                name="paidAmount"
+                value={formik.values.paidAmount}
+                onChange={formik.handleChange}
+              />
+              {warningText && (
+                <div className="flex items-center gap-1.5 text-yellow-600 text-sm">
+                  <FaExclamationTriangle />
+                  <span>{warningText}</span>
+                </div>
+              )}
+
+              <div className="flex justify-between rounded-lg border border-green-200 bg-green-50 p-3 text-sm font-semibold text-green-700">
                 <span>Balance Amount</span>
                 <span>₹{formik.values.dueAmount.toFixed(2)}</span>
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/purchases/purchaseInvoice")}
-          >
-            Cancel
-          </Button>
-          <Button type="submit">Save Purchase Invoice</Button>
-        </div>
+        </FormSection>
       </form>
     </div>
   );

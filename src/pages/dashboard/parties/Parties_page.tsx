@@ -1,6 +1,6 @@
-
 import { PartiesTable } from "../../../components/Parties/PartiesTable";
 import { PartiesHeader } from "../../../components/Parties/PartiesHeader";
+import { Card } from "../../../components/UI/Card";
 import { useState } from "react";
 
 export const Parties_Page = () => {
@@ -8,9 +8,14 @@ export const Parties_Page = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
   return (
- <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1 min-w-[200px] ">
-      <h1 className="text-2xl primary-font text-gray-800 mb-6"
-      >Parties</h1>
+    <div className="secondary-font space-y-6">
+      <div>
+        <h1 className="text-xl primary-font text-gray-900">Parties</h1>
+        <p className="text-sm text-gray-500 mt-0.5">
+          Manage your customers and suppliers
+        </p>
+      </div>
+
       <PartiesHeader
         selectedCategories={selectedCategories}
         setSelectedCategories={setSelectedCategories}
@@ -18,10 +23,12 @@ export const Parties_Page = () => {
         setSearchTerm={setSearchTerm}
       />
 
-      <PartiesTable
-        selectedCategories={selectedCategories}
-        searchTerm={searchTerm}
-      />
+      <Card>
+        <PartiesTable
+          selectedCategories={selectedCategories}
+          searchTerm={searchTerm}
+        />
+      </Card>
     </div>
   );
 };

@@ -3,6 +3,7 @@ import { MdOutlineFileCopy } from "react-icons/md";
 import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Button } from "../UI/Button";
 import { Badge } from "../UI/Badge";
+import { Card } from "../UI/Card";
 import { Table } from "../Table/Table";
 import type { Column } from "../Table/Table";
 import { useNavigate } from "react-router-dom";
@@ -49,10 +50,14 @@ const PurchaseOrder = () => {
   ];
 
   return (
-    <div className="bg-[#f9fafc] min-h-screen px-2 py-2 md:px-2">
+    <div className="secondary-font bg-slate-50 min-h-screen p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 
-          className="text-xl primary-font text-gray-800">Purchase Orders</h1>
+        <div>
+          <h1 className="text-xl primary-font text-gray-900">Purchase Orders</h1>
+          <p className="text-sm light-font text-gray-500 mt-0.5">
+            Manage and track your purchase orders
+          </p>
+        </div>
         <Button
           className="w-full sm:w-auto cursor-pointer"
           onClick={() => navigate("/purchases/purchaseorder/create")}
@@ -62,9 +67,9 @@ const PurchaseOrder = () => {
       </div>
 
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 mb-6">
-        <div className="flex items-center text-accent font-medium text-sm gap-2 border-b-2 border-accent pb-1">
+        <div className="flex items-center text-accent secondary-font text-sm gap-2 border-b-2 border-accent pb-1">
           <span>●</span>
-          <span className="secondary-font">Purchase Orders</span>
+          <span>Purchase Orders</span>
         </div>
         <div className="w-full md:w-1/2">
           <SearchDateFilter
@@ -75,18 +80,20 @@ const PurchaseOrder = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <Card>
         {data.length === 0 ? (
-          <div className="flex flex-col items-center py-12 text-gray-500 text-center">
-            <MdOutlineFileCopy className="text-4xl text-gray-300 mb-2" />
-            <p className="text-sm secondary-font">No Transactions Matching the current filter</p>
+          <div className="flex flex-col items-center py-16 text-gray-500 text-center">
+            <MdOutlineFileCopy className="text-4xl text-gray-300 mb-3" />
+            <p className="text-sm secondary-font text-gray-600">
+              No Transactions Matching the current filter
+            </p>
           </div>
         ) : (
           <div className="overflow-x-auto">
             <Table columns={columns} data={data} />
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

@@ -7,6 +7,7 @@ import { purchaseApi } from "../features/purchase/purchaseApiSlice";
 import { authApi } from "../features/auth/authApiSlice";
 import { documentApi } from "../features/document/documentApiSlice";
 import { paymentApi } from "../features/payment/paymentApiSlice";
+import { demoApi } from "../features/demo/demoApiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     [authApi.reducerPath]: authApi.reducer,
     [documentApi.reducerPath]: documentApi.reducer,
     [paymentApi.reducerPath]: paymentApi.reducer,
+    [demoApi.reducerPath]: demoApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -27,6 +29,7 @@ export const store = configureStore({
       authApi.middleware,
       documentApi.middleware,
       paymentApi.middleware,
+      demoApi.middleware,
     ),
 });
 

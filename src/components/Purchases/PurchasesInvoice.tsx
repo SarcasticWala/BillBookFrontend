@@ -11,6 +11,7 @@ import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Table, type Column } from "../Table/Table";
 import { Badge } from "../UI/Badge";
 import { Button } from "../UI/Button";
+import { Card } from "../UI/Card";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 import { BsThreeDotsVertical } from "react-icons/bs";
@@ -97,10 +98,10 @@ const PurchasesInvoice = () => {
   ];
 
   return (
-    <div className="min-h-screen px-2 py-2 lg:px-2 md:py-2">
+    <div className="secondary-font min-h-screen px-2 py-2 lg:px-2 md:py-2">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-6">
-        <h1 className="text-xl primary-font text-gray-800">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <h1 className="text-xl primary-font text-gray-900">
           Purchase Invoices
         </h1>
 
@@ -126,37 +127,37 @@ const PurchasesInvoice = () => {
         </div>
       </div>
 
-      {/* Dashboard Cards */}
+      {/* Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="w-full bg-white p-4 rounded-md shadow-sm border border-gray-200 hover:border-blue-500 transition-all cursor-pointer">
-          <div className="flex items-center gap-1 text-blue-700 mb-1">
+        <Card className="hover:border-primary transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 text-primary mb-1.5">
             <MdShoppingCartCheckout className="text-base" />
             <p className="text-sm secondary-font">Total Purchases</p>
           </div>
-          <div className="text-black secondary-font text-lg ml-[2px]">
+          <div className="text-gray-900 primary-font text-xl">
             ₹ {totalPurchases.toFixed(2)}
           </div>
-        </div>
+        </Card>
 
-        <div className="w-full bg-white p-4 rounded-md shadow-sm border border-gray-200 hover:border-green-500 transition-all cursor-pointer">
-          <div className="flex items-center  gap-1 text-emerald-500 mb-1">
+        <Card className="hover:border-emerald-500 transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 text-emerald-600 mb-1.5">
             <MdOutlinePayment className="text-base" />
             <p className="text-sm secondary-font">Paid</p>
           </div>
-          <div className="text-black secondary-font text-lg ml-[2px]">
+          <div className="text-gray-900 primary-font text-xl">
             ₹ {totalPaid.toFixed(2)}
           </div>
-        </div>
+        </Card>
 
-        <div className="w-full bg-white p-4 rounded-md shadow-sm border border-gray-200 hover:border-red-500 transition-all cursor-pointer">
-          <div className="flex items-center gap-1 text-red-500 mb-1">
+        <Card className="hover:border-red-500 transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 text-red-500 mb-1.5">
             <MdMoneyOff className="text-base" />
             <p className="text-sm secondary-font">Unpaid</p>
           </div>
-          <div className="text-black secondary-font text-lg ml-[2px]">
+          <div className="text-gray-900 primary-font text-xl">
             ₹ {totalUnpaid.toFixed(2)}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Filters + Actions */}
@@ -185,7 +186,7 @@ const PurchasesInvoice = () => {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <Card>
         {isLoading ? (
           <p className="text-center text-gray-400 py-10">Loading invoices...</p>
         ) : isError ? (
@@ -211,7 +212,7 @@ const PurchasesInvoice = () => {
             />
           </div>
         )}
-      </div>
+      </Card>
     </div>
   );
 };

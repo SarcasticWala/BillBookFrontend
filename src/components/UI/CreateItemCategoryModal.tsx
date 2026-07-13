@@ -20,7 +20,7 @@ const CreateItemCategoryModal: React.FC<Props> = ({ onClose }) => {
       return;
     }
     try {
-      const response = await createCategory({ catagory: name.trim() }).unwrap();
+      const response = await createCategory({ name: name.trim() }).unwrap();
       toast.success("Item category created successfully");
       // Return the new category's id so the caller can auto-select it.
       onClose(response?.data?.id);

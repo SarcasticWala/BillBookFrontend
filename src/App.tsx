@@ -38,6 +38,8 @@ const CreatePurchaseForm = lazy(() => import("./pages/dashboard/Purchace/Purchas
 const CreateSalesForm = lazy(() => import("./pages/dashboard/sales/SalesInvoice/CreateSalesInvoice/CreateSalesInvoices"));
 const ExpensesPage = lazy(() => import("./pages/dashboard/Expenss/ExpensesPage"));
 const SettingsPage = lazy(() => import("./pages/dashboard/Settings/Settings"));
+const BookDemoPage = lazy(() => import("./pages/dashboard/BookDemo/BookDemoPage"));
+const AdminDemoRequests = lazy(() => import("./pages/dashboard/Admin/AdminDemoRequests"));
 function App() {
   return (
     <Router>
@@ -50,8 +52,8 @@ function App() {
           element={
             <div className="flex ">
               <Sidebar />
-              <div className="flex-1 min-h-screen sm:ml-60  flex flex-col bg-white pb-8">
-                <div className="flex-grow p-4 w-full max-w-9xl mx-auto">
+              <div className="flex-1 min-w-0 min-h-screen sm:ml-60  flex flex-col bg-white pb-8">
+                <div className="flex-grow p-4 sm:p-6 w-full max-w-9xl mx-auto">
                   <Routes>
                     <Route path="dashboard" element={<DashboardPage />} />
                     <Route path="parties" element={<Parties_Page />} />
@@ -68,6 +70,8 @@ function App() {
                      <Route path="automated-bills" element={<AutomatedBillsPage />} />
                      <Route path="expenses" element={<ExpensesPage />} />
                     <Route path="settings" element={<SettingsPage />} />
+                    <Route path="book-demo" element={<BookDemoPage />} />
+                    <Route path="admin/demo-requests" element={<AdminDemoRequests />} />
                     <Route
                       path="create-category"
                       element={<CreateCategory />}

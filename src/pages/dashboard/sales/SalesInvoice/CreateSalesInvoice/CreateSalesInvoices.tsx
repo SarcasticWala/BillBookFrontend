@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
-import { FaArrowLeft, FaExclamationTriangle, FaTrash } from "react-icons/fa";
+import { FaExclamationTriangle, FaTrash } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { PartySelectorModal } from "./PartySelectorModal";
 import { ItemSelectorModal } from "./ItemSelectorModal";
@@ -9,6 +9,9 @@ import { useGetItemByIdQuery } from "../../../../../features/item/itemApiSlice";
 import { useCreateSaleMutation } from "../../../../../features/sales/saleApiSlice";
 import { Button } from "../../../../../components/UI/Button";
 import { Card } from "../../../../../components/UI/Card";
+import { Input } from "../../../../../components/UI/Input";
+import { PageHeader } from "../../../../../components/UI/PageHeader";
+import { FormSection } from "../../../../../components/UI/FormSection";
 import { FiPlus } from "react-icons/fi";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { toast } from "react-toastify";
@@ -652,7 +655,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
   ];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto secondary-font">
+    <div className="secondary-font">
       <PartySelectorModal
         isOpen={isPartyModalOpen}
         onClose={() => setPartyModalOpen(false)}
@@ -723,7 +726,28 @@ const handleTaxPercentChange = (index: number, val: string) => {
         }}
       />
 
+      <PageHeader
+        title="Create Sales Invoice"
+        subtitle="Fill in the details below"
+        onBack={() => navigate("/sales/invoices")}
+        actions={
+          <>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => navigate("/sales/invoices")}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" form="create-sales-form">
+              Save Sales Invoice
+            </Button>
+          </>
+        }
+      />
+
       <form
+        id="create-sales-form"
         onSubmit={async (e) => {
           e.preventDefault();
           const errors = await formik.validateForm();
@@ -735,28 +759,10 @@ const handleTaxPercentChange = (index: number, val: string) => {
           }
           formik.handleSubmit(e);
         }}
-        className="space-y-6"
+        className="space-y-5 sm:space-y-6 p-4 sm:p-6 max-w-5xl mx-auto"
       >
-        {/* header & navigation */}
-        <div>
-          <button
-            type="button"
-            onClick={() => navigate("/sales/invoices")}
-            className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mb-4"
-          >
-            <FaArrowLeft />
-            <span>Back</span>
-          </button>
-          <h1 className="text-2xl primary-font text-gray-800 mb-1">
-            Create Sales Invoice
-          </h1>
-          <p className="text-sm light-font text-gray-500">
-            Fill in the details below
-          </p>
-        </div>
-
         {/* Party Selection */}
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
         {!selectedPartyId ? (
           <div className="border border-dashed border-blue-400 p-4 rounded-md text-center bg-blue-50">
             <p
@@ -829,53 +835,41 @@ const handleTaxPercentChange = (index: number, val: string) => {
         </Card>
 
         {/* Invoice details */}
-        <Card className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="input-label">Invoice No*</label>
-            <input
-              name="invioceNo"
-              value={formik.values.invioceNo}
-              onChange={formik.handleChange}
-              className="input-field"
-              required
-            />
-          </div>
-          <div>
-            <label className="input-label">Invoice Date*</label>
-            <input
-              type="date"
-              name="invioceDate"
-              value={formik.values.invioceDate}
-              onChange={formik.handleChange}
-              className="input-field"
-              required
-            />
-          </div>
-          <div>
-            <label className="input-label">Payment Terms (days)</label>
-            <input
-              type="number"
-              name="paymentTermDays"
-              min={0}
-              value={formik.values.paymentTermDays}
-              onChange={formik.handleChange}
-              className="input-field"
-            />
-            <label className="input-label mt-2">Due Date</label>
-            <input
-              type="date"
-              name="dueDate"
-              value={formik.values.dueDate}
-              onChange={formik.handleChange}
-              className="input-field"
-            />
-          </div>
-        </div>
-        </Card>
+        <FormSection title="Invoice Details">
+          <Input
+            label="Invoice No"
+            required
+            name="invioceNo"
+            value={formik.values.invioceNo}
+            onChange={formik.handleChange}
+          />
+          <Input
+            label="Invoice Date"
+            required
+            type="date"
+            name="invioceDate"
+            value={formik.values.invioceDate}
+            onChange={formik.handleChange}
+          />
+          <Input
+            label="Payment Terms (days)"
+            type="number"
+            name="paymentTermDays"
+            min={0}
+            value={formik.values.paymentTermDays}
+            onChange={formik.handleChange}
+          />
+          <Input
+            label="Due Date"
+            type="date"
+            name="dueDate"
+            value={formik.values.dueDate}
+            onChange={formik.handleChange}
+          />
+        </FormSection>
 
         {/* Items */}
-        <Card className="p-6">
+        <Card className="p-4 sm:p-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-lg primary-font text-gray-800">Items</h2>
             <Button
@@ -897,8 +891,9 @@ const handleTaxPercentChange = (index: number, val: string) => {
         </Card>
 
         {/* Summary */}
-        <Card className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-200 pt-6">
+        <Card className="p-4 sm:p-6">
+        <h2 className="text-lg primary-font text-gray-800 mb-4">Summary &amp; Payment</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
           <div>
             <label htmlFor="sale-notes" className="text-sm text-gray-700 input-label">
               Notes
@@ -1026,17 +1021,6 @@ const handleTaxPercentChange = (index: number, val: string) => {
           </div>
         </div>
         </Card>
-
-        <div className="flex justify-end gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/sales/invoices")}
-          >
-            Cancel
-          </Button>
-          <Button type="submit">Save Sales Invoice</Button>
-        </div>
       </form>
     </div>
   );

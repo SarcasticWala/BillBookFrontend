@@ -28,7 +28,7 @@ export function Table<T>({
     location.pathname.includes("sales/create-invoice");
 
   return (
-    <div className="mt-6 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden secondary-font">
+    <div className="mt-4 sm:mt-6 bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden secondary-font">
       <div className="overflow-x-auto max-h-[calc(100vh-300px)] ">
         <table className="w-full table-auto text-sm text-left text-gray-700 secondary-font">
           <thead className="bg-gray-50 border-b border-gray-200 sticky top-0 z-10">
@@ -36,7 +36,7 @@ export function Table<T>({
               {columns.map((col, idx) => (
                 <th
                   key={idx}
-                  className={`px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${
+                  className={`px-4 sm:px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider whitespace-nowrap ${
                     isInvoicePage ? "text-center" : ""
                   }`}
                 >
@@ -65,7 +65,7 @@ export function Table<T>({
                   {columns.map((col, colIndex) => (
                     <td
                       key={colIndex}
-                      className="px-6 py-3.5 whitespace-nowrap secondary-font"
+                      className="px-4 sm:px-6 py-3.5 whitespace-nowrap secondary-font"
                     >
                       {col.render
                         ? col.render(

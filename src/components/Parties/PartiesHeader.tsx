@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CategorySelector } from "../Category/CategorySelector";
 import { Button } from "../UI/Button";
+import { Card } from "../UI/Card";
 import {
   useGetCategoriesQuery,
   useGetPartiesQuery,
@@ -91,47 +92,45 @@ export const PartiesHeader: React.FC<Props> = ({
         </div>
       </div> */}
       <div className="flex flex-wrap gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1 min-w-[200px] cursor-pointer transition-all duration-200 hover:border-blue-500">
-          <div className="flex items-center secondary-font gap-1 text-blue-400 mb-1">
+        <Card className="flex-1 min-w-[200px] cursor-pointer transition-all duration-200 hover:border-blue-500">
+          <div className="flex items-center secondary-font gap-1.5 text-blue-500 mb-1.5">
             <MdBarChart className="text-base" />
             <p className="text-sm secondary-font">All Parties</p>
           </div>
           {isLoading ? (
-            <div className="h-6 w-16 bg-gray-200 animate-pulse rounded" />
+            <div className="h-7 w-16 bg-gray-200 animate-pulse rounded" />
           ) : (
-            <p className="text-black secondary-font text-lg ml-[2px]">
-              {totalParties}
-            </p>
+            <p className="primary-font text-xl text-gray-900">{totalParties}</p>
           )}
-        </div>
+        </Card>
 
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1 min-w-[200px] cursor-pointer transition-all duration-200 hover:border-green-500">
-          <div className="flex items-center secondary-font gap-1 text-emerald-500 mb-1">
+        <Card className="flex-1 min-w-[200px] cursor-pointer transition-all duration-200 hover:border-green-500">
+          <div className="flex items-center secondary-font gap-1.5 text-emerald-500 mb-1.5">
             <FaMoneyBillWave className="text-base" />
             <p className="text-sm secondary-font">To Collect</p>
           </div>
           {isLoading ? (
-            <div className="h-6 w-16 bg-gray-200 animate-pulse rounded" />
+            <div className="h-7 w-16 bg-gray-200 animate-pulse rounded" />
           ) : (
-            <p className="text-black secondary-font text-lg ml-[2px]">
+            <p className="primary-font text-xl text-gray-900">
               ₹{toCollectTotal.toLocaleString("en-IN")}
             </p>
           )}
-        </div>
+        </Card>
 
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1 min-w-[200px] cursor-pointer transition-all duration-200 hover:border-red-500">
-          <div className="flex items-center secondary-font gap-1 text-red-500 mb-1">
+        <Card className="flex-1 min-w-[200px] cursor-pointer transition-all duration-200 hover:border-red-500">
+          <div className="flex items-center secondary-font gap-1.5 text-red-500 mb-1.5">
             <FaCreditCard className="text-base" />
             <p className="text-sm secondary-font">To Pay</p>
           </div>
           {isLoading ? (
-            <div className="h-6 w-16 bg-gray-200 animate-pulse rounded" />
+            <div className="h-7 w-16 bg-gray-200 animate-pulse rounded" />
           ) : (
-            <p className="text-black secondary-font text-lg ml-[2px]">
+            <p className="primary-font text-xl text-gray-900">
               ₹{toPayTotal.toLocaleString("en-IN")}
             </p>
           )}
-        </div>
+        </Card>
       </div>
 
       {/* Filters + Actions */}
@@ -142,7 +141,7 @@ export const PartiesHeader: React.FC<Props> = ({
           placeholder="Search Party"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-[200px] px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+          className="input-field w-full sm:w-[220px]"
         />
 
         <CategorySelector
@@ -173,14 +172,15 @@ export const PartiesHeader: React.FC<Props> = ({
           })}
         </div>
 
-        <div className="ml-auto flex gap-2">
-          <button
+        <div className="w-full sm:w-auto sm:ml-auto flex flex-col sm:flex-row gap-2">
+          <Button
+            variant="outline"
             onClick={() => setIsBulkModalOpen(true)}
-            className="border border-gray-300 rounded px-3 py-2 bg-white text-gray-700 shadow-sm hover:bg-gray-100 flex gap-1 items-center"
+            className="secondary-font cursor-pointer w-full sm:w-auto"
           >
-            <FaFileExcel />
-            <span className="cursor-pointer light-font">Bulk Upload</span>
-          </button>
+            <FaFileExcel className="text-emerald-600" />
+            Bulk Upload
+          </Button>
 
           <BulkUploadModal
             isOpen={isBulkModalOpen}
@@ -194,7 +194,7 @@ export const PartiesHeader: React.FC<Props> = ({
           <Button
             variant="primary"
             onClick={handleCreateParty}
-            className="cursor-pointer primary-font"
+            className="cursor-pointer primary-font w-full sm:w-auto"
           >
             Create Party
           </Button>

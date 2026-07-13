@@ -76,19 +76,19 @@ const BulkUploadModal = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative">
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto mx-auto">
         <button
-          className="absolute top-3 right-4 text-gray-600 text-xl hover:text-gray-900"
+          className="absolute top-2 right-2 sm:top-3 sm:right-4 text-gray-600 text-2xl leading-none hover:text-gray-900 flex items-center justify-center h-10 w-10"
           onClick={onClose}
         >
           &times;
         </button>
 
-        <div className="flex items-center gap-3 mb-4">
-          <FaFileExcel className="text-green-600 text-2xl" />
+        <div className="flex items-center gap-3 mb-4 pr-8">
+          <FaFileExcel className="text-green-600 text-2xl shrink-0" />
           <div>
-            <h2 className="text-xl font-semibold">{title}</h2>
+            <h2 className="text-lg sm:text-xl font-semibold">{title}</h2>
             <p className="text-sm text-gray-600">{description}</p>
           </div>
         </div>
@@ -113,22 +113,22 @@ const BulkUploadModal = ({
 
           <button
             onClick={handleDownloadSample}
-            className="text-blue-600 text-sm underline hover:text-blue-800"
+            className="inline-block text-blue-600 text-sm underline hover:text-blue-800 py-2"
           >
             Download Sample File
           </button>
 
-          <div className="flex justify-end gap-2 pt-2">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm border rounded text-gray-600 hover:bg-gray-100"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 text-sm border rounded text-gray-600 hover:bg-gray-100"
               disabled={isUploading}
             >
               Cancel
             </button>
             <button
               onClick={handleUpload}
-              className="px-4 py-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
               disabled={!excelFile || isUploading}
             >
               {isUploading ? "Uploading..." : "Save"}

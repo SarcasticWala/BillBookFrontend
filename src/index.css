@@ -45,9 +45,9 @@ body {
   min-width: 0;
   border: 1px solid #d1d5db;
   border-radius: 8px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.55rem 0.75rem;
   background-color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   color: #111827;
   outline: none;
   transition: box-shadow 0.15s ease, border-color 0.15s ease;
@@ -55,7 +55,7 @@ body {
 
 .input-field::placeholder {
   color: #9ca3af;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
 }
 
 .input-field:hover:not(:disabled):not(:focus) {
@@ -74,12 +74,12 @@ body {
 
 .input-label {
   display: block;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.375rem;
   font-weight: 500;
-  color: #374151;
-  font-size: 1rem;
-  line-height: 1.5;
-  letter-spacing: 0.015em;
+  color: #4b5563;            /* gray-600 — quieter, more professional */
+  font-size: 0.8125rem;      /* 13px — compact label */
+  line-height: 1.4;
+  letter-spacing: 0.01em;
 }
 
 .input-label.inline {

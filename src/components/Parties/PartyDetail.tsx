@@ -1,8 +1,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useGetPartyByIdQuery } from "../../features/party/partyApiSlice";
-import { FaArrowLeft } from "react-icons/fa";
 import { MdEdit } from "react-icons/md";
 import { Button } from "../UI/Button";
+import { PageHeader } from "../UI/PageHeader";
+import { FormSection } from "../UI/FormSection";
+import { Badge } from "../UI/Badge";
 
 export default function PartyDetail() {
   const navigate = useNavigate();
@@ -10,10 +12,12 @@ export default function PartyDetail() {
   const { data, isLoading, isError } = useGetPartyByIdQuery(id || "");
 
   if (isLoading)
-    return <div className="p-6 text-gray-500">Loading party…</div>;
+    return <div className="p-4 sm:p-6 text-gray-500 secondary-font">Loading party…</div>;
   if (isError || !data?.data)
     return (
-      <div className="p-6 text-center text-red-500">Error loading party</div>
+      <div className="p-4 sm:p-6 text-center text-red-500 secondary-font">
+        Error loading party
+      </div>
     );
 
   const party = data.data;
@@ -42,124 +46,110 @@ export default function PartyDetail() {
       party.billingAddress?.type === "BOTH");
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
-      {/* Header */}
-      <div className="flex items-center mb-4 justify-between">
-        <div className="flex items-center">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center hover:underline text-sm cursor-pointer"
-          >
-            <FaArrowLeft className="mr-2" />
-          </button>
-          <h2 className="text-xl primary-font ml-4">{name}</h2>
-        </div>
-        <Button onClick={() => navigate(`/parties/create-party/${party.id}`)}>
-          <MdEdit /> Edit party
-        </Button>
-      </div>
+    <div className="secondary-font">
+      <PageHeader
+        title={name}
+        subtitle="Party profile"
+        onBack={() => navigate(-1)}
+        actions={
+          <Button onClick={() => navigate(`/parties/create-party/${party.id}`)}>
+            <MdEdit /> Edit party
+          </Button>
+        }
+      />
 
       {/* Tabs (visual only) */}
-      <div className="flex space-x-4 mb-6 pb-2 text-sm font-medium text-gray-600">
-        <div className="text-blue-600 border-b-2 border-blue-600 pb-1">
+      <div className="flex space-x-4 mb-6 border-b border-gray-200 text-sm secondary-font text-gray-600">
+        <div className="text-primary border-b-2 border-primary pb-2 -mb-px">
           Profile
         </div>
-        {/* <div className="hover:text-blue-600 cursor-pointer">Transactions</div>
-        <div className="hover:text-blue-600 cursor-pointer">
-          Ledger (Statement)
-        </div>
-        <div className="hover:text-blue-600 cursor-pointer">
-          Item Wise Report
-        </div> */}
       </div>
 
       {/* Grid Details */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 text-sm text-gray-800">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 max-w-5xl">
         {/* General Details */}
-        <div className="bg-gray-50 border border-gray-200 rounded p-4">
-          <h3 className="font-semibold text-gray-700 mb-3">General Details</h3>
-          <DetailRow label="Party Name" value={name} />
-          <DetailRow
-            label="Party Type"
-            value={party.partyType === "CUSTOMER" ? "Customer" : "Supplier"}
-          />
-          <DetailRow label="Mobile Number" value={mobile} />
-
-          <DetailRow label="Party Category" value={categoryName} />
-          <DetailRow label="Email" value={party.email} />
-          <DetailRow
-            label="Opening Balance"
-            value={`₹${party.openingBalance || 0}`}
-          />
-        </div>
+        <FormSection title="General Details" layout="plain">
+          <div className="divide-y divide-gray-100">
+            <DetailRow label="Party Name" value={name} />
+            <DetailRow
+              label="Party Type"
+              value={party.partyType === "CUSTOMER" ? "Customer" : "Supplier"}
+              badge={party.partyType === "CUSTOMER" ? "info" : "neutral"}
+            />
+            <DetailRow label="Mobile Number" value={mobile} />
+            <DetailRow label="Party Category" value={categoryName} />
+            <DetailRow label="Email" value={party.email} />
+            <DetailRow
+              label="Opening Balance"
+              value={`₹${party.openingBalance || 0}`}
+            />
+          </div>
+        </FormSection>
 
         {/* Business Details */}
-        <div className="bg-gray-50 border border-gray-200 rounded p-4">
-          <h3 className="font-semibold text-gray-700 mb-3">Business Details</h3>
-          <DetailRow label="GSTIN" value={gstin} />
-          <DetailRow label="PAN Number" value={party.panNumber} />
+        <FormSection title="Business Details" layout="plain">
+          <div className="divide-y divide-gray-100">
+            <DetailRow label="GSTIN" value={gstin} />
+            <DetailRow label="PAN Number" value={party.panNumber} />
 
-          {isSameAddress ? (
-            <DetailRow
-              label="Billing & Shipping Address"
-              value={formatAddress(billing)}
-            />
-          ) : (
-            <>
+            {isSameAddress ? (
               <DetailRow
-                label="Billing Address"
+                label="Billing & Shipping Address"
                 value={formatAddress(billing)}
               />
-              <DetailRow
-                label="Shipping Address"
-                value={formatAddress(shipping)}
-              />
-            </>
-          )}
-
-          {/* <div className="text-blue-600 mt-2 cursor-pointer text-sm hover:underline">
-            Manage Shipping Addresses
-          </div> */}
-        </div>
+            ) : (
+              <>
+                <DetailRow
+                  label="Billing Address"
+                  value={formatAddress(billing)}
+                />
+                <DetailRow
+                  label="Shipping Address"
+                  value={formatAddress(shipping)}
+                />
+              </>
+            )}
+          </div>
+        </FormSection>
 
         {/* Credit Details */}
-        <div className="bg-gray-50 border border-gray-200 rounded p-4">
-          <h3 className="font-semibold text-gray-700 mb-3">Credit Details</h3>
-          <DetailRow
-            label="Credit Period"
-            value={`${party.creditPeriod || 0} Days`}
-          />
-          <DetailRow
-            label="Credit Limit"
-            value={`₹${party.creditLimit || "-"}`}
-          />
-        </div>
+        <FormSection title="Credit Details" layout="plain">
+          <div className="divide-y divide-gray-100">
+            <DetailRow
+              label="Credit Period"
+              value={`${party.creditPeriod || 0} Days`}
+            />
+            <DetailRow
+              label="Credit Limit"
+              value={`₹${party.creditLimit || "-"}`}
+            />
+          </div>
+        </FormSection>
       </div>
-
-      {/* Party Bank Details Box */}
-      {/* <div className="bg-yellow-50 border border-yellow-300 rounded p-4 mt-6 flex items-center justify-between">
-        <div>
-          <div className="text-gray-700 font-medium">Party Bank Details</div>
-          <p className="text-sm text-gray-600">
-            Add bank information to manage transactions with this party.
-          </p>
-        </div>
-        <button className="text-white bg-yellow-500 hover:bg-yellow-600 px-3 py-1 rounded text-sm font-medium">
-          +
-        </button>
-      </div> */}
     </div>
   );
 }
 
 // Reusable label/value row
-function DetailRow({ label, value }: { label: string; value?: string }) {
+function DetailRow({
+  label,
+  value,
+  badge,
+}: {
+  label: string;
+  value?: string;
+  badge?: "info" | "success" | "warning" | "danger" | "neutral";
+}) {
   return (
-    <div className="flex justify-between border-b py-2">
-      <span className="text-gray-600">{label}</span>
-      <span className="font-medium text-right max-w-xs truncate">
-        {value || "-"}
-      </span>
+    <div className="flex items-center justify-between gap-4 py-2.5 text-sm">
+      <span className="text-gray-500 light-font shrink-0">{label}</span>
+      {badge ? (
+        <Badge variant={badge}>{value || "-"}</Badge>
+      ) : (
+        <span className="secondary-font text-gray-900 text-right max-w-xs truncate">
+          {value || "-"}
+        </span>
+      )}
     </div>
   );
 }

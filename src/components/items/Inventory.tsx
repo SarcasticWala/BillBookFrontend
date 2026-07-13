@@ -2,6 +2,7 @@ import { MdAutoGraph } from "react-icons/md";
 import { FaBoxOpen, FaRupeeSign, FaTimes, FaFileExcel } from "react-icons/fa";
 import { CategorySelector } from "../Category/CategorySelector";
 import { Button } from "../UI/Button";
+import { Card } from "../UI/Card";
 import { useEffect, useState } from "react";
 import { CreateItemModal } from "../UI/CreateItemModal";
 import {
@@ -88,17 +89,17 @@ const Inventory = () => {
   }, [searchQuery]);
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl primary-font mb-6 text-gray-800">Items</h1>
+    <div className="secondary-font p-4 sm:p-6">
+      <h1 className="text-xl primary-font mb-5 sm:mb-6 text-gray-900">Items</h1>
 
       {/* Stat Cards */}
-      <div className="flex flex-col md:flex-row gap-4 mb-4">
-        <div className="w-full md:w-1/2 bg-white p-4 rounded-md shadow-sm border border-gray-200">
-          <div className="flex items-center gap-1 text-blue-600 mb-1">
+      <div className="flex flex-col md:flex-row gap-4 mb-6">
+        <Card className="w-full md:w-1/2">
+          <div className="flex items-center gap-1.5 text-primary mb-1">
             <MdAutoGraph className="text-base" />
             <p className="text-sm secondary-font">Stock Value</p>
           </div>
-          <div className="flex items-baseline gap-1 text-black secondary-font text-lg">
+          <div className="flex items-baseline gap-1 text-gray-900 primary-font text-xl">
             <FaRupeeSign className="text-base" />
             {isLoading ? (
               <StatSkeleton />
@@ -106,17 +107,17 @@ const Inventory = () => {
               <span>{stockValue.toLocaleString("en-IN")}</span>
             )}
           </div>
-        </div>
+        </Card>
 
-        <div className="w-full md:w-1/2 bg-white p-4 rounded-md shadow-sm border border-gray-200">
-          <div className="flex items-center gap-1 text-yellow-500 mb-1">
+        <Card className="w-full md:w-1/2">
+          <div className="flex items-center gap-1.5 text-yellow-500 mb-1">
             <FaBoxOpen className="text-base" />
             <p className="text-sm secondary-font">Low Stock</p>
           </div>
-          <div className="text-black secondary-font text-lg">
+          <div className="text-gray-900 primary-font text-xl">
             {isLoading ? <StatSkeleton /> : lowStockCount}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Filters Row */}
@@ -128,7 +129,7 @@ const Inventory = () => {
             placeholder={rotatingPlaceholders[placeholderIndex]}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 pr-8"
+            className="input-field pr-8"
           />
           {searchQuery && (
             <button
@@ -154,12 +155,12 @@ const Inventory = () => {
             return (
               <span
                 key={id}
-                className="flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm"
+                className="flex items-center bg-blue-50 text-primary border border-blue-100 px-2.5 py-1 rounded-full text-sm secondary-font"
               >
                 {category?.catagory || "Unknown"}
                 <button
                   onClick={() => handleCategoryRemove(id)}
-                  className="ml-2 text-blue-600 hover:text-blue-800"
+                  className="ml-2 text-primary hover:text-primary-hover cursor-pointer"
                 >
                   &times;
                 </button>
@@ -168,22 +169,24 @@ const Inventory = () => {
           })}
         </div>
 
-        <button
+        <Button
+          variant="outline"
           onClick={() => setShowLowStockOnly((prev) => !prev)}
-          className="bg-white light-font text-gray-700 border border-gray-300 px-4 py-2 rounded-md hover:bg-gray-100 transition cursor-pointer"
+          className="cursor-pointer"
         >
           {showLowStockOnly ? "Show All Items" : "Show Low Stock"}
-        </button>
+        </Button>
 
-        <div className="ml-auto flex gap-2">
+        <div className="w-full sm:w-auto sm:ml-auto flex flex-wrap gap-2">
           {/* Bulk Upload trigger */}
-          <button
+          <Button
+            variant="outline"
             onClick={() => setIsBulkModalOpen(true)}
-            className="border border-gray-300 rounded-md px-3 py-2 bg-white text-gray-700 shadow-sm hover:bg-gray-50 flex gap-1 items-center cursor-pointer"
+            className="cursor-pointer flex-1 sm:flex-none justify-center"
           >
             <FaFileExcel />
-            <span className="light-font">Bulk Add Items</span>
-          </button>
+            <span>Bulk Add Items</span>
+          </Button>
 
           <BulkUploadModal
             isOpen={isBulkModalOpen}
@@ -197,7 +200,7 @@ const Inventory = () => {
           <Button
             variant="primary"
             onClick={() => setModalOpen(true)}
-            className="cursor-pointer primary-font"
+            className="cursor-pointer primary-font flex-1 sm:flex-none justify-center"
           >
             Create Item
           </Button>

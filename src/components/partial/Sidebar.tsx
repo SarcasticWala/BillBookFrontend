@@ -24,7 +24,10 @@ import {
   MdDescription,
   MdMenu,
   MdClose,
+  MdOutlineOndemandVideo,
+  MdAdminPanelSettings,
 } from "react-icons/md";
+import { useGetMeQuery } from "../../features/auth/authApiSlice";
 
 const Sidebar = () => {
   const [active, setActive] = useState(() => localStorage.getItem("activeSidebar") || "");
@@ -34,6 +37,8 @@ const Sidebar = () => {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [openAccounting, setOpenAccounting] = useState(false);
   const [loading, setLoading] = useState(true);
+  const { data: meData } = useGetMeQuery();
+  const isAdmin = !!meData?.data?.isAdmin;
 
   const toggleMobile = () => setIsMobileOpen(!isMobileOpen);
   const closeMobile = () => setIsMobileOpen(false);
@@ -69,6 +74,7 @@ const Sidebar = () => {
     { label: "Dashboard", icon: <MdDashboard />, path: "/dashboard" },
     { label: "Parties", icon: <MdGroups />, path: "/parties" },
     { label: "Reports", icon: <MdAssessment />, path: "/reports" },
+    { label: "Book a Demo", icon: <MdOutlineOndemandVideo />, path: "/book-demo" },
   ];
 
 
@@ -126,7 +132,7 @@ const Sidebar = () => {
   return (
     <>
       <button
-        className="fixed top-3 right-3 z-50 p-2 bg-slate-800 text-white rounded-md shadow sm:hidden cursor-pointer"
+        className="fixed top-3 right-3 z-50 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center bg-slate-800 text-white rounded-md shadow sm:hidden cursor-pointer"
         onClick={toggleMobile}
       >
         <MdMenu size={24} />
@@ -134,7 +140,7 @@ const Sidebar = () => {
 
       {isMobileOpen && (
         <div
-          className="fixed inset-0  bg-opacity-25 z-40 sm:hidden cursor-pointer"
+          className="fixed inset-0 bg-black/50 z-40 sm:hidden cursor-pointer"
           onClick={closeMobile}
         />
       )}
@@ -151,7 +157,10 @@ const Sidebar = () => {
   `}>
 
         <div className="sm:hidden flex justify-end p-3 cursor-pointer">
-          <button onClick={closeMobile}>
+          <button
+            onClick={closeMobile}
+            className="text-gray-300 hover:text-white p-1.5 min-h-[44px] min-w-[44px] flex items-center justify-center"
+          >
             <MdClose size={24} />
           </button>
         </div>
@@ -175,6 +184,8 @@ const Sidebar = () => {
           <div className="space-y-2">
             <p className="text-xs text-gray-400 px-3 font-medium tracking-wider uppercase">General</p>
             {general.map(({ label, icon, path }, idx) => renderLink(path, label, icon, idx))}
+            {isAdmin &&
+              renderLink("/admin/demo-requests", "Demo Requests", <MdAdminPanelSettings />)}
 
             {/* Items Dropdown */}
             <div>

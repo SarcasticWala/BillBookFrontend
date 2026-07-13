@@ -281,22 +281,22 @@ export const CreateItemModal = ({
       className="fixed inset-0 z-50 overflow-y-auto"
     >
       <div className="flex items-center justify-center min-h-screen bg-black/40 p-4">
-        <div className="bg-white w-full max-w-6xl rounded-lg p-6 relative secondary-font">
+        <div className="bg-white w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto rounded-lg p-4 sm:p-6 relative secondary-font">
           {/* Header */}
           <div className="flex justify-between items-center pb-2 mb-4">
             <h2 className="text-xl primary-font">Create New Item</h2>
             <button
               onClick={onClose}
-              className="text-gray-500 hover:text-black cursor-pointer"
+              className="text-gray-500 hover:text-black cursor-pointer p-2 -mr-2 flex items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 sm:p-0 sm:-mr-0"
             >
               <FaTimes />
             </button>
           </div>
 
           {/* Content */}
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
             {/* Sidebar Tabs */}
-            <div className="w-1/4 border border-gray-200 rounded-md p-4 shadow-sm">
+            <div className="w-full lg:w-1/4 border border-gray-200 rounded-md p-4 shadow-sm">
               <ul className="space-y-2">
                 <li
                   onClick={() => setActiveTab("BASIC")}
@@ -351,7 +351,7 @@ export const CreateItemModal = ({
             </div>
 
             {/* Form Panels */}
-            <div className="w-3/4 space-y-5 min-h-[500px] border border-gray-200 rounded-md p-4 shadow-sm">
+            <div className="w-full lg:w-3/4 space-y-5 lg:min-h-[500px] border border-gray-200 rounded-md p-4 shadow-sm">
               {activeTab === "BASIC" && (
                 <>
                   {/* Item Type */}
@@ -592,7 +592,7 @@ export const CreateItemModal = ({
                 <>
                   <div>
                     <label className="input-label">Item Code *</label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <input
                         name="itemCode"
                         value={form.itemCode}
@@ -863,7 +863,7 @@ export const CreateItemModal = ({
                 <>
                   <div>
                     <label className="input-label">Purchase Price</label>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                       <input
                         type="number"
                         name="purchasePrice"
@@ -872,13 +872,13 @@ export const CreateItemModal = ({
                         min={0}
                         step="0.01" //decimals for currency
                         placeholder="ex: ₹200"
-                        className="input-field"
+                        className="input-field w-full sm:w-auto"
                       />
                       <select
                         name="purchasePriceTaxType"
                         value={form.purchasePriceTaxType}
                         onChange={handleChange}
-                        className="input-field"
+                        className="input-field w-full sm:w-auto"
                         disabled={form.itemProductType === "OLD"}
                       >
                         <option value="WITH_TAX">With Tax</option>

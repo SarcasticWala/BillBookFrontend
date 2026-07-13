@@ -45,12 +45,19 @@ const AdjustStockPurchaseModal: React.FC<AdjustStockPurchaseModalProps> = ({
     <Dialog open={open} onClose={() => setOpen(false)} className="relative z-50">
       <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white rounded-xl p-6 w-full max-w-xl">
+        <Dialog.Panel className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <Dialog.Title className="text-lg font-bold">
               Add Stock for Purchase
             </Dialog.Title>
-            <FaTimes className="cursor-pointer" onClick={() => setOpen(false)} />
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="-mr-2 flex h-11 w-11 items-center justify-center text-gray-500 hover:text-gray-700"
+              aria-label="Close"
+            >
+              <FaTimes className="cursor-pointer" />
+            </button>
           </div>
 
           <div className="space-y-3">
@@ -65,7 +72,7 @@ const AdjustStockPurchaseModal: React.FC<AdjustStockPurchaseModalProps> = ({
             {hasSerialisation && quantity >= 1 ? (
               <div>
                 <label className="block text-sm">Serial Numbers</label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {itemSerialNos.map((s, i) => (
                     <input
                       key={i}
@@ -85,7 +92,7 @@ const AdjustStockPurchaseModal: React.FC<AdjustStockPurchaseModalProps> = ({
             ): null}
           </div>
 
-          <div className="mt-6 flex justify-end gap-2">
+          <div className="mt-6 flex flex-col-reverse sm:flex-row justify-end gap-2">
             <Button variant="outline" onClick={() => {
                 setQuantity(0);
                 setItemSerialNos([]);

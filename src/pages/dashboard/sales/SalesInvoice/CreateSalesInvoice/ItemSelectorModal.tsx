@@ -227,14 +227,14 @@ export const ItemSelectorModal: React.FC<{
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0">
       <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white max-w-4xl w-full rounded-xl shadow-2xl p-6 flex flex-col border border-gray-200 h-[80vh]">
+        <Dialog.Panel className="bg-white max-w-4xl w-full rounded-xl shadow-2xl p-4 sm:p-6 flex flex-col border border-gray-200 h-[90vh] sm:h-[80vh] max-h-[90vh]">
           {/* Header */}
           <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
-            <h2 className="text-xl font-semibold text-gray-800 flex items-center gap-2">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800 flex items-center gap-2">
               <FaClipboardList /> Select Items
             </h2>
             <button
-              className="text-gray-500 hover:text-gray-800 transition"
+              className="text-gray-500 hover:text-gray-800 transition p-2 -mr-2 flex items-center justify-center min-h-[44px] min-w-[44px]"
               onClick={onClose}
             >
               <FaTimes size={18} />
@@ -242,20 +242,20 @@ export const ItemSelectorModal: React.FC<{
           </div>
 
           {/* Search + Create */}
-          <div className="flex items-center gap-3 mb-4">
-            <div className="relative w-100">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-4">
+            <div className="relative w-full sm:flex-1">
               <FaSearch className="absolute left-3 top-3 text-gray-400" />
               <input
                 type="text"
                 placeholder="Search items..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="border border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-100 rounded-lg pl-10 pr-3 py-2 w-full text-sm outline-none"
+                className="border border-gray-300 focus:border-blue-400 focus:ring focus:ring-blue-100 rounded-lg pl-10 pr-3 py-2.5 sm:py-2 w-full text-sm outline-none"
               />
             </div>
             <button
               onClick={() => setCreateItemModalOpen(true)}
-              className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm shadow-sm transition flex items-center gap-2 cursor-pointer"
+              className="bg-green-600 hover:bg-green-700 text-white px-3 py-2.5 sm:py-2 rounded-lg text-sm shadow-sm transition flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto min-h-[44px] sm:min-h-0 shrink-0"
             >
               <span>
                 <FaPlus />
@@ -284,10 +284,10 @@ export const ItemSelectorModal: React.FC<{
                   return (
                     <li
                       key={it.id}
-                      className="p-3 border-b border-gray-200 flex justify-between items-center bg-white hover:bg-gray-50 transition"
+                      className="p-3 border-b border-gray-200 flex justify-between items-center gap-3 bg-white hover:bg-gray-50 transition"
                     >
-                      <div>
-                        <div className="font-medium flex items-center gap-2 text-gray-800">
+                      <div className="min-w-0">
+                        <div className="font-medium flex items-center flex-wrap gap-2 text-gray-800">
                           <FaCube className="text-gray-500" />
                           {it.itemName || it.serviceName}
                           {it.hasSerialisation && (
@@ -307,7 +307,7 @@ export const ItemSelectorModal: React.FC<{
                             </span>
                           )}
                         </div>
-                        <div className="flex items-center gap-2 mt-0.5">
+                        <div className="flex items-center flex-wrap gap-2 mt-0.5">
                           {it.itemName && (
                             <div className="text-xs text-gray-500 flex items-center gap-1">
                               <FaList /> Stock: {it.netQuantity}
@@ -321,7 +321,7 @@ export const ItemSelectorModal: React.FC<{
                         </div>
                       </div>
                       <button
-                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-sm flex items-center gap-1 transition"
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 sm:py-1.5 rounded-lg text-sm flex items-center gap-1 transition shrink-0 min-h-[44px] sm:min-h-0"
                         onClick={() => handleAddClick(it)}
                       >
                         <FaPlus /> Add
@@ -339,11 +339,11 @@ export const ItemSelectorModal: React.FC<{
               {selectedItems.map((si) => (
                 <div
                   key={si.id}
-                  className="flex justify-between items-center text-sm py-1"
+                  className="flex justify-between items-center gap-2 text-sm py-1"
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-gray-700 flex items-center gap-2">
-                      <FaCube /> {si.name}
+                  <div className="flex items-center flex-wrap gap-2 min-w-0">
+                    <span className="font-medium text-gray-700 flex items-center gap-2 min-w-0">
+                      <FaCube className="shrink-0" /> <span className="truncate">{si.name}</span>
                     </span>
                     {si.salePrice && (
                       <span className="text-xs text-gray-500 flex items-center gap-1">
@@ -351,9 +351,9 @@ export const ItemSelectorModal: React.FC<{
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 shrink-0">
                     <button
-                      className="p-1 border rounded-lg hover:bg-gray-100 transition"
+                      className="p-2 sm:p-1 border rounded-lg hover:bg-gray-100 transition min-h-[40px] min-w-[40px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
                       onClick={() => handleMinusClick(si.id)}
                     >
                       <FaMinus />
@@ -362,7 +362,7 @@ export const ItemSelectorModal: React.FC<{
                       {si.quantity}
                     </span>
                     <button
-                      className="p-1 border rounded-lg hover:bg-gray-100 transition"
+                      className="p-2 sm:p-1 border rounded-lg hover:bg-gray-100 transition min-h-[40px] min-w-[40px] sm:min-h-0 sm:min-w-0 flex items-center justify-center"
                       onClick={() =>
                         handlePlusClick(
                           items.find((i: any) => i.id === si.id) || si
@@ -377,7 +377,7 @@ export const ItemSelectorModal: React.FC<{
               <div className="flex justify-end pt-3">
                 <button
                   onClick={finalizeSelection}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg shadow-sm transition flex items-center gap-2"
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 sm:py-2 rounded-lg shadow-sm transition flex items-center justify-center gap-2 w-full sm:w-auto min-h-[44px] sm:min-h-0"
                 >
                   Add Items
                 </button>

@@ -70,14 +70,14 @@ export const SerialSelectorModal: React.FC<SerialSelectorModalProps> = ({
 
       {/* Modal Container */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white w-full max-w-lg rounded-xl shadow-2xl border border-gray-200 p-6 flex flex-col">
+        <Dialog.Panel className="bg-white w-full max-w-lg mx-4 rounded-xl shadow-2xl border border-gray-200 p-4 sm:p-6 flex flex-col max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
-            <h2 className="text-xl font-semibold text-gray-800">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-800">
               Select Serials
             </h2>
             <button
-              className="text-gray-500 hover:text-gray-800 transition"
+              className="text-gray-500 hover:text-gray-800 transition p-2 -mr-2 min-h-[44px] min-w-[44px] flex items-center justify-center"
               onClick={onClose}
             >
               <FaTimes size={18} />
@@ -85,7 +85,7 @@ export const SerialSelectorModal: React.FC<SerialSelectorModalProps> = ({
           </div>
 
           {/* Search + Select All */}
-          <div className="flex gap-2 mb-4">
+          <div className="flex flex-col sm:flex-row gap-2 mb-4">
             <div className="relative flex-1">
               <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
               <input
@@ -93,12 +93,12 @@ export const SerialSelectorModal: React.FC<SerialSelectorModalProps> = ({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search serial number..."
-                className="pl-9 pr-3 py-2 border border-gray-300 rounded-lg w-full text-sm focus:border-blue-400 focus:ring focus:ring-blue-100 outline-none"
+                className="pl-9 pr-3 py-2.5 border border-gray-300 rounded-lg w-full text-sm focus:border-blue-400 focus:ring focus:ring-blue-100 outline-none"
               />
             </div>
             <button
               onClick={handleSelectAll}
-              className="px-4 py-2 flex items-center gap-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition"
+              className="px-4 py-2.5 flex items-center justify-center gap-2 border border-gray-300 rounded-lg text-sm hover:bg-gray-100 transition w-full sm:w-auto"
             >
               {filteredSerials.every((s) => selected.includes(s)) ? (
                 <>
@@ -122,7 +122,7 @@ export const SerialSelectorModal: React.FC<SerialSelectorModalProps> = ({
                 return (
                   <li
                     key={serial}
-                    className={`flex items-center p-2 text-sm cursor-pointer select-none ${
+                    className={`flex items-center p-3 text-sm cursor-pointer select-none ${
                       index % 2 === 0 ? "bg-gray-50" : "bg-white"
                     } hover:bg-blue-50 transition`}
                     onClick={() => toggleSerial(serial)}
@@ -141,16 +141,16 @@ export const SerialSelectorModal: React.FC<SerialSelectorModalProps> = ({
           )}
 
           {/* Footer */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200 mt-4">
+          <div className="flex flex-col sm:flex-row justify-end gap-3 pt-4 border-t border-gray-200 mt-4">
             <button
               onClick={onClose}
-              className="px-4 py-2 flex items-center gap-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition"
+              className="px-4 py-2.5 flex items-center justify-center gap-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 transition w-full sm:w-auto"
             >
               Cancel
             </button>
             <button
               onClick={handleSave}
-              className="px-4 py-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-sm"
+              className="px-4 py-2.5 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-sm w-full sm:w-auto"
             >
               Save
             </button>

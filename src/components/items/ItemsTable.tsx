@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { FaBoxes, FaBox, FaArrowDown } from "react-icons/fa";
 import { useState } from "react";
 import AdjustStockModal from "./AdjustStockModal";
+import { Badge } from "../UI/Badge";
 
 interface Item {
   name: string;
@@ -73,15 +74,9 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
           <div className="flex items-center gap-2">
             <span>{name}</span>
             {isProduct && (
-              <span
-                className={`px-2 py-0.5 text-xs rounded-full font-medium ${
-                  type === "OLD"
-                    ? "bg-gray-200 text-gray-700"
-                    : "bg-green-100 text-green-700"
-                }`}
-              >
+              <Badge variant={type === "OLD" ? "neutral" : "success"}>
                 {type}
-              </span>
+              </Badge>
             )}
           </div>
         );
@@ -124,15 +119,15 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
   ];
 
   return (
-    <div className="py-6">
-      <h2 className="text-lg font-semibold mb-4">Inventory List</h2>
+    <div className="secondary-font py-4 sm:py-6">
+      <h2 className="text-xl primary-font text-gray-900 mb-4">Inventory List</h2>
 
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
-              className="h-12 w-full bg-gray-100 rounded-md animate-pulse"
+              className="h-12 w-full bg-gray-100 rounded-lg animate-pulse"
             />
           ))}
         </div>
@@ -141,7 +136,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
       ) : items.length === 0 ? (
         <div className="flex flex-col items-center justify-center mt-16 text-center">
           <FaBoxes className="text-5xl text-yellow-500 mb-4" />
-          <p className="text-lg font-semibold mb-2">
+          <p className="text-lg primary-font text-gray-900 mb-2">
             Add all your Items at once!
           </p>
           <p className="text-sm text-gray-500 mb-6">

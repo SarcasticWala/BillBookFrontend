@@ -28,11 +28,11 @@ const CreateCategory: React.FC<Props> = ({ isOpen, onClose, onAddCategory }) => 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-30">
-      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6">
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-30 p-4">
+      <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-4 sm:p-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Create New Category</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-red-500 text-xl font-bold">
+          <button onClick={onClose} className="flex items-center justify-center h-11 w-11 -mr-2 text-gray-500 hover:text-red-500 text-xl font-bold">
             ×
           </button>
         </div>
@@ -47,24 +47,24 @@ const CreateCategory: React.FC<Props> = ({ isOpen, onClose, onAddCategory }) => 
               name="category"
               type="text"
               placeholder="Ex: Snacks"
-              className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
+              className="w-full border border-gray-300 rounded px-3 py-2.5 min-h-[44px] focus:outline-none focus:ring-2 focus:ring-blue-600 text-sm"
               value={categoryName}
               onChange={(e) => setCategoryName(e.target.value)}
             />
           </div>
 
-          <div className="flex justify-end gap-2">
+          <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
+              className="w-full sm:w-auto min-h-[44px] px-4 py-2.5 text-sm rounded bg-gray-100 text-gray-800 hover:bg-gray-200"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={categoryName.trim() === ""}
-              className={`px-4 py-2 text-sm rounded text-white ${
+              className={`w-full sm:w-auto min-h-[44px] px-4 py-2.5 text-sm rounded text-white ${
                 categoryName.trim() === ""
                   ? "bg-blue-400 cursor-not-allowed"
                   : "bg-blue-600 hover:bg-blue-700"

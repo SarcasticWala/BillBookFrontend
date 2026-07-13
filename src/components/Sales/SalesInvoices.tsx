@@ -8,6 +8,7 @@ import {
 } from "react-icons/md";
 import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Button } from "../UI/Button";
+import { Card } from "../UI/Card";
 import { useNavigate } from "react-router-dom";
 import { SaleTable } from "./SaleTable";
 import { useGetSaleInvoicesQuery } from "../../features/sales/saleApiSlice";
@@ -37,7 +38,7 @@ const SalesInvoices = () => {
   return (
     <div className="min-h-screen  px-2 py-2 lg:px-2 md:py-2">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-6">
-        <h1 className="text-xl primary-font text-gray-800">Sales Invoices</h1>
+        <h1 className="text-xl primary-font text-gray-900">Sales Invoices</h1>
         <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
           <Button
             variant="outline"
@@ -61,29 +62,29 @@ const SalesInvoices = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="w-full bg-white p-4 rounded-md shadow-sm border border-gray-200 hover:border-blue-500 transition-all cursor-pointer">
-          <div className="flex items-center gap-1 text-blue-700 mb-1">
+        <Card className="hover:border-primary transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 text-primary mb-1">
             <MdAttachMoney className="text-base" />
             <p className="text-sm secondary-font">Total Sales</p>
           </div>
-          <div className="text-black secondary-font text-lg ml-[2px]">₹ {totalSale}</div>
-        </div>
+          <div className="text-gray-900 primary-font text-lg">₹ {totalSale}</div>
+        </Card>
 
-        <div className="w-full bg-white p-4 rounded-md shadow-sm border border-gray-200 hover:border-green-500 transition-all cursor-pointer">
-          <div className="flex items-center gap-1 text-emerald-500 mb-1">
+        <Card className="hover:border-primary transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 text-emerald-600 mb-1">
             <MdOutlinePayment className="text-base" />
             <p className="text-sm secondary-font">Paid</p>
           </div>
-          <div className="text-black secondary-font text-lg ml-[2px]">₹ {totalPaidAmont}</div>
-        </div>
+          <div className="text-gray-900 primary-font text-lg">₹ {totalPaidAmont}</div>
+        </Card>
 
-        <div className="w-full bg-white p-4 rounded-md shadow-sm border border-gray-200 hover:border-red-500 transition-all cursor-pointer">
-          <div className="flex items-center gap-1 text-red-500 mb-1">
+        <Card className="hover:border-primary transition-colors cursor-pointer">
+          <div className="flex items-center gap-1.5 text-red-500 mb-1">
             <MdMoneyOff className="text-base" />
             <p className="text-sm secondary-font">Unpaid</p>
           </div>
-          <div className="text-black secondary-font text-lg ml-[2px]">₹ {totalDueAmount}</div>
-        </div>
+          <div className="text-gray-900 primary-font text-lg">₹ {totalDueAmount}</div>
+        </Card>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 mb-6">
@@ -110,11 +111,11 @@ const SalesInvoices = () => {
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm p-4">
+      <Card>
         <div className="overflow-x-auto">
           <SaleTable />
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { Button } from "../UI/Button";
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative w-full secondary-font py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
+    <section className="relative w-full secondary-font py-12 sm:py-16 px-4 sm:px-6 lg:px-8 overflow-hidden">
      <div className="absolute inset-0 bg-gradient-to-br from-indigo-50 via-blue-50 to-purple-50 -z-10">
        
         <div className="absolute inset-0 opacity-10 [mask-image:linear-gradient(to_bottom,transparent,white)]">
@@ -16,7 +16,7 @@ const Hero: React.FC = () => {
       </div>
 
       <div className="relative max-w-7xl mx-auto">
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-8 sm:gap-12">
      
           <div className="flex-1 text-center lg:text-left">
             <div className="mb-6">
@@ -25,12 +25,12 @@ const Hero: React.FC = () => {
               </span>
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl primary-font text-black mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl primary-font text-black mb-6 leading-tight">
               Best <span className="text-black">Billing</span> &<br className="hidden sm:block" />
               <span className="text-black">Invoicing</span> Software
             </h1>
 
-            <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
+            <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
               Transform your business with India's most trusted GST billing software. 
               Handle invoicing, e-invoicing, and e-way billing with ease.
             </p>
@@ -60,11 +60,11 @@ const Hero: React.FC = () => {
 
           
           <div className="flex-1 flex justify-center lg:justify-end">
-            <div className="relative w-80 h-80 lg:w-96 lg:h-96">
+            <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-96 lg:h-96">
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-indigo-400/20 to-purple-400/20 animate-pulse"></div>
               <div className="absolute inset-4 rounded-full bg-gradient-to-br from-purple-400/30 to-pink-400/30 animate-pulse delay-75"></div>
               <div className="absolute inset-8 rounded-full bg-white/80 backdrop-blur-sm shadow-2xl flex items-center justify-center">
-                <div className="text-center p-8">
+                <div className="text-center p-6 sm:p-8">
                   <div className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
                     <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -89,8 +89,8 @@ const Hero: React.FC = () => {
         </div>
 
   
-        <div className="mt-16 text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight">
+        <div className="mt-12 sm:mt-16 text-center">
+          <h2 className="text-2xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight">
             <span className="text-indigo-600">#</span> One software for<br />
             All your business needs
           </h2>

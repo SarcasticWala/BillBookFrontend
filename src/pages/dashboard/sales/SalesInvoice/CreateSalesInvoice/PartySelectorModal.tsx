@@ -23,17 +23,24 @@ export const PartySelectorModal: React.FC<{
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0">
       <div className="fixed inset-0 bg-black/40" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white max-w-md w-full rounded shadow-lg p-6">
+        <Dialog.Panel className="bg-white max-w-md w-full rounded shadow-lg p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-bold">Select Party</h2>
-            <FaTimes className="cursor-pointer" onClick={onClose} />
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Close"
+              className="flex items-center justify-center min-h-[44px] min-w-[44px] -mr-2 text-gray-600 hover:text-gray-900 cursor-pointer"
+            >
+              <FaTimes />
+            </button>
           </div>
           <ul className="max-h-60 overflow-auto">
             {isLoading && <li>Loading…</li>}
             {filteredParties.map((party: any) => (
               <li
                 key={party.id}
-                className="cursor-pointer p-2 hover:bg-blue-50 border-b"
+                className="cursor-pointer py-3 px-2 hover:bg-blue-50 border-b"
                 onClick={() => {
                   onSelect(party);
                   onClose();

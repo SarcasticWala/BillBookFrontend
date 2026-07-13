@@ -1,14 +1,8 @@
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useGetItemByIdQuery } from "../../features/item/itemApiSlice";
-import {
-  FaArrowLeft,
-  FaInfoCircle,
-  FaTags,
-  FaBoxes,
-  FaEllipsisH,
-  FaAlignLeft,
-} from "react-icons/fa";
 import { Badge } from "../UI/Badge";
+import { PageHeader } from "../UI/PageHeader";
+import { FormSection } from "../UI/FormSection";
 
 export const ItemDetailsPage = () => {
   const { id } = useParams();
@@ -41,47 +35,31 @@ export const ItemDetailsPage = () => {
   const item = data.data;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="flex items-center">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center text-gray-600 hover:text-gray-900 transition-colors cursor-pointer"
-        >
-          <FaArrowLeft className="mr-2" />
-          <span className="text-sm font-medium">Back</span>
-        </button>
-      </div>
+    <div className="secondary-font">
+      <PageHeader
+        title={item.itemName || item.serviceName}
+        subtitle="Item details"
+        onBack={() => navigate(-1)}
+        actions={<Badge variant="info">{itemType || "PRODUCT"}</Badge>}
+      />
 
-      {/* Title */}
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl primary-font text-gray-800">
-          {item.itemName || item.serviceName}
-        </h1>
-        <Badge variant="info">{itemType || "PRODUCT"}</Badge>
-      </div>
+      <div className="space-y-5 max-w-5xl">
+        {/* Images */}
+        {item.itemImage?.length > 0 && (
+          <div className="flex gap-3 flex-wrap">
+            {item.itemImage.map((url: string, index: number) => (
+              <img
+                key={index}
+                src={url}
+                alt={`Item Image ${index + 1}`}
+                className="w-28 h-28 object-cover rounded-lg border border-gray-200 shadow-sm"
+              />
+            ))}
+          </div>
+        )}
 
-      {/* Images */}
-      {item.itemImage?.length > 0 && (
-        <div className="flex gap-3 flex-wrap">
-          {item.itemImage.map((url: string, index: number) => (
-            <img
-              key={index}
-              src={url}
-              alt={`Item Image ${index + 1}`}
-              className="w-28 h-28 object-cover rounded-lg shadow"
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Detail Sections */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* General Info */}
-        <DetailSection
-          title="General Info"
-          icon={<FaInfoCircle className="text-blue-500" />}
-        >
+        <FormSection title="General Info">
           <Detail label="Item Code" value={item.itemCode || item.serviceCode} />
           <Detail label="Category" value={item.itemCatagory?.catagory} />
           <Detail label="HSN/SAC Code" value={item.hsnCode || item.sacCode} />
@@ -98,13 +76,10 @@ export const ItemDetailsPage = () => {
                 : "-"
             }
           />
-        </DetailSection>
+        </FormSection>
 
         {/* Pricing */}
-        <DetailSection
-          title="Pricing"
-          icon={<FaTags className="text-green-500" />}
-        >
+        <FormSection title="Pricing">
           <Detail label="Sale Price" value={formatCurrency(item.salePrice)} />
           <Detail
             label="Purchase Price"
@@ -120,13 +95,10 @@ export const ItemDetailsPage = () => {
             label="Purchase Tax Applicable"
             value={item.isPurchaseTaxApplicable ? "Yes" : "No"}
           />
-        </DetailSection>
+        </FormSection>
 
         {/* Stock */}
-        <DetailSection
-          title="Stock & Units"
-          icon={<FaBoxes className="text-yellow-500" />}
-        >
+        <FormSection title="Stock & Units">
           <Detail label="Measuring Unit" value={item.unit?.name} />
           <Detail label="Unit Short Name" value={item.unit?.shortName} />
           <Detail label="Net Quantity" value={item.netQuantity} />
@@ -136,13 +108,10 @@ export const ItemDetailsPage = () => {
             value={item.isAlertEnabled ? "Yes" : "No"}
           />
           <Detail label="Alert Quantity" value={item.productAlertValue} />
-        </DetailSection>
+        </FormSection>
 
         {/* Misc */}
-        <DetailSection
-          title="Other"
-          icon={<FaEllipsisH className="text-purple-500" />}
-        >
+        <FormSection title="Other">
           <Detail
             label="Online Visibility"
             value={item.isOnlineVisible ? "Yes" : "No"}
@@ -151,42 +120,18 @@ export const ItemDetailsPage = () => {
             label="As of Date"
             value={new Date(item.asOfDate).toLocaleDateString()}
           />
-        </DetailSection>
-      </div>
+        </FormSection>
 
-      {/* Description */}
-      <DetailSection
-        title="Description"
-        icon={<FaAlignLeft className="text-gray-500" />}
-      >
-        <p className="text-gray-600 text-sm">
-          {item.description || "No description provided."}
-        </p>
-      </DetailSection>
+        {/* Description */}
+        <FormSection title="Description" layout="plain">
+          <p className="text-sm text-gray-600">
+            {item.description || "No description provided."}
+          </p>
+        </FormSection>
+      </div>
     </div>
   );
 };
-
-/* Reusable detail section container */
-const DetailSection = ({
-  title,
-  icon,
-  children,
-}: {
-  title: string;
-  icon: React.ReactNode;
-  children: React.ReactNode;
-}) => (
-  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-5 space-y-3">
-    <div className="flex items-center gap-2">
-      {icon}
-      <h3 className="text-lg primary-font text-gray-800">{title}</h3>
-    </div>
-    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6 text-sm">
-      {children}
-    </div>
-  </div>
-);
 
 /* Reusable detail field */
 const Detail = ({
@@ -197,10 +142,8 @@ const Detail = ({
   value: string | number | undefined | null;
 }) => (
   <div>
-    <span className="block text-gray-500 text-xs font-medium mb-0.5">
-      {label}
-    </span>
-    <span className="font-semibold text-gray-800">
+    <span className="block input-label mb-0.5">{label}</span>
+    <span className="text-sm font-semibold text-gray-800">
       {value !== undefined && value !== null && value !== "" ? value : "-"}
     </span>
   </div>

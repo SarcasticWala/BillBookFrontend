@@ -30,7 +30,7 @@ export const useAuth = () => {
         throw new Error(err.message || "Backend login failed");
       }
 
-      const { token, user } = await res.json();
+      const { token, data: user } = await res.json();
       setToken(token);
       return user;
     } catch (error) {

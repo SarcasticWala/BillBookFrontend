@@ -1,6 +1,7 @@
 import { useGetPartiesQuery } from "../../features/party/partyApiSlice";
 import { Table } from "../Table/Table";
 import type { Column } from "../Table/Table";
+import { Badge } from "../UI/Badge";
 import { useNavigate } from "react-router-dom";
 
 interface Party {
@@ -61,29 +62,32 @@ export const PartiesTable: React.FC<PartiesTableProps> = ({
       header: "Party Type",
       accessor: "type",
       render: (value: string) => (
+        <Badge variant={value === "Customer" ? "info" : "success"}>{value}</Badge>
+      ),
+    },
+    {
+      header: "Balance",
+      accessor: "balance",
+      render: (value: string) => (
         <span
-          className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-            value === "Customer"
-              ? "bg-blue-100 text-blue-800"
-              : "bg-green-100 text-green-800"
+          className={`secondary-font ${
+            value.startsWith("+") ? "text-green-600" : "text-red-500"
           }`}
         >
           {value}
         </span>
       ),
     },
-    { header: "Balance", accessor: "balance" },
   ];
 
   return (
-    <div className="py-6">
-      <h2 className="text-lg primary-font text-gray-800 mb-4"
-    >Parties List</h2>
+    <div className="py-4 sm:py-6">
+      <h2 className="text-lg primary-font text-gray-900 mb-4">Parties List</h2>
 
       {isLoading ? (
         <div className="space-y-4">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="grid grid-cols-6 gap-4">
+            <div key={i} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
               <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />
               <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />
               <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { MdPhotoCamera } from "react-icons/md";
-import { FaArrowLeft } from "react-icons/fa";
 import {
   useGetMeQuery,
   useUpdateProfileMutation,
@@ -11,6 +10,7 @@ import { Card } from "../../../components/UI/Card";
 import { Input } from "../../../components/UI/Input";
 import { Textarea } from "../../../components/UI/Textarea";
 import { Button } from "../../../components/UI/Button";
+import { FormSection } from "../../../components/UI/FormSection";
 
 interface ProfileForm {
   businessName: string;
@@ -133,20 +133,28 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <button
-        type="button"
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900 transition-colors cursor-pointer mb-4"
-      >
-        <FaArrowLeft />
-        <span>Back</span>
-      </button>
-
-      <h1 className="text-2xl primary-font text-gray-800 mb-1">Settings</h1>
-      <p className="text-sm light-font text-gray-500 mb-6">
-        Manage your business profile
-      </p>
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto secondary-font">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-xl primary-font text-gray-900">Settings</h1>
+          <p className="text-sm light-font text-gray-500 mt-1">
+            Manage your business profile
+          </p>
+        </div>
+        <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate("/dashboard")}
+            disabled={isSaving}
+          >
+            Cancel
+          </Button>
+          <Button type="submit" form="settings-form" disabled={isSaving || isLoading}>
+            {isSaving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
+      </div>
 
       {isLoading ? (
         <Card className="space-y-4">
@@ -155,10 +163,10 @@ const SettingsPage: React.FC = () => {
           ))}
         </Card>
       ) : (
-        <form onSubmit={handleSubmit} noValidate>
-          <Card className="p-6 space-y-6">
-            {/* Business logo — click the avatar to upload */}
-            <div className="flex flex-col items-center text-center pb-6 border-b border-gray-100">
+        <form id="settings-form" onSubmit={handleSubmit} noValidate className="space-y-5">
+          {/* Business logo — click the avatar to upload */}
+          <FormSection title="Business Logo" layout="plain">
+            <div className="flex flex-col items-center text-center">
               <label className="relative cursor-pointer group" title="Upload logo">
                 <div className="w-24 h-24 rounded-full bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
                   {logoPreview ? (
@@ -193,79 +201,67 @@ const SettingsPage: React.FC = () => {
                 PNG, JPG or WEBP · up to 2MB
               </p>
             </div>
+          </FormSection>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5">
-              <Input
-                label="Business Name"
-                value={form.businessName}
-                onChange={setField("businessName")}
-                error={errors.businessName}
-                placeholder="e.g. Acme Traders"
-                required
-                maxLength={100}
-              />
-              <Input
-                label="Owner Name"
-                value={form.name}
-                onChange={setField("name")}
-                placeholder="Your name"
-                maxLength={100}
-              />
-              <Input
-                label="Phone"
-                value={user?.phone || ""}
-                disabled
-                containerClassName="opacity-90"
-              />
-              <Input
-                label="Email"
-                type="email"
-                value={form.email}
-                onChange={setField("email")}
-                error={errors.email}
-                placeholder="you@business.com"
-                maxLength={120}
-              />
-              <Input
-                label="GSTIN"
-                value={form.gstin}
-                onChange={setField("gstin")}
-                error={errors.gstin}
-                placeholder="22AAAAA0000A1Z5"
-                maxLength={15}
-              />
-              <Input
-                label="State"
-                value={form.state}
-                onChange={setField("state")}
-                placeholder="e.g. West Bengal"
-                maxLength={60}
-              />
-            </div>
-
-            <Textarea
-              label="Business Address"
-              value={form.address}
-              onChange={setField("address")}
-              rows={3}
-              placeholder="Street, city, pincode"
-              maxLength={300}
+          {/* Business details */}
+          <FormSection title="Business Details">
+            <Input
+              label="Business Name"
+              value={form.businessName}
+              onChange={setField("businessName")}
+              error={errors.businessName}
+              placeholder="e.g. Acme Traders"
+              required
+              maxLength={100}
             />
-
-            <div className="flex justify-end gap-3 pt-5 border-t border-gray-100">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => navigate("/dashboard")}
-                disabled={isSaving}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? "Saving..." : "Save Changes"}
-              </Button>
+            <Input
+              label="Owner Name"
+              value={form.name}
+              onChange={setField("name")}
+              placeholder="Your name"
+              maxLength={100}
+            />
+            <Input
+              label="Phone"
+              value={user?.phone || ""}
+              disabled
+              containerClassName="opacity-90"
+            />
+            <Input
+              label="Email"
+              type="email"
+              value={form.email}
+              onChange={setField("email")}
+              error={errors.email}
+              placeholder="you@business.com"
+              maxLength={120}
+            />
+            <Input
+              label="GSTIN"
+              value={form.gstin}
+              onChange={setField("gstin")}
+              error={errors.gstin}
+              placeholder="22AAAAA0000A1Z5"
+              maxLength={15}
+            />
+            <Input
+              label="State"
+              value={form.state}
+              onChange={setField("state")}
+              placeholder="e.g. West Bengal"
+              maxLength={60}
+            />
+            <div className="md:col-span-2">
+              <Textarea
+                label="Business Address"
+                value={form.address}
+                onChange={setField("address")}
+                rows={3}
+                placeholder="Street, city, pincode"
+                maxLength={300}
+              />
             </div>
-          </Card>
+          </FormSection>
         </form>
       )}
     </div>

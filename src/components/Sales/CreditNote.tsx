@@ -49,9 +49,9 @@ const CreditNote = () => {
   ];
 
   return (
-    <div className='bg-[#f9fafc] min-h-screen px-2 py-2 md:px-2'>
+    <div className='secondary-font min-h-screen px-2 py-2 md:px-2'>
       <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4'>
-        <h1 className="text-xl primary-font  text-gray-800">Credit Notes</h1>
+        <h1 className="text-xl primary-font text-gray-900">Credit Notes</h1>
         <Button
           className="w-full sm:w-auto cursor-pointer"
           onClick={() => navigate("/sales/creditnote/create")}
@@ -74,10 +74,10 @@ const CreditNote = () => {
         </div>
       </div>
 
-      <div className='bg-white rounded-lg shadow-sm p-4'>
+      <div className='bg-white rounded-lg border border-gray-200 shadow-sm p-4'>
         {data.length === 0 ? (
-          <div className='flex flex-col items-center py-12 text-gray-500 text-center'>
-            <MdOutlineFileCopy className='text-4xl text-gray-300 mb-2' />
+          <div className='flex flex-col items-center py-16 text-gray-500 text-center'>
+            <MdOutlineFileCopy className='text-4xl text-gray-300 mb-3' />
             <p className='text-sm secondary-font'>No Transactions Matching the current filter</p>
           </div>
         ) : (

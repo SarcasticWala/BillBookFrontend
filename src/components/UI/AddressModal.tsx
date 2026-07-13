@@ -85,13 +85,14 @@ const AddressModal: React.FC<AddressModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
+      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg primary-font text-gray-900">Enter Address</h2>
           <button
             onClick={onClose}
-            className="text-xl text-gray-400 hover:text-gray-600 cursor-pointer"
+            className="text-2xl leading-none text-gray-400 hover:text-gray-600 cursor-pointer flex items-center justify-center h-11 w-11 -mr-2 shrink-0"
+            aria-label="Close"
           >
             ×
           </button>
@@ -160,7 +161,7 @@ const AddressModal: React.FC<AddressModalProps> = ({
         </div>
 
         {/* Buttons */}
-        <div className="flex justify-end gap-2 mt-6">
+        <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 mt-6">
           <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>

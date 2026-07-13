@@ -77,19 +77,19 @@ const handleResendOtp = async () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50  secondary-font">
       <div id="recaptcha-container"></div>
 
-      <main className="max-w-6xl mx-auto px-6 py-12 grid lg:grid-cols-2 gap-12 items-center">
-       
-        <section className="space-y-10">
-          <h2 className="text-5xl primary-font text-gray-900 leading-tight">
+      <main className="max-w-6xl mx-auto px-4 py-8 sm:px-6 sm:py-12 grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+
+        <section className="space-y-6 sm:space-y-10">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl primary-font text-gray-900 leading-tight">
             Power Your{" "}
             <span className="block bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
               Billing Workflow
             </span>
           </h2>
-          <p className="text-lg text-gray-700 max-w-md">
+          <p className="text-base sm:text-lg text-gray-700 max-w-md">
             Secure your access. Simplify your operations. Built for modern billing environments.
           </p>
-          <div className="grid grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <Card>
               <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
                 <FiShield className="text-primary w-6 h-6" />
@@ -107,7 +107,7 @@ const handleResendOtp = async () => {
           </div>
         </section>
 
-        <section className="bg-white p-8 rounded-lg shadow-lg border border-gray-200 max-w-md w-full mx-auto">
+        <section className="bg-white p-6 sm:p-8 rounded-lg shadow-lg border border-gray-200 max-w-md w-full mx-auto">
           <form onSubmit={formik.handleSubmit}>
             <div className="text-center mb-6">
               <h2 className="text-2xl primary-font text-gray-900">

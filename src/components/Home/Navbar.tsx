@@ -8,7 +8,7 @@ const Navbar: React.FC = () => {
     <header className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
        
-        <div className="text-indigo-700  primary-font text-4xl">
+        <div className="text-indigo-700  primary-font text-2xl sm:text-3xl lg:text-4xl">
           <span >BillBook</span>
           <span className="text-black ">Software</span>
         </div>

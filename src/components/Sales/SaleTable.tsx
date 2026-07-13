@@ -69,19 +69,23 @@ export const SaleTable = () => {
 
   if (isLoading) {
     return (
-      <p className="text-center text-gray-400 py-10">Loading invoices...</p>
+      <p className="text-center text-gray-400 py-12 text-sm secondary-font">
+        Loading invoices...
+      </p>
     );
   }
 
   if (isError) {
     return (
-      <p className="text-center text-red-500 py-10">Failed to load invoices.</p>
+      <p className="text-center text-red-500 py-12 text-sm secondary-font">
+        Failed to load invoices.
+      </p>
     );
   }
 
   if (invoicesData.length === 0) {
     return (
-      <div className="flex flex-col items-center py-10 text-gray-500 text-center">
+      <div className="flex flex-col items-center py-12 text-gray-500 text-center">
         <MdOutlineFileCopy className="text-5xl text-gray-300 mb-3" />
         <p className="text-sm secondary-font">
           No Transactions Matching the current filter
