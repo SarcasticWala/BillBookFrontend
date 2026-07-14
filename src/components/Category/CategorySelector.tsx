@@ -2,8 +2,15 @@ import { useState } from "react";
 
 interface CategoryOption {
   id: string;
-  catagory: string;
+  // The API returns categories with a `name` field; older/other shapes may use
+  // `catagory` or `label`, so all are accepted.
+  name?: string;
+  catagory?: string;
+  label?: string;
 }
+
+const optionLabel = (opt: CategoryOption): string =>
+  opt.name || opt.catagory || opt.label || "";
 
 interface CategorySelectorProps {
   value: string;
@@ -51,7 +58,7 @@ export const CategorySelector = ({
         <option value="">{placeholder}</option>
         {options.map((opt) => (
           <option key={opt.id} value={opt.id}>
-            {opt.catagory}
+            {optionLabel(opt)}
           </option>
         ))}
         <option value="__create__" className="text-primary font-medium">

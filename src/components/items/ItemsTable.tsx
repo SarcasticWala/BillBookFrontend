@@ -1,4 +1,7 @@
-import { useGetItemsQuery } from "../../features/item/itemApiSlice";
+import {
+  useGetItemsQuery,
+  useGetCategoriesQuery,
+} from "../../features/item/itemApiSlice";
 import { Table } from "../Table/Table";
 import type { Column } from "../Table/Table";
 import { useNavigate } from "react-router-dom";
@@ -33,10 +36,21 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
 
   const itemsData = data?.data || [];
 
+  // Items store their category as a plain name string (item.category), but the
+  // filter passes category ids. Map the selected ids to names to compare.
+  const { data: categoriesData } = useGetCategoriesQuery();
+  const nameById: Record<string, string> = {};
+  for (const c of categoriesData?.data || []) {
+    nameById[c.id] = c.name || c.catagory || c.label || "";
+  }
+  const selectedCategoryNames = selectedCategories
+    .map((id) => nameById[id])
+    .filter(Boolean);
+
   const filteredItemsData = itemsData.filter((item: any) => {
     const matchesCategory =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(item.itemCatagory?.id);
+      selectedCategoryNames.length === 0 ||
+      selectedCategoryNames.includes(item.category);
 
     const matchesLowStock =
       !showLowStockOnly ||
@@ -56,7 +70,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
   const items: Item[] = filteredItemsData.map((item: any) => ({
     name: item.itemName || item.serviceName || "-",
     code: item.itemCode || item.serviceCode || "-",
-    category: item.itemCatagory?.catagory || "-",
+    category: item.category || "-",
     salePrice: item.salePrice ? `₹${item.salePrice}` : "-",
     purchasePrice: item.purchasePrice ? `₹${item.purchasePrice}` : "-",
   }));

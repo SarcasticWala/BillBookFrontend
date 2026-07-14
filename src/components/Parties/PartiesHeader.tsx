@@ -160,7 +160,7 @@ export const PartiesHeader: React.FC<Props> = ({
                 key={id}
                 className="flex items-center bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm"
               >
-                {category?.catagory || "Unknown"}
+                {category?.name || category?.catagory || category?.label || "Unknown"}
                 <button
                   onClick={() => handleCategoryRemove(id)}
                   className="ml-2 text-blue-600 hover:text-blue-800"

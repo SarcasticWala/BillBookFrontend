@@ -85,70 +85,48 @@ const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
       selectedSerials.length === 0);
 
   const handleSave = async () => {
+    // How many units to move. For a serialised "reduce", the count comes from
+    // the selected serials; otherwise it's the entered quantity.
+    const magnitude =
+      actionType === "reduce" && hasSerialisation
+        ? selectedSerials.length
+        : quantity;
+
+    if (magnitude <= 0) {
+      return toast.error("Quantity must be greater than 0.");
+    }
+
+    // The backend expects a signed `adjustment` number (or an absolute `stock`).
+    const adjustment = actionType === "add" ? magnitude : -magnitude;
+
+    const payload: any = {
+      id: item.id,
+      adjustment,
+      // Extra context — ignored by the current backend, kept for future use.
+      asOfDate: date,
+      remarks,
+      hasSerialisationOn: hasSerialisation,
+    };
+    if (hasSerialisation) {
+      payload.itemSerialNos =
+        actionType === "add"
+          ? itemSerialNos.map((s) => s.trim()).filter(Boolean)
+          : selectedSerials;
+    }
+
     try {
-      const payload: any = {
-        id: item.id,
-        actionType,
-        remarks,
-        asOfDate: date,
-        hasSerialisationOn: hasSerialisation,
-      };
+      await updateItemStock(payload).unwrap();
+      toast.success("Stock updated successfully");
 
-      if (actionType === "add") {
-        if (quantity <= 0) {
-          return toast.error("Quantity must be greater than 0.");
-        }
-        payload.quantity = quantity;
-        if (hasSerialisation) {
-          payload.itemSerialNos = itemSerialNos
-            .map((s) => s.trim())
-            .filter(Boolean);
-        }
-      }
+      // Refetch so every list/detail reflects the new stock.
+      dispatch(itemApi.util.invalidateTags(["Item"]));
 
-      if (actionType === "reduce") {
-        if (hasSerialisation) {
-          payload.itemSerialNos = selectedSerials;
-          payload.quantity = payload.itemSerialNos.length;
-        } else {
-          if (quantity <= 0) {
-            return toast.error("Quantity must be greater than 0.");
-          }
-          payload.quantity = quantity;
-        }
-      }
-
-      const res: any = await updateItemStock(payload);
-
-      if (res.data?.success) {
-        toast.success("Stock updated successfully");
-
-        // Optimistically update the cache
-        dispatch(
-          itemApi.util.updateQueryData("getItems", undefined, (draft: any) => {
-            const found = draft.data.find((i: any) => i.id === item.id);
-            if (found) {
-              if (actionType === "add") {
-                found.netQuantity = (found.netQuantity ?? 0) + payload.quantity;
-              } else if (actionType === "reduce") {
-                found.netQuantity = (found.netQuantity ?? 0) - payload.quantity;
-              }
-            }
-          })
-        );
-
-        // Invalidate to ensure fresh fetch
-        dispatch(itemApi.util.invalidateTags(["Item"]));
-
-        setSelectedSerials([]);
-        setItemSerialNos([]);
-        setQuantity(0);
-        setOpen(false);
-      } else {
-        toast.error(res.data?.message || "Error updating stock");
-      }
-    } catch (err) {
-      toast.error("Server error");
+      setSelectedSerials([]);
+      setItemSerialNos([]);
+      setQuantity(0);
+      setOpen(false);
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Error updating stock");
     }
   };
 

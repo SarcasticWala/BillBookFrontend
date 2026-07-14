@@ -8,16 +8,21 @@ export const PartySelectorModal: React.FC<{
   onClose: () => void;
   onSelect: (party: any) => void;
 }> = ({ isOpen, onClose, onSelect }) => {
-  const { data, isLoading } = useGetPartiesQuery(undefined);
+  const { data, isLoading, isError } = useGetPartiesQuery(undefined);
   const parties = data?.data || [];
   const location = useLocation();
   const pathname = location.pathname;
-  let filteredParties: any[] = [];
-  if (pathname.includes("sale")) {
-    filteredParties = parties.filter((p: any) => p.partyType === "CUSTOMER");
-  } else if (pathname.includes("purchase")) {
-    filteredParties = parties.filter((p: any) => p.partyType === "SUPPLIER"); // typo fix
-  }
+
+  // Tolerant field readers — the API returns the write shape (partyName/mobileNo/
+  // billingAddressData), matching PartiesTable. Fall back to mapped read shapes too.
+  const partyName = (p: any): string => p.partyName || p.name || "";
+  const partyAddress = (p: any): string => {
+    const a = p.billingAddressData || p.billingAddress || {};
+    return [a.ad, a.city, a.st, a.pin].filter(Boolean).join(", ") || p.address || "";
+  };
+
+  const wantedType = pathname.includes("purchase") ? "SUPPLIER" : "CUSTOMER";
+  const filteredParties = parties.filter((p: any) => p.partyType === wantedType);
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0">
@@ -36,7 +41,16 @@ export const PartySelectorModal: React.FC<{
             </button>
           </div>
           <ul className="max-h-60 overflow-auto">
-            {isLoading && <li>Loading…</li>}
+            {isLoading && <li className="py-3 px-2 text-gray-500">Loading…</li>}
+            {isError && (
+              <li className="py-3 px-2 text-red-600">Failed to load parties.</li>
+            )}
+            {!isLoading && !isError && filteredParties.length === 0 && (
+              <li className="py-3 px-2 text-gray-500">
+                No {wantedType === "SUPPLIER" ? "suppliers" : "customers"} found.
+                Create one from the Parties page first.
+              </li>
+            )}
             {filteredParties.map((party: any) => (
               <li
                 key={party.id}
@@ -46,8 +60,8 @@ export const PartySelectorModal: React.FC<{
                   onClose();
                 }}
               >
-                <div className="font-medium">{party.name}</div>
-                <div className="text-xs text-gray-600">{party.address}</div>
+                <div className="font-medium">{partyName(party)}</div>
+                <div className="text-xs text-gray-600">{partyAddress(party)}</div>
               </li>
             ))}
           </ul>

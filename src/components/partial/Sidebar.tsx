@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link, } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import BusinessInfo from "./BusinessInfo";
+import { useAuth } from "../../hooks/useAuth";
 import {
   MdDashboard,
   MdGroups,
@@ -26,6 +27,7 @@ import {
   MdClose,
   MdOutlineOndemandVideo,
   MdAdminPanelSettings,
+  MdLogout,
 } from "react-icons/md";
 import { useGetMeQuery } from "../../features/auth/authApiSlice";
 
@@ -39,9 +41,18 @@ const Sidebar = () => {
   const [loading, setLoading] = useState(true);
   const { data: meData } = useGetMeQuery();
   const isAdmin = !!meData?.data?.isAdmin;
+  const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const toggleMobile = () => setIsMobileOpen(!isMobileOpen);
   const closeMobile = () => setIsMobileOpen(false);
+
+  const handleLogout = () => {
+    logout();
+    closeMobile();
+    localStorage.removeItem("activeSidebar");
+    navigate("/login", { replace: true });
+  };
 
   const handleActive = (label: string) => {
     setActive(label);
@@ -109,7 +120,7 @@ const Sidebar = () => {
   );
 
  const renderSkeleton = () => (
-    <div className="px-4 py-6 space-y-4 animate-pulse">
+    <div className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-4 animate-pulse hide-scrollbar">
      
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-full bg-gray-400" />
@@ -148,8 +159,8 @@ const Sidebar = () => {
 
       <div
         className={`
-    fixed top-0 left-0 z-50 bg-slate-800 w-60  flex flex-col h-screen
-    sm:top-0 sm:left-0 sm:bottom-2 sm:h-screen  shadow-2xl
+    fixed top-0 left-0 z-50 bg-slate-800 w-[85vw] max-w-[16rem] sm:w-60 flex flex-col
+    h-[100dvh] shadow-2xl
     transform transition-transform duration-300 ease-in-out
     ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
     sm:translate-x-0
@@ -168,7 +179,7 @@ const Sidebar = () => {
   {loading ? (
           renderSkeleton()
         ) : (
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-6 hide-scrollbar">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pt-2 pb-10 space-y-6 hide-scrollbar">
           {/* Business Info Section — links to profile settings */}
           <BusinessInfo onNavigate={() => handleActive("Settings")} />
 
@@ -368,7 +379,19 @@ const Sidebar = () => {
           </div> */}
         </div>
          )}
-      </div> 
+
+        {/* Logout — pinned at the bottom of the sidebar */}
+        <div className="shrink-0 border-t border-slate-700 p-4">
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+          >
+            <MdLogout className="text-lg" />
+            <span>Log out</span>
+          </button>
+        </div>
+      </div>
     </>
   );
 };

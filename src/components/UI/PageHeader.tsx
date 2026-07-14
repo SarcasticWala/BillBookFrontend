@@ -30,12 +30,16 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <div
       className={cn(
-        "flex items-center justify-between gap-4 bg-white border-b border-gray-200 px-4 sm:px-6 py-3.5 -mx-4 sm:-mx-6 -mt-4 mb-6",
+        // Stack on mobile (title row, then actions row) so action buttons never
+        // slide under the fixed mobile menu button; side-by-side from `sm` up.
+        "flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4",
+        "bg-white border-b border-gray-200 py-3 px-4 sm:px-6 -mx-4 sm:-mx-6 -mt-4 mb-6",
         sticky ? "sticky top-0 z-20" : undefined,
         className
       )}
     >
-      <div className="flex items-center gap-3 min-w-0">
+      {/* pr-12 keeps the title/back clear of the fixed mobile menu button. */}
+      <div className="flex items-center gap-3 min-w-0 pr-12 sm:pr-0">
         {onBack && (
           <button
             type="button"
@@ -54,7 +58,11 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         </div>
       </div>
 
-      {actions && <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3 shrink-0">{actions}</div>}
+      {actions && (
+        <div className="flex flex-wrap items-center gap-2 sm:justify-end sm:gap-3 sm:shrink-0">
+          {actions}
+        </div>
+      )}
     </div>
   );
 };

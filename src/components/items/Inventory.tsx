@@ -157,7 +157,7 @@ const Inventory = () => {
                 key={id}
                 className="flex items-center bg-blue-50 text-primary border border-blue-100 px-2.5 py-1 rounded-full text-sm secondary-font"
               >
-                {category?.catagory || "Unknown"}
+                {category?.name || category?.catagory || category?.label || "Unknown"}
                 <button
                   onClick={() => handleCategoryRemove(id)}
                   className="ml-2 text-primary hover:text-primary-hover cursor-pointer"

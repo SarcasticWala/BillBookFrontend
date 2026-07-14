@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import PartyDetail from "./components/Parties/PartyDetail.tsx";
 import { ItemDetailsPage } from "./components/items/ItemDetailsPage.tsx";
+import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
 
 // Lazy components
 const CreateCategory = lazy(
@@ -50,6 +51,7 @@ function App() {
         <Route
           path="/*"
           element={
+            <ProtectedRoute>
             <div className="flex ">
               <Sidebar />
               <div className="flex-1 min-w-0 min-h-screen sm:ml-60  flex flex-col bg-white pb-8">
@@ -83,6 +85,7 @@ function App() {
                 <Footer />
               </div>
             </div>
+            </ProtectedRoute>
           }
         />
       </Routes>

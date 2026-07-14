@@ -1,4 +1,7 @@
-import { useGetPartiesQuery } from "../../features/party/partyApiSlice";
+import {
+  useGetPartiesQuery,
+  useGetCategoriesQuery,
+} from "../../features/party/partyApiSlice";
 import { Table } from "../Table/Table";
 import type { Column } from "../Table/Table";
 import { Badge } from "../UI/Badge";
@@ -21,8 +24,16 @@ interface PartiesTableProps {
 // (partyName/mobileNo) or a mapped read shape (name/mobileNumber).
 const partyName = (p: any): string => p.partyName || p.name || "";
 const partyMobile = (p: any): string => p.mobileNo || p.mobileNumber || "";
-const partyCategoryName = (p: any): string =>
-  p.partyCatagory?.catagory || p.partyCatagory?.name || (typeof p.partyCatagory === "string" ? p.partyCatagory : "") || "";
+// partyCatagory is stored as a plain category id (string). Resolve it to the
+// category's display name via the categories lookup; fall back to any nested
+// object shape the API might return.
+const partyCategoryId = (p: any): string =>
+  (typeof p.partyCatagory === "string" ? p.partyCatagory : p.partyCatagory?.id) || "";
+const partyCategoryName = (p: any, byId: Record<string, string>): string =>
+  p.partyCatagory?.catagory ||
+  p.partyCatagory?.name ||
+  byId[partyCategoryId(p)] ||
+  "";
 
 export const PartiesTable: React.FC<PartiesTableProps> = ({
   selectedCategories,
@@ -32,11 +43,17 @@ export const PartiesTable: React.FC<PartiesTableProps> = ({
   const { data, isLoading, isError } = useGetPartiesQuery(undefined);
   const partiesData = data?.data || [];
 
+  const { data: categoriesData } = useGetCategoriesQuery(undefined);
+  const categoryById: Record<string, string> = {};
+  for (const c of categoriesData?.data || []) {
+    categoryById[c.id] = c.name || c.catagory || c.label || "";
+  }
+
   const query = searchTerm.trim().toLowerCase();
   const filteredParties = partiesData.filter((p: any) => {
     const matchesCategory =
       selectedCategories.length === 0 ||
-      selectedCategories.includes(p.partyCatagory?.id ?? p.partyCatagory);
+      selectedCategories.includes(partyCategoryId(p));
     const matchesSearch =
       !query ||
       partyName(p).toLowerCase().includes(query) ||
@@ -46,7 +63,7 @@ export const PartiesTable: React.FC<PartiesTableProps> = ({
 
   const parties: Party[] = filteredParties.map((party: any) => ({
     name: partyName(party) || "-",
-    category: partyCategoryName(party) || "-",
+    category: partyCategoryName(party, categoryById) || "-",
     mobile: partyMobile(party) || "-",
     type: party.partyType === "CUSTOMER" ? "Customer" : "Supplier",
     balance: `${party.openingBalanceType === "TO_COLLECT" ? "+" : "-"} ₹${(

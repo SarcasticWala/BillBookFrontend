@@ -129,22 +129,25 @@ const CreateParty: React.FC = () => {
   useEffect(() => {
     if (partyData?.data && isEditMode) {
       const p = partyData.data;
-      setPartyName(p.name);
-      setMobileNo(p.mobileNumber);
+      // The API returns parties in the write shape (partyName/mobileNo/gstNumber/
+      // billingAddressData/...), so read those fields directly.
+      setPartyName(p.partyName || p.name || "");
+      setMobileNo(p.mobileNo || p.mobileNumber || "");
       setEmail(p.email || "");
-      setGstNumber(p.gstin || "");
+      setGstNumber(p.gstNumber || p.gstin || "");
       setPanNumber(p.panNumber || "");
       setOpeningBalance(p.openingBalance || 0);
       setOpeningBalanceType(p.openingBalanceType || "TO_COLLECT");
       setPartyType(p.partyType || "CUSTOMER");
-      setPartyCategory(p.partyCatagory?.id || "");
+      // partyCatagory is stored as a plain category id (string).
+      setPartyCategory(
+        typeof p.partyCatagory === "string" ? p.partyCatagory : p.partyCatagory?.id || ""
+      );
       setCreditPeriod(p.creditPeriod?.toString() || "");
       setCreditLimit(p.creditLimit?.toString() || "");
-      setBillingAddressData(p.billingAddress?.miscData || null);
-      setShippingAddressData(p.shippingAddress?.miscData || null);
-      setSameAsBilling(
-        p.billingAddress?.id === p.shippingAddress?.id || p.billingAddress?.type === "BOTH"
-      );
+      setBillingAddressData(p.billingAddressData || null);
+      setShippingAddressData(p.shippingAddressData || null);
+      setSameAsBilling(p.isSameAddress ?? true);
     }
   }, [partyData]);
 
@@ -287,7 +290,7 @@ const CreateParty: React.FC = () => {
               <option value="">Select Category</option>
               {categoryOptions.map((c: any) => (
                 <option key={c.id} value={c.id}>
-                  {c.catagory}
+                  {c.name || c.catagory || c.label}
                 </option>
               ))}
               <option value="__create__" className="text-primary font-medium">

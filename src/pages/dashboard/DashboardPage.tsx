@@ -9,9 +9,120 @@ import { FiArrowUpRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/UI/Button";
 import { Card } from "../../components/UI/Card";
+import { useGetPartiesQuery } from "../../features/party/partyApiSlice";
+import { useGetSaleInvoicesQuery } from "../../features/sales/saleApiSlice";
+import { useGetPurchaseInvoicesQuery } from "../../features/purchase/purchaseApiSlice";
+import { useGetPaymentsQuery } from "../../features/payment/paymentApiSlice";
+
+const num = (v: unknown): number => {
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
+};
+const inr = (n: number): string => `₹ ${Math.round(n).toLocaleString("en-IN")}`;
+
+interface Txn {
+  date: string;
+  type: string;
+  no: string;
+  party: string;
+  amount: number;
+  sign: 1 | -1;
+}
 
 const DashboardPage = () => {
   const navigate = useNavigate();
+
+  const { data: partiesRes } = useGetPartiesQuery(undefined);
+  const { data: salesRes } = useGetSaleInvoicesQuery(undefined);
+  const { data: purchasesRes } = useGetPurchaseInvoicesQuery(undefined);
+  const { data: payInRes } = useGetPaymentsQuery("PAYMENT_IN");
+  const { data: payOutRes } = useGetPaymentsQuery("PAYMENT_OUT");
+
+  const parties: any[] = partiesRes?.data || [];
+  const sales: any[] = salesRes?.data || [];
+  const purchases: any[] = purchasesRes?.data || [];
+  const paymentsIn: any[] = payInRes?.data || [];
+  const paymentsOut: any[] = payOutRes?.data || [];
+
+  // Net position per party: opening balance (by type) + running balance
+  // (positive = they owe us / to collect, negative = we owe / to pay).
+  let toCollect = 0;
+  let toPay = 0;
+  for (const p of parties) {
+    const opening =
+      (p.openingBalanceType === "TO_PAY" ? -1 : 1) * num(p.openingBalance);
+    const net = opening + num(p.balance);
+    if (net > 0) toCollect += net;
+    else if (net < 0) toPay += -net;
+  }
+
+  // Cash position: money received in vs paid out.
+  const moneyIn =
+    sales.reduce((a, s) => a + num(s.receivedAmount), 0) +
+    paymentsIn.reduce((a, p) => a + num(p.amount), 0);
+  const moneyOut =
+    purchases.reduce((a, s) => a + num(s.receivedAmount), 0) +
+    paymentsOut.reduce((a, p) => a + num(p.amount), 0);
+  const cashBalance = moneyIn - moneyOut;
+
+  // Merge all transactions, newest first.
+  const partyName = (x: any): string =>
+    x.partyName || x.partyId?.partyName || "-";
+  const txns: Txn[] = [
+    ...sales.map((s) => ({
+      date: s.createdAt,
+      type: "Sale",
+      no: s.invioceNo || "-",
+      party: partyName(s),
+      amount: num(s.totalSaleAmount),
+      sign: 1 as const,
+    })),
+    ...purchases.map((s) => ({
+      date: s.createdAt,
+      type: "Purchase",
+      no: s.invioceNo || "-",
+      party: partyName(s),
+      amount: num(s.totalSaleAmount),
+      sign: -1 as const,
+    })),
+    ...paymentsIn.map((p) => ({
+      date: p.paymentDate || p.createdAt,
+      type: "Payment In",
+      no: p.paymentNo || "-",
+      party: partyName(p),
+      amount: num(p.amount),
+      sign: 1 as const,
+    })),
+    ...paymentsOut.map((p) => ({
+      date: p.paymentDate || p.createdAt,
+      type: "Payment Out",
+      no: p.paymentNo || "-",
+      party: partyName(p),
+      amount: num(p.amount),
+      sign: -1 as const,
+    })),
+  ]
+    .filter((t) => t.date)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+    .slice(0, 8);
+
+  const fmtDate = (d: string) =>
+    d
+      ? new Date(d).toLocaleDateString("en-IN", {
+          day: "2-digit",
+          month: "short",
+          year: "numeric",
+        })
+      : "-";
+
+  const lastUpdate = new Date().toLocaleString("en-IN", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
   return (
     <div className="secondary-font min-h-screen bg-slate-50 p-4 space-y-6">
       {/* HEADER */}
@@ -56,7 +167,7 @@ const DashboardPage = () => {
         <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
           <h2 className="text-lg primary-font text-gray-900">Business Overview</h2>
           <p className="text-xs light-font text-gray-500">
-            Last Update: 28 Jan 2026 | 09:01 PM
+            Last Update: {lastUpdate}
           </p>
         </div>
 
@@ -64,13 +175,15 @@ const DashboardPage = () => {
           {/* TO COLLECT */}
           <div className="bg-green-50 border border-gray-200 rounded-lg p-4 hover:border-green-500 transition cursor-pointer">
             <p className="text-sm secondary-font text-green-700">↓ To Collect</p>
-            <p className="text-lg primary-font text-gray-900 mt-2">₹ 0</p>
+            <p className="text-lg primary-font text-gray-900 mt-2">
+              {inr(toCollect)}
+            </p>
           </div>
 
           {/* TO PAY */}
           <div className="bg-red-50 border border-gray-200 rounded-lg p-4 hover:border-red-500 transition cursor-pointer">
             <p className="text-sm secondary-font text-red-600">↑ To Pay</p>
-            <p className="text-lg primary-font text-gray-900 mt-2">₹ 0</p>
+            <p className="text-lg primary-font text-gray-900 mt-2">{inr(toPay)}</p>
           </div>
 
           {/* CASH + BANK */}
@@ -79,7 +192,9 @@ const DashboardPage = () => {
               <MdAccountBalanceWallet />
               <p className="text-sm secondary-font">Total Cash + Bank Balance</p>
             </div>
-            <p className="text-lg primary-font text-gray-900 mt-2">₹ 0</p>
+            <p className="text-lg primary-font text-gray-900 mt-2">
+              {inr(cashBalance)}
+            </p>
           </div>
         </div>
       </Card>
@@ -100,12 +215,33 @@ const DashboardPage = () => {
                   <span>Type</span>
                   <span>Txn No</span>
                   <span>Party Name</span>
-                  <span>Amount</span>
+                  <span className="text-right">Amount</span>
                 </div>
 
-                <div className="flex items-center justify-center py-12 text-sm light-font text-gray-400">
-                  No transactions made yet!
-                </div>
+                {txns.length === 0 ? (
+                  <div className="flex items-center justify-center py-12 text-sm light-font text-gray-400">
+                    No transactions made yet!
+                  </div>
+                ) : (
+                  txns.map((t, i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-5 items-center border-b border-gray-100 last:border-0 px-4 py-3 text-sm text-gray-700"
+                    >
+                      <span>{fmtDate(t.date)}</span>
+                      <span>{t.type}</span>
+                      <span className="truncate pr-2">{t.no}</span>
+                      <span className="truncate pr-2">{t.party}</span>
+                      <span
+                        className={`text-right primary-font ${
+                          t.sign > 0 ? "text-green-600" : "text-red-600"
+                        }`}
+                      >
+                        {t.sign > 0 ? "+" : "-"} {inr(t.amount)}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>

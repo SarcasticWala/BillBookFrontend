@@ -1,47 +1,70 @@
-import { sendOtpFirebase, verifyOtpFirebase } from "../services/auth.service";
 import { API_BASE_URL, setToken, clearToken } from "../config/api";
 
+async function postJson(path: string, body: unknown) {
+  const res = await fetch(`${API_BASE_URL}${path}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json.message || "Request failed");
+  }
+  return json;
+}
+
 export const useAuth = () => {
-  const sendOtp = async (mobile: string) => {
-    await sendOtpFirebase(mobile);
+  /** Email + password login against our backend. */
+  const login = async (email: string, password: string) => {
+    const { token, data: user } = await postJson("/api/auth/login", {
+      email,
+      password,
+    });
+    setToken(token);
+    return user;
   };
 
-  const verifyOtp = async (otp: string) => {
-    try {
-      const result = await verifyOtpFirebase(otp);
+  /**
+   * Request a phone OTP from our backend. In development the backend returns
+   * the code (`devCode`) since no SMS provider is wired yet, so signup/reset
+   * can be tested end-to-end.
+   */
+  const sendOtp = async (mobile: string): Promise<{ devCode?: string }> => {
+    const res = await postJson("/api/auth/send-otp", { phone: mobile });
+    return { devCode: res.devCode };
+  };
 
-      // Null/undefined check on result and user property
-      if (!result || !result.user) {
-        throw new Error(
-          "User verification failed: Invalid response from authentication service"
-        );
-      }
+  /** Create the account after the phone OTP is verified server-side. */
+  const register = async (payload: {
+    name: string;
+    email: string;
+    password: string;
+    phone: string;
+    otp: string;
+  }) => {
+    const { token, data: user } = await postJson("/api/auth/register", payload);
+    setToken(token);
+    return user;
+  };
 
-      // Exchange the Firebase ID token for our backend-issued JWT.
-      const idToken = await result.user.getIdToken();
-      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ idToken }),
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || "Backend login failed");
-      }
-
-      const { token, data: user } = await res.json();
-      setToken(token);
-      return user;
-    } catch (error) {
-      console.error("OTP verification error:", error);
-      throw error;
-    }
+  /** Reset password after verifying the account's phone via OTP. */
+  const resetPassword = async (payload: {
+    email: string;
+    phone: string;
+    otp: string;
+    newPassword: string;
+  }) => {
+    const { token, data: user } = await postJson(
+      "/api/auth/reset-password",
+      payload
+    );
+    setToken(token);
+    return user;
   };
 
   const logout = () => {
     clearToken();
   };
 
-  return { sendOtp, verifyOtp, logout };
+  return { login, sendOtp, register, resetPassword, logout };
 };
