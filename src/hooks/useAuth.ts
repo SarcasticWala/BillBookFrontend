@@ -1,11 +1,27 @@
 import { API_BASE_URL, setToken, clearToken } from "../config/api";
 
 async function postJson(path: string, body: unknown) {
-  const res = await fetch(`${API_BASE_URL}${path}`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
+  // Abort if the server doesn't respond in time (e.g. a cold-started or
+  // unreachable backend) so the UI shows an error instead of spinning forever.
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30_000);
+  let res: Response;
+  try {
+    res = await fetch(`${API_BASE_URL}${path}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+  } catch (err: any) {
+    clearTimeout(timeout);
+    if (err?.name === "AbortError") {
+      throw new Error("The server took too long to respond. Please try again.");
+    }
+    // Network/CORS failures surface as a generic TypeError.
+    throw new Error("Can't reach the server. Please check your connection and try again.");
+  }
+  clearTimeout(timeout);
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(json.message || "Request failed");
