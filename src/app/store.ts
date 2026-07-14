@@ -8,6 +8,7 @@ import { authApi } from "../features/auth/authApiSlice";
 import { documentApi } from "../features/document/documentApiSlice";
 import { paymentApi } from "../features/payment/paymentApiSlice";
 import { demoApi } from "../features/demo/demoApiSlice";
+import { authErrorMiddleware } from "./authErrorMiddleware";
 
 export const store = configureStore({
   reducer: {
@@ -30,6 +31,7 @@ export const store = configureStore({
       documentApi.middleware,
       paymentApi.middleware,
       demoApi.middleware,
+      authErrorMiddleware,
     ),
 });
 

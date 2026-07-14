@@ -25,16 +25,16 @@ export const useAuth = () => {
   };
 
   /**
-   * Request a phone OTP from our backend. In development the backend returns
-   * the code (`devCode`) since no SMS provider is wired yet, so signup/reset
-   * can be tested end-to-end.
+   * Request an email verification code from our backend. In development, if no
+   * SMTP is configured, the backend returns the code (`devCode`) so signup/reset
+   * can be tested without sending real email.
    */
-  const sendOtp = async (mobile: string): Promise<{ devCode?: string }> => {
-    const res = await postJson("/api/auth/send-otp", { phone: mobile });
+  const sendOtp = async (email: string): Promise<{ devCode?: string }> => {
+    const res = await postJson("/api/auth/send-otp", { email });
     return { devCode: res.devCode };
   };
 
-  /** Create the account after the phone OTP is verified server-side. */
+  /** Create the account after the email OTP is verified server-side. */
   const register = async (payload: {
     name: string;
     email: string;
@@ -47,10 +47,9 @@ export const useAuth = () => {
     return user;
   };
 
-  /** Reset password after verifying the account's phone via OTP. */
+  /** Reset password after verifying the account's email via OTP. */
   const resetPassword = async (payload: {
     email: string;
-    phone: string;
     otp: string;
     newPassword: string;
   }) => {

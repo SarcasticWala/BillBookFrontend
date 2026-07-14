@@ -20,6 +20,9 @@ type Mode = "login" | "signup" | "forgot";
 type Step = "details" | "verify";
 
 const emailOk = (v: string) => /\S+@\S+\.\S+/.test(v);
+// Minimum acceptable password: 8+ chars with lower, upper and a number.
+const strongEnough = (v: string) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(v);
+const WEAK_MSG = "Use 8+ characters with upper, lower and a number";
 
 export default function AuthPage() {
   const navigate = useNavigate();
@@ -94,19 +97,19 @@ export default function AuthPage() {
     if (!form.email.trim()) next.email = "Enter your email";
     else if (!emailOk(form.email)) next.email = "Enter a valid email";
     if (!form.password) next.password = "Enter a password";
-    else if (form.password.length < 8) next.password = "Use at least 8 characters";
+    else if (!strongEnough(form.password)) next.password = WEAK_MSG;
     if (form.mobile.length !== 10) next.mobile = "Enter a valid 10-digit mobile number";
     setErrors(next);
     if (Object.keys(next).length) return;
 
     try {
       setLoading(true);
-      const { devCode } = await sendOtp(form.mobile);
+      const { devCode } = await sendOtp(form.email.trim());
       setStep("verify");
       setOtpTimer(30);
       showDevCode(devCode);
     } catch (err: any) {
-      toast.error(err?.message || "Could not send OTP");
+      toast.error(err?.message || "Could not send code");
     } finally {
       setLoading(false);
     }
@@ -138,23 +141,22 @@ export default function AuthPage() {
     }
   };
 
-  // ---- Forgot step 1: validate email+phone, then send OTP ----
+  // ---- Forgot step 1: validate email, then send OTP ----
   const handleForgotDetails = async () => {
     const next: Record<string, string> = {};
     if (!form.email.trim()) next.email = "Enter your email";
     else if (!emailOk(form.email)) next.email = "Enter a valid email";
-    if (form.mobile.length !== 10) next.mobile = "Enter your registered 10-digit mobile";
     setErrors(next);
     if (Object.keys(next).length) return;
 
     try {
       setLoading(true);
-      const { devCode } = await sendOtp(form.mobile);
+      const { devCode } = await sendOtp(form.email.trim());
       setStep("verify");
       setOtpTimer(30);
       showDevCode(devCode);
     } catch (err: any) {
-      toast.error(err?.message || "Could not send OTP");
+      toast.error(err?.message || "Could not send code");
     } finally {
       setLoading(false);
     }
@@ -163,8 +165,8 @@ export default function AuthPage() {
   // ---- Forgot step 2: verify OTP + set the new password ----
   const handleForgotVerify = async () => {
     const next: Record<string, string> = {};
-    if (form.otp.length < 6) next.otp = "Enter the 6-digit OTP";
-    if (form.newPassword.length < 8) next.newPassword = "Use at least 8 characters";
+    if (form.otp.length < 6) next.otp = "Enter the 6-digit code";
+    if (!strongEnough(form.newPassword)) next.newPassword = WEAK_MSG;
     setErrors(next);
     if (Object.keys(next).length) return;
 
@@ -172,7 +174,6 @@ export default function AuthPage() {
       setLoading(true);
       await resetPassword({
         email: form.email.trim(),
-        phone: form.mobile,
         otp: form.otp,
         newPassword: form.newPassword,
       });
@@ -190,12 +191,12 @@ export default function AuthPage() {
   const handleResend = async () => {
     try {
       setLoading(true);
-      const { devCode } = await sendOtp(form.mobile);
+      const { devCode } = await sendOtp(form.email.trim());
       setOtpTimer(30);
-      toast.success("OTP resent");
+      toast.success("Code resent");
       showDevCode(devCode);
     } catch (err: any) {
-      toast.error(err?.message || "Failed to resend OTP");
+      toast.error(err?.message || "Failed to resend code");
     } finally {
       setLoading(false);
     }
@@ -214,7 +215,7 @@ export default function AuthPage() {
           </h2>
           <p className="text-base sm:text-lg text-gray-700 max-w-md">
             Create invoices, track parties, and manage inventory — all in one
-            place, secured with mobile-number verification.
+            place, secured with email verification.
           </p>
           <Card>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
@@ -224,7 +225,7 @@ export default function AuthPage() {
               Secure by design
             </h3>
             <p className="text-sm light-font text-gray-600">
-              Password-protected accounts with verified phone numbers.
+              Password-protected accounts with email verification.
             </p>
           </Card>
         </section>
@@ -315,7 +316,7 @@ export default function AuthPage() {
               >
                 <Header
                   title="Set up your account"
-                  subtitle="We'll verify your mobile number next."
+                  subtitle="We'll email you a verification code next."
                 />
                 <Field
                   label="Full name"
@@ -344,6 +345,7 @@ export default function AuthPage() {
                   toggle={() => setShowPassword((s) => !s)}
                   autoComplete="new-password"
                 />
+                <PasswordStrength value={form.password} />
                 <div>
                   <label className="input-label">Mobile Number</label>
                   <div
@@ -369,7 +371,7 @@ export default function AuthPage() {
                   )}
                 </div>
                 <Button type="submit" fullWidth disabled={loading} className="mt-1">
-                  {loading ? "Sending OTP..." : (<>Continue <FiArrowRight /></>)}
+                  {loading ? "Sending code..." : (<>Continue <FiArrowRight /></>)}
                 </Button>
                 <SwitchHint
                   text="Already have an account?"
@@ -389,8 +391,8 @@ export default function AuthPage() {
                 className="space-y-4"
               >
                 <Header
-                  title="Verify your number"
-                  subtitle={`Enter the OTP sent to +91 ${form.mobile}`}
+                  title="Verify your email"
+                  subtitle={`Enter the code sent to ${form.email}`}
                 />
                 <div>
                   <label className="input-label">OTP Code</label>
@@ -456,7 +458,7 @@ export default function AuthPage() {
               >
                 <Header
                   title="Reset password"
-                  subtitle="Verify your registered mobile number to continue."
+                  subtitle="We'll email you a code to reset your password."
                 />
                 <Field
                   label="Email"
@@ -468,32 +470,8 @@ export default function AuthPage() {
                   placeholder="you@company.com"
                   autoComplete="email"
                 />
-                <div>
-                  <label className="input-label">Registered Mobile</label>
-                  <div
-                    className={`flex items-center gap-2 rounded-lg border px-3 bg-white ${
-                      errors.mobile ? "border-red-400" : "border-gray-300"
-                    }`}
-                  >
-                    <span className="text-sm text-gray-500 shrink-0">🇮🇳 +91</span>
-                    <input
-                      type="tel"
-                      inputMode="numeric"
-                      maxLength={10}
-                      value={form.mobile}
-                      onChange={(e) =>
-                        set("mobile")(e.target.value.replace(/\D/g, "").slice(0, 10))
-                      }
-                      placeholder="Mobile number"
-                      className="w-full py-2.5 text-sm outline-none bg-transparent"
-                    />
-                  </div>
-                  {errors.mobile && (
-                    <p className="mt-1 text-sm text-red-500">{errors.mobile}</p>
-                  )}
-                </div>
                 <Button type="submit" fullWidth disabled={loading} className="mt-1">
-                  {loading ? "Sending OTP..." : (<>Send OTP <FiArrowRight /></>)}
+                  {loading ? "Sending code..." : (<>Send code <FiArrowRight /></>)}
                 </Button>
                 <SwitchHint
                   text="Remembered it?"
@@ -514,7 +492,7 @@ export default function AuthPage() {
               >
                 <Header
                   title="Set a new password"
-                  subtitle={`Enter the OTP sent to +91 ${form.mobile}`}
+                  subtitle={`Enter the code sent to ${form.email}`}
                 />
                 <div>
                   <label className="input-label">OTP Code</label>
@@ -561,6 +539,7 @@ export default function AuthPage() {
                   toggle={() => setShowPassword((s) => !s)}
                   autoComplete="new-password"
                 />
+                <PasswordStrength value={form.newPassword} />
                 <Button
                   type="submit"
                   fullWidth
@@ -594,6 +573,56 @@ function Header({ title, subtitle }: { title: string; subtitle: string }) {
     <div>
       <h1 className="text-lg primary-font text-gray-900">{title}</h1>
       <p className="text-sm light-font text-gray-500 mt-0.5">{subtitle}</p>
+    </div>
+  );
+}
+
+/** Live password strength meter + requirement checklist (shown while typing). */
+function PasswordStrength({ value }: { value: string }) {
+  if (!value) return null;
+  const checks = [
+    { label: "8+ characters", ok: value.length >= 8 },
+    { label: "Upper & lowercase", ok: /[a-z]/.test(value) && /[A-Z]/.test(value) },
+    { label: "A number", ok: /\d/.test(value) },
+    { label: "A symbol", ok: /[^A-Za-z0-9]/.test(value) },
+  ];
+  const score = checks.filter((c) => c.ok).length; // 0–4
+  const meta = [
+    { label: "Very weak", bar: "bg-red-500", text: "text-red-600" },
+    { label: "Weak", bar: "bg-red-500", text: "text-red-600" },
+    { label: "Fair", bar: "bg-orange-500", text: "text-orange-600" },
+    { label: "Good", bar: "bg-yellow-500", text: "text-yellow-600" },
+    { label: "Strong", bar: "bg-green-500", text: "text-green-600" },
+  ][score];
+
+  return (
+    <div className="-mt-1">
+      <div className="flex gap-1" aria-hidden="true">
+        {[0, 1, 2, 3].map((i) => (
+          <span
+            key={i}
+            className={`h-1.5 flex-1 rounded-full transition-colors ${
+              i < score ? meta.bar : "bg-gray-200"
+            }`}
+          />
+        ))}
+      </div>
+      <p className={`mt-1 text-xs secondary-font ${meta.text}`}>
+        Password strength: {meta.label}
+      </p>
+      <ul className="mt-1.5 grid grid-cols-2 gap-x-3 gap-y-1">
+        {checks.map((c) => (
+          <li
+            key={c.label}
+            className={`text-[11px] flex items-center gap-1 ${
+              c.ok ? "text-green-600" : "text-gray-400"
+            }`}
+          >
+            <span>{c.ok ? "✓" : "○"}</span>
+            {c.label}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
