@@ -109,13 +109,13 @@ const Sidebar = () => {
       to={to}
       key={key}
       onClick={() => handleActive(label)}
-      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === label
-        ? "bg-primary text-white font-medium shadow-md"
-        : "text-gray-300 hover:bg-slate-700 hover:text-white"
+      className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors ${active === label
+        ? "bg-primary text-white font-medium shadow-sm"
+        : "text-slate-300 hover:bg-slate-700/70 hover:text-white"
         }`}
     >
-      <span className="text-lg">{icon}</span>
-      <span>{label}</span>
+      <span className="w-5 flex items-center justify-center text-lg shrink-0">{icon}</span>
+      <span className="truncate">{label}</span>
     </Link>
   );
 
@@ -193,7 +193,7 @@ const Sidebar = () => {
 
           {/* General Section */}
           <div className="space-y-2">
-            <p className="text-xs text-gray-400 px-3 font-medium tracking-wider uppercase">General</p>
+            <p className="px-3 text-[11px] font-semibold uppercase tracking-widest text-slate-500">General</p>
             {general.map(({ label, icon, path }, idx) => renderLink(path, label, icon, idx))}
             {isAdmin &&
               renderLink("/admin/demo-requests", "Demo Requests", <MdAdminPanelSettings />)}
@@ -203,8 +203,8 @@ const Sidebar = () => {
               <div
                 onClick={() => setOpenItems(!openItems)}
                 className={`flex justify-between items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === "Items"
-                  ? "bg-primary text-white font-medium shadow-md"
-                  : "text-gray-300 hover:bg-slate-700 hover:text-white"
+                  ? "bg-primary text-white font-medium shadow-sm"
+                  : "text-slate-300 hover:bg-slate-700/70 hover:text-white"
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -230,8 +230,8 @@ const Sidebar = () => {
               <div
                 onClick={() => setOpenSales(!openSales)}
                 className={`flex justify-between items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === "Sales"
-                  ? "bg-primary text-white font-medium shadow-md"
-                  : "text-gray-300 hover:bg-slate-700 hover:text-white"
+                  ? "bg-primary text-white font-medium shadow-sm"
+                  : "text-slate-300 hover:bg-slate-700/70 hover:text-white"
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -269,8 +269,8 @@ const Sidebar = () => {
               <div
                 onClick={() => setOpenPurchases(!openPurchases)}
                 className={`flex justify-between items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === "Purchases"
-                  ? "bg-primary text-white font-medium shadow-md"
-                  : "text-gray-300 hover:bg-slate-700 hover:text-white"
+                  ? "bg-primary text-white font-medium shadow-sm"
+                  : "text-slate-300 hover:bg-slate-700/70 hover:text-white"
                   }`}
               >
                 <div className="flex items-center gap-3">
@@ -318,8 +318,8 @@ const Sidebar = () => {
               <div
                 onClick={() => setOpenAccounting(!openAccounting)}
                 className={`flex justify-between items-center px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-all duration-200 ${active === "Accounting"
-                  ? "bg-primary text-white font-medium shadow-md"
-                  : "text-gray-300 hover:bg-slate-700 hover:text-white"
+                  ? "bg-primary text-white font-medium shadow-sm"
+                  : "text-slate-300 hover:bg-slate-700/70 hover:text-white"
                   }`}
               >
                 <div className="flex items-center gap-3">

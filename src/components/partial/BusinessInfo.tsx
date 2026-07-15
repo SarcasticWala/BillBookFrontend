@@ -18,22 +18,22 @@ const BusinessInfo: React.FC<BusinessInfoProps> = ({ onNavigate }) => {
   const logoUrl = user?.logoUrl || "";
 
   return (
-    <div className="pb-4 border-b border-slate-700">
+    <div className="pb-4 border-b border-slate-700/70">
       <Link
         to="/settings"
         onClick={onNavigate}
-        className="flex items-center gap-3 rounded-lg p-1 -m-1 hover:bg-slate-700 transition-colors"
+        className="flex items-center gap-3 rounded-lg p-2 -m-1 hover:bg-slate-700/70 transition-colors"
       >
-        <div className="w-10 h-10 rounded-full bg-yellow-500 flex items-center justify-center text-slate-800 text-lg font-bold overflow-hidden shrink-0">
+        <div className="w-10 h-10 rounded-full bg-yellow-500 ring-2 ring-slate-600/60 flex items-center justify-center text-slate-900 text-base font-bold overflow-hidden shrink-0">
           {logoUrl ? (
             <img src={logoUrl} alt="Logo" className="w-full h-full object-cover" />
           ) : (
             initial
           )}
         </div>
-        <div>
-          <p className="text-sm font-semibold text-white">{businessName}</p>
-          {phone && <p className="text-xs text-gray-400">{phone}</p>}
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-white truncate leading-tight">{businessName}</p>
+          {phone && <p className="text-xs text-slate-400 truncate">{phone}</p>}
         </div>
       </Link>
     </div>

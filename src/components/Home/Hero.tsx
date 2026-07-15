@@ -1,5 +1,6 @@
 import React from "react";
 import { Button } from "../UI/Button";
+import { DotBackground } from "../UI/DotBackground";
 
 const stats = [
   { value: "1 Cr+", label: "Businesses trust us" },
@@ -49,12 +50,10 @@ const features = [
 
 const Hero: React.FC = () => {
   return (
-    <section className="relative w-full secondary-font overflow-hidden">
-      {/* subtle background: no candy blobs, just a quiet gradient + grid */}
-      <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/60 via-white to-white -z-10" />
-      <div className="absolute inset-0 -z-10 opacity-[0.04] [mask-image:linear-gradient(to_bottom,white,transparent)]">
-        <div className="absolute inset-0 bg-[radial-gradient(#000000_1px,transparent_1px)] [background-size:24px_24px]" />
-      </div>
+    <section className="relative isolate w-full secondary-font overflow-hidden">
+      {/* Quiet gradient wash + a uniform dot grid across the whole section. */}
+      <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/60 via-white to-white -z-20" />
+      <DotBackground className="-z-10" />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-16">
         <div className="flex flex-col lg:flex-row items-center gap-14 lg:gap-10">
