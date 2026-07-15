@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Reveal } from "../UI/Reveal";
+import { Shimmer } from "../UI/Shimmer";
 
 const testimonials = [
   {
@@ -32,6 +33,12 @@ const avatarColors = [
 ];
 
 const Testimonials: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 900);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <section className="w-full py-20 sm:py-24">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -49,7 +56,28 @@ const Testimonials: React.FC = () => {
         </Reveal>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {testimonials.map((t, i) => (
+          {loading
+            ? [0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className="h-full rounded-2xl border border-slate-200 bg-white p-6"
+                >
+                  <Shimmer className="h-8 w-8 rounded mb-4" />
+                  <div className="space-y-2 mb-6">
+                    <Shimmer className="h-3.5 w-full rounded" />
+                    <Shimmer className="h-3.5 w-11/12 rounded" />
+                    <Shimmer className="h-3.5 w-2/3 rounded" />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Shimmer className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2">
+                      <Shimmer className="h-3.5 w-28 rounded" />
+                      <Shimmer className="h-3 w-20 rounded" />
+                    </div>
+                  </div>
+                </div>
+              ))
+            : testimonials.map((t, i) => (
             <Reveal key={t.name} delay={i * 120}>
               <figure className="h-full rounded-2xl border border-slate-200 bg-white p-6 hover:border-indigo-200 hover:shadow-md transition-all">
                 <svg className="w-8 h-8 text-indigo-200 mb-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

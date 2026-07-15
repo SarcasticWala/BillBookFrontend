@@ -9,6 +9,7 @@ import { FiArrowUpRight } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/UI/Button";
 import { Card } from "../../components/UI/Card";
+import { Shimmer } from "../../components/UI/Shimmer";
 import { useGetPartiesQuery } from "../../features/party/partyApiSlice";
 import { useGetSaleInvoicesQuery } from "../../features/sales/saleApiSlice";
 import { useGetPurchaseInvoicesQuery } from "../../features/purchase/purchaseApiSlice";
@@ -32,11 +33,12 @@ interface Txn {
 const DashboardPage = () => {
   const navigate = useNavigate();
 
-  const { data: partiesRes } = useGetPartiesQuery(undefined);
-  const { data: salesRes } = useGetSaleInvoicesQuery(undefined);
-  const { data: purchasesRes } = useGetPurchaseInvoicesQuery(undefined);
-  const { data: payInRes } = useGetPaymentsQuery("PAYMENT_IN");
-  const { data: payOutRes } = useGetPaymentsQuery("PAYMENT_OUT");
+  const { data: partiesRes, isLoading: lP } = useGetPartiesQuery(undefined);
+  const { data: salesRes, isLoading: lS } = useGetSaleInvoicesQuery(undefined);
+  const { data: purchasesRes, isLoading: lPu } = useGetPurchaseInvoicesQuery(undefined);
+  const { data: payInRes, isLoading: lIn } = useGetPaymentsQuery("PAYMENT_IN");
+  const { data: payOutRes, isLoading: lOut } = useGetPaymentsQuery("PAYMENT_OUT");
+  const loading = lP || lS || lPu || lIn || lOut;
 
   const parties: any[] = partiesRes?.data || [];
   const sales: any[] = salesRes?.data || [];
@@ -174,15 +176,21 @@ const DashboardPage = () => {
           {/* TO COLLECT */}
           <div className="bg-green-50 border border-gray-200 rounded-lg p-4 hover:border-green-500 transition cursor-pointer">
             <p className="text-sm secondary-font text-green-700">↓ To Collect</p>
-            <p className="text-lg primary-font text-gray-900 mt-2">
-              {inr(toCollect)}
-            </p>
+            {loading ? (
+              <Shimmer className="h-6 w-24 rounded mt-2" />
+            ) : (
+              <p className="text-lg primary-font text-gray-900 mt-2">{inr(toCollect)}</p>
+            )}
           </div>
 
           {/* TO PAY */}
           <div className="bg-red-50 border border-gray-200 rounded-lg p-4 hover:border-red-500 transition cursor-pointer">
             <p className="text-sm secondary-font text-red-600">↑ To Pay</p>
-            <p className="text-lg primary-font text-gray-900 mt-2">{inr(toPay)}</p>
+            {loading ? (
+              <Shimmer className="h-6 w-24 rounded mt-2" />
+            ) : (
+              <p className="text-lg primary-font text-gray-900 mt-2">{inr(toPay)}</p>
+            )}
           </div>
 
           {/* CASH + BANK */}
@@ -191,9 +199,11 @@ const DashboardPage = () => {
               <MdAccountBalanceWallet />
               <p className="text-sm secondary-font">Total Cash + Bank Balance</p>
             </div>
-            <p className="text-lg primary-font text-gray-900 mt-2">
-              {inr(cashBalance)}
-            </p>
+            {loading ? (
+              <Shimmer className="h-6 w-24 rounded mt-2" />
+            ) : (
+              <p className="text-lg primary-font text-gray-900 mt-2">{inr(cashBalance)}</p>
+            )}
           </div>
         </div>
       </Card>
@@ -217,7 +227,22 @@ const DashboardPage = () => {
                   <span className="text-right">Amount</span>
                 </div>
 
-                {txns.length === 0 ? (
+                {loading ? (
+                  [0, 1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="grid grid-cols-5 items-center border-b border-gray-100 last:border-0 px-4 py-3.5"
+                    >
+                      <Shimmer className="h-3.5 w-20 rounded" />
+                      <Shimmer className="h-3.5 w-16 rounded" />
+                      <Shimmer className="h-3.5 w-24 rounded" />
+                      <Shimmer className="h-3.5 w-28 rounded" />
+                      <div className="flex justify-end">
+                        <Shimmer className="h-3.5 w-16 rounded" />
+                      </div>
+                    </div>
+                  ))
+                ) : txns.length === 0 ? (
                   <div className="flex items-center justify-center py-12 text-sm light-font text-gray-400">
                     No transactions made yet!
                   </div>

@@ -28,6 +28,8 @@ import {
   MdOutlineOndemandVideo,
   MdAdminPanelSettings,
   MdLogout,
+  MdSecurity,
+  MdVerifiedUser,
 } from "react-icons/md";
 import { useGetMeQuery } from "../../features/auth/authApiSlice";
 
@@ -380,16 +382,33 @@ const Sidebar = () => {
         </div>
          )}
 
-        {/* Logout — pinned at the bottom of the sidebar */}
-        <div className="shrink-0 border-t border-slate-700 p-4">
+        {/* Footer — logout + trust badges + version, pinned to the bottom. */}
+        <div className="shrink-0 border-t border-slate-700/70 px-4 py-3 space-y-3">
           <button
             type="button"
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-gray-300 hover:bg-slate-700 hover:text-white transition-colors cursor-pointer"
+            className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm text-slate-300 hover:bg-slate-700/70 hover:text-white transition-colors cursor-pointer"
           >
             <MdLogout className="text-lg" />
             <span>Log out</span>
           </button>
+
+          <div className="flex items-center gap-4 px-1 text-[11px] text-slate-400">
+            <span className="inline-flex items-center gap-1">
+              <MdSecurity className="text-sm text-emerald-400" /> 100% Secure
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <MdVerifiedUser className="text-sm text-indigo-400" /> ISO Certified
+            </span>
+          </div>
+
+          <div className="flex items-center justify-between px-1 text-[11px] text-slate-500">
+            <span className="font-semibold tracking-tight">
+              <span className="text-indigo-400">Bill</span>
+              <span className="text-slate-300">Book</span>
+            </span>
+            <span>v1.0.0</span>
+          </div>
         </div>
       </div>
     </>

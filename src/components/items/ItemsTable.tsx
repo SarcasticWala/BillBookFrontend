@@ -9,6 +9,7 @@ import { FaBoxes, FaBox, FaArrowDown } from "react-icons/fa";
 import { useState } from "react";
 import AdjustStockModal from "./AdjustStockModal";
 import { Badge } from "../UI/Badge";
+import { Shimmer } from "../UI/Shimmer";
 
 interface Item {
   name: string;
@@ -139,10 +140,7 @@ export const ItemsTable: React.FC<ItemsTableProps> = ({
       {isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 5 }).map((_, i) => (
-            <div
-              key={i}
-              className="h-12 w-full bg-gray-100 rounded-lg animate-pulse"
-            />
+            <Shimmer key={i} className="h-12 w-full rounded-lg" />
           ))}
         </div>
       ) : isError ? (

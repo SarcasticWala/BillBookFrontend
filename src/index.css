@@ -121,3 +121,35 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .animate-blob { animation: none; }
 }
+
+/* Shimmer / skeleton loading */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.shimmer {
+  background-color: #e2e8f0; /* slate-200 base */
+  background-image: linear-gradient(
+    100deg,
+    rgba(226, 232, 240, 0) 30%,
+    rgba(241, 245, 249, 0.9) 50%,
+    rgba(226, 232, 240, 0) 70%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* Indeterminate progress sheen for the brand loader */
+@keyframes indeterminate {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(320%); }
+}
+.animate-indeterminate {
+  animation: indeterminate 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shimmer { animation: none; background-image: none; }
+  .animate-indeterminate { animation: none; }
+}

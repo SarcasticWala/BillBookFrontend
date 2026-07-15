@@ -3,6 +3,7 @@ import {
   useGetCategoriesQuery,
 } from "../../features/party/partyApiSlice";
 import { Table } from "../Table/Table";
+import { Shimmer } from "../UI/Shimmer";
 import type { Column } from "../Table/Table";
 import { Badge } from "../UI/Badge";
 import { useNavigate } from "react-router-dom";
@@ -107,12 +108,9 @@ export const PartiesTable: React.FC<PartiesTableProps> = ({
         <div className="space-y-4">
           {[...Array(6)].map((_, i) => (
             <div key={i} className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-              <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />
-              <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />
-              <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />
-              <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />
-              <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />
-              <div className="h-5 bg-gray-200 animate-pulse rounded col-span-1" />
+              {[...Array(6)].map((__, c) => (
+                <Shimmer key={c} className="h-5 rounded col-span-1" />
+              ))}
             </div>
           ))}
         </div>

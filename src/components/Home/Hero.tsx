@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../UI/Button";
-import { DotBackground } from "../UI/DotBackground";
+import InvoiceCardSkeleton from "./InvoiceCardSkeleton";
 
 const stats = [
   { value: "1 Cr+", label: "Businesses trust us" },
@@ -49,11 +49,16 @@ const features = [
 ];
 
 const Hero: React.FC = () => {
+  // Brief skeleton on the invoice preview card, then reveal.
+  const [cardLoading, setCardLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setCardLoading(false), 900);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
-    <section className="relative isolate w-full secondary-font overflow-hidden">
-      {/* Quiet gradient wash + a uniform dot grid across the whole section. */}
-      <div className="absolute inset-0 bg-gradient-to-b from-indigo-50/60 via-white to-white -z-20" />
-      <DotBackground className="-z-10" />
+    <section className="relative w-full secondary-font overflow-hidden">
+      {/* Background (dot grid + gradient) is provided at the page root now. */}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-16">
         <div className="flex flex-col lg:flex-row items-center gap-14 lg:gap-10">
@@ -101,6 +106,10 @@ const Hero: React.FC = () => {
           <div className="flex-1 flex justify-center lg:justify-end w-full">
             <div className="relative w-full max-w-sm">
               <div className="absolute -top-3 -right-3 w-full h-full rounded-2xl bg-indigo-100 -z-10" />
+              {cardLoading ? (
+                <InvoiceCardSkeleton />
+              ) : (
+                <>
               <div className="rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/60 overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                   <div>
@@ -155,6 +164,8 @@ const Hero: React.FC = () => {
                   <div className="text-[11px] text-slate-400">e-Invoice compliant</div>
                 </div>
               </div>
+                </>
+              )}
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Reveal } from "../UI/Reveal";
+import { Shimmer } from "../UI/Shimmer";
 
 type Billing = "monthly" | "yearly";
 
@@ -58,6 +59,11 @@ const Check = () => (
 
 const Pricing: React.FC = () => {
   const [billing, setBilling] = useState<Billing>("monthly");
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 900);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <section className="w-full py-20 sm:py-24 bg-white/60">
@@ -100,7 +106,25 @@ const Pricing: React.FC = () => {
         </Reveal>
 
         <div className="grid md:grid-cols-3 gap-6 items-start">
-          {tiers.map((tier, i) => {
+          {loading
+            ? [0, 1, 2].map((i) => (
+                <div
+                  key={i}
+                  className={`rounded-2xl bg-white p-6 sm:p-7 border border-slate-200 ${i === 1 ? "md:scale-[1.04]" : ""}`}
+                >
+                  <Shimmer className="h-5 w-24 rounded mb-2" />
+                  <Shimmer className="h-3.5 w-40 rounded mb-6" />
+                  <Shimmer className="h-10 w-28 rounded mb-2" />
+                  <Shimmer className="h-3 w-20 rounded mb-6" />
+                  <Shimmer className="h-10 w-full rounded-lg mb-6" />
+                  <div className="space-y-3">
+                    {[0, 1, 2, 3].map((k) => (
+                      <Shimmer key={k} className="h-3.5 w-full rounded" />
+                    ))}
+                  </div>
+                </div>
+              ))
+            : tiers.map((tier, i) => {
             const price = billing === "monthly" ? tier.monthly : tier.yearly;
             return (
               <Reveal key={tier.name} delay={i * 120}>

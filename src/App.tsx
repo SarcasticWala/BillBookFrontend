@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
+import { BrandLoader } from "./components/UI/BrandLoader.tsx";
 import PartyDetail from "./components/Parties/PartyDetail.tsx";
 import { ItemDetailsPage } from "./components/items/ItemDetailsPage.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
@@ -42,9 +43,17 @@ const SettingsPage = lazy(() => import("./pages/dashboard/Settings/Settings"));
 const BookDemoPage = lazy(() => import("./pages/dashboard/BookDemo/BookDemoPage"));
 const AdminDemoRequests = lazy(() => import("./pages/dashboard/Admin/AdminDemoRequests"));
 function App() {
+  // Brief branded splash on initial app load, with a smooth fade-out.
+  const [booting, setBooting] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setBooting(false), 900);
+    return () => clearTimeout(t);
+  }, []);
+
   return (
     <Router>
-      <Suspense fallback={<div className="p-6">Loading...</div>}>
+      <BrandLoader visible={booting} />
+      <Suspense fallback={<BrandLoader visible />}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="login" element={<Login />} />

@@ -6,10 +6,13 @@ import Pricing from "../../components/Home/Pricing";
 import Faq from "../../components/Home/Faq";
 import FinalCTA from "../../components/Home/FinalCTA";
 import LandingFooter from "../../components/Home/LandingFooter";
+import { DotBackground } from "../../components/UI/DotBackground";
 
 const Home: React.FC = () => {
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex flex-col">
+    <div className="relative isolate min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex flex-col">
+      {/* Dot grid spans the whole page, behind every section. */}
+      <DotBackground className="-z-10" />
       <Navbar />
       <main className="flex-grow">
         <Hero />
