@@ -331,7 +331,9 @@ const CreateParty: React.FC = () => {
                 checked={sameAsBilling}
                 onChange={(e) => {
                   setSameAsBilling(e.target.checked);
-                  if (e.target.checked) setShippingAddressData(billingAddressData);
+                  // Checked -> mirror billing; unchecked -> clear so the user
+                  // can enter a separate shipping address.
+                  setShippingAddressData(e.target.checked ? billingAddressData : null);
                 }}
               />
               Same as Billing address

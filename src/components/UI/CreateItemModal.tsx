@@ -458,7 +458,7 @@ export const CreateItemModal = ({
                       <option value="">Select Category</option>
                       {categoryOptions.map((c: any) => (
                         <option key={c.id} value={c.id}>
-                          {c.catagory}
+                          {c.name || c.catagory || c.label}
                         </option>
                       ))}
                       <option

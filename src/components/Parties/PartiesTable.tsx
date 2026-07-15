@@ -66,8 +66,10 @@ export const PartiesTable: React.FC<PartiesTableProps> = ({
     category: partyCategoryName(party, categoryById) || "-",
     mobile: partyMobile(party) || "-",
     type: party.partyType === "CUSTOMER" ? "Customer" : "Supplier",
-    balance: `${party.openingBalanceType === "TO_COLLECT" ? "+" : "-"} ₹${(
-      party.openingBalance || 0
+    // Use the running `balance` (+ = to collect, - = to pay) as the single
+    // source of truth, matching the Parties totals and the Dashboard.
+    balance: `${(Number(party.balance) || 0) >= 0 ? "+" : "-"} ₹${Math.abs(
+      Number(party.balance) || 0
     ).toLocaleString("en-IN")}`,
   }));
 

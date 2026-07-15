@@ -44,14 +44,13 @@ const DashboardPage = () => {
   const paymentsIn: any[] = payInRes?.data || [];
   const paymentsOut: any[] = payOutRes?.data || [];
 
-  // Net position per party: opening balance (by type) + running balance
-  // (positive = they owe us / to collect, negative = we owe / to pay).
+  // `balance` is the single source of truth for each party's net position
+  // (it starts at the signed opening balance and moves with invoices/payments):
+  // positive = they owe us (to collect), negative = we owe them (to pay).
   let toCollect = 0;
   let toPay = 0;
   for (const p of parties) {
-    const opening =
-      (p.openingBalanceType === "TO_PAY" ? -1 : 1) * num(p.openingBalance);
-    const net = opening + num(p.balance);
+    const net = num(p.balance);
     if (net > 0) toCollect += net;
     else if (net < 0) toPay += -net;
   }

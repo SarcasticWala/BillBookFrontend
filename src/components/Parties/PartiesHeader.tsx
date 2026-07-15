@@ -37,13 +37,16 @@ export const PartiesHeader: React.FC<Props> = ({
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
   const totalParties = partiesData.length;
-  const toCollectTotal = partiesData
-    .filter((p: any) => p.openingBalanceType === "TO_COLLECT")
-    .reduce((acc: number, curr: any) => acc + curr.openingBalance, 0);
-
-  const toPayTotal = partiesData
-    .filter((p: any) => p.openingBalanceType === "TO_PAY")
-    .reduce((acc: number, curr: any) => acc + curr.openingBalance, 0);
+  // `balance` is the source of truth: + = to collect, - = to pay.
+  const num = (v: any) => (Number.isFinite(Number(v)) ? Number(v) : 0);
+  const toCollectTotal = partiesData.reduce(
+    (acc: number, p: any) => acc + Math.max(0, num(p.balance)),
+    0
+  );
+  const toPayTotal = partiesData.reduce(
+    (acc: number, p: any) => acc + Math.max(0, -num(p.balance)),
+    0
+  );
 
   const handleCategorySelect = (val: string) => {
     if (!selectedCategories.includes(val)) {

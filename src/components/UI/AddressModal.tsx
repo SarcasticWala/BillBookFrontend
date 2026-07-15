@@ -73,6 +73,10 @@ const AddressModal: React.FC<AddressModalProps> = ({
       toast.error("Street address is required");
       return;
     }
+    if (!/^\d{6}$/.test(pincode)) {
+      toast.error("Enter a valid 6-digit pincode");
+      return;
+    }
     onSave({
       ad: street.trim(),
       st: state || "",
@@ -149,12 +153,15 @@ const AddressModal: React.FC<AddressModalProps> = ({
 
           {/* Pincode */}
           <div>
-            <label className="input-label">Pincode</label>
+            <label className="input-label">
+              Pincode <span className="text-red-500">*</span>
+            </label>
             <input
               className="input-field w-full"
-              placeholder="Enter pincode"
+              placeholder="6-digit pincode"
               value={pincode}
-              onChange={(e) => setPincode(e.target.value)}
+              inputMode="numeric"
+              onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
               maxLength={6}
             />
           </div>
