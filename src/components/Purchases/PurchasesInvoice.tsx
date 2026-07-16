@@ -14,8 +14,13 @@ import { Button } from "../UI/Button";
 import { Card } from "../UI/Card";
 import { useNavigate } from "react-router-dom";
 import { format } from "date-fns";
-import { BsThreeDotsVertical } from "react-icons/bs";
-import { useGetPurchaseInvoicesQuery } from "../../features/purchase/purchaseApiSlice";
+import { MdOutlineVisibility, MdEdit, MdDeleteOutline } from "react-icons/md";
+import { toast } from "react-toastify";
+import { RowActionsMenu } from "../UI/RowActionsMenu";
+import {
+  useGetPurchaseInvoicesQuery,
+  useDeletePurchaseMutation,
+} from "../../features/purchase/purchaseApiSlice";
 
 type PurchaseInvoice = {
   id: string;
@@ -38,6 +43,23 @@ const PurchasesInvoice = () => {
   } = useGetPurchaseInvoicesQuery(undefined);
   const invoicesData = response?.data || [];
 
+  const [deletePurchase] = useDeletePurchaseMutation();
+
+  const handleDelete = async (id: string) => {
+    if (
+      !window.confirm(
+        "Delete this invoice? This reverses its stock and party-balance effects and cannot be undone."
+      )
+    )
+      return;
+    try {
+      await deletePurchase(id).unwrap();
+      toast.success("Invoice deleted");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to delete invoice");
+    }
+  };
+
   // Table data mapping
   const tableData: PurchaseInvoice[] = invoicesData.map((invoice: any) => {
     const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
@@ -47,7 +69,8 @@ const PurchasesInvoice = () => {
         ? format(new Date(invoice.invioceDate), "dd MMM yyyy")
         : "-",
       invoiceNumber: invoice.invioceNo || "-",
-      partyName: invoice.party?.name || "-",
+      partyName:
+        invoice.partyName || invoice.partyId?.partyName || invoice.party?.name || "-",
       dueIn: dueDate ? format(dueDate, "PPP") : "No Due Date",
       amount: `₹${invoice.totalPurchaseAmount ?? "-"}`,
       status: invoice.isFullyPaid
@@ -91,8 +114,27 @@ const PurchasesInvoice = () => {
     },
     {
       header: "",
-      render: () => (
-        <BsThreeDotsVertical className="text-gray-500 cursor-pointer" />
+      render: (_value, row) => (
+        <RowActionsMenu
+          actions={[
+            {
+              label: "View details",
+              icon: <MdOutlineVisibility className="text-base" />,
+              onClick: () => navigate(`/purchases/invoice/${row.id}`),
+            },
+            {
+              label: "Edit",
+              icon: <MdEdit className="text-base" />,
+              onClick: () => navigate(`/purchases/invoice/${row.id}/edit`),
+            },
+            {
+              label: "Delete",
+              icon: <MdDeleteOutline className="text-base" />,
+              danger: true,
+              onClick: () => handleDelete(row.id),
+            },
+          ]}
+        />
       ),
     },
   ];

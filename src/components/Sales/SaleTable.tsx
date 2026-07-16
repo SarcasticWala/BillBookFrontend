@@ -1,10 +1,19 @@
-import { useGetSaleInvoicesQuery } from "../../features/sales/saleApiSlice";
+import {
+  useGetSaleInvoicesQuery,
+  useDeleteSaleMutation,
+} from "../../features/sales/saleApiSlice";
 import { Table } from "../Table/Table";
 import { Badge } from "../UI/Badge";
 import type { Column } from "../Table/Table";
 import { format } from "date-fns";
-import { MdOutlineFileCopy } from "react-icons/md";
-import { BsThreeDotsVertical } from "react-icons/bs";
+import {
+  MdOutlineFileCopy,
+  MdOutlineVisibility,
+  MdEdit,
+  MdDeleteOutline,
+} from "react-icons/md";
+import { toast } from "react-toastify";
+import { RowActionsMenu } from "../UI/RowActionsMenu";
 import { useNavigate } from "react-router-dom";
 
 type SalesInvoice = {
@@ -23,6 +32,23 @@ export const SaleTable = () => {
   const navigate = useNavigate();
   const invoicesData = response?.data || [];
 
+  const [deleteSale] = useDeleteSaleMutation();
+
+  const handleDelete = async (id: string) => {
+    if (
+      !window.confirm(
+        "Delete this invoice? This reverses its stock and party-balance effects and cannot be undone."
+      )
+    )
+      return;
+    try {
+      await deleteSale(id).unwrap();
+      toast.success("Invoice deleted");
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to delete invoice");
+    }
+  };
+
   const tableData: SalesInvoice[] = invoicesData.map((invoice: any) => {
     const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
     const invoiceDate = invoice.invioceDate ? new Date(invoice.invioceDate) : null;
@@ -31,7 +57,8 @@ export const SaleTable = () => {
       id: invoice.id,
       date: dueDate ? format(dueDate, "dd MMM yyyy") : "-",
       invoiceNumber: invoice.invioceNo || "-",
-      partyName: invoice.party?.name || "-",
+      partyName:
+        invoice.partyName || invoice.partyId?.partyName || invoice.party?.name || "-",
       dueIn: dueDate ? format(dueDate, "PPP") : "No Due Date",
       amount: `₹${invoice.totalSaleAmount ?? "-"}`,
       status: invoice.isFullyPaid
@@ -61,8 +88,27 @@ export const SaleTable = () => {
     },
     {
       header: "",
-      render: () => (
-        <BsThreeDotsVertical className="text-gray-500 cursor-pointer" />
+      render: (_value, row) => (
+        <RowActionsMenu
+          actions={[
+            {
+              label: "View details",
+              icon: <MdOutlineVisibility className="text-base" />,
+              onClick: () => navigate(`/sales/invoice/${row.id}`),
+            },
+            {
+              label: "Edit",
+              icon: <MdEdit className="text-base" />,
+              onClick: () => navigate(`/sales/invoice/${row.id}/edit`),
+            },
+            {
+              label: "Delete",
+              icon: <MdDeleteOutline className="text-base" />,
+              danger: true,
+              onClick: () => handleDelete(row.id),
+            },
+          ]}
+        />
       ),
     },
   ];

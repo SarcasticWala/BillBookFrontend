@@ -3,6 +3,7 @@ import { lazy, Suspense, useState, useEffect } from "react";
 import { BrandLoader } from "./components/UI/BrandLoader.tsx";
 import PartyDetail from "./components/Parties/PartyDetail.tsx";
 import { ItemDetailsPage } from "./components/items/ItemDetailsPage.tsx";
+import { InvoiceDetailPage } from "./components/invoices/InvoiceDetailPage.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
 
 // Lazy components
@@ -89,6 +90,10 @@ function App() {
                     />
                     <Route path="purchase/create-invoice" element={<CreatePurchaseForm />} />
                     <Route path="sales/create-invoice" element={<CreateSalesForm />} />
+                    <Route path="sales/invoice/:id" element={<InvoiceDetailPage type="SALE" />} />
+                    <Route path="purchases/invoice/:id" element={<InvoiceDetailPage type="PURCHASE" />} />
+                    <Route path="sales/invoice/:id/edit" element={<CreateSalesForm />} />
+                    <Route path="purchases/invoice/:id/edit" element={<CreatePurchaseForm />} />
                   </Routes>
                 </div>
                 <Footer />

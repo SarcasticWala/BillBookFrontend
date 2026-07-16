@@ -22,7 +22,11 @@ export const PartySelectorModal: React.FC<{
   };
 
   const wantedType = pathname.includes("purchase") ? "SUPPLIER" : "CUSTOMER";
-  const filteredParties = parties.filter((p: any) => p.partyType === wantedType);
+  // Prefer parties of the expected type, but if the user has none of that type
+  // yet, fall back to showing all parties so they're never blocked from
+  // picking a party they've already created.
+  const preferred = parties.filter((p: any) => p.partyType === wantedType);
+  const filteredParties = preferred.length ? preferred : parties;
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0">

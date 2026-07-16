@@ -68,6 +68,15 @@ export const itemApi = createApi({
       }),
       invalidatesTags: ["Item"],
     }),
+    updateItem: builder.mutation({
+      query: ({ id, formData }: { id: string; formData: FormData }) => ({
+        url: `update/${id}`,
+        method: "PUT",
+        body: formData,
+        headers: {}, // browser sets content-type
+      }),
+      invalidatesTags: ["Item"],
+    }),
   }),
 });
 
@@ -81,4 +90,5 @@ export const {
   useGetItemByIdQuery,
   useBulkCreateItemsMutation,
   useUpdateItemStockMutation,
+  useUpdateItemMutation,
 } = itemApi;

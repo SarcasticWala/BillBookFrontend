@@ -21,7 +21,32 @@ export const saleApi = createApi({
       query: () => "/sale-invoices",
       providesTags: ["Sale"],
     }),
+    getSaleById: builder.query({
+      query: (id: string) => `/${id}`,
+      providesTags: ["Sale"],
+    }),
+    updateSale: builder.mutation({
+      query: ({ id, ...body }: { id: string } & Record<string, any>) => ({
+        url: `/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Sale"],
+    }),
+    deleteSale: builder.mutation({
+      query: (id: string) => ({
+        url: `/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Sale"],
+    }),
   }),
 });
 
-export const { useCreateSaleMutation, useGetSaleInvoicesQuery } = saleApi;
+export const {
+  useCreateSaleMutation,
+  useGetSaleInvoicesQuery,
+  useGetSaleByIdQuery,
+  useUpdateSaleMutation,
+  useDeleteSaleMutation,
+} = saleApi;

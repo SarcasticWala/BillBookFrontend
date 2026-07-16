@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { FaExclamationTriangle, FaTrash } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PartySelectorModal } from "./PartySelectorModal";
 import { ItemSelectorModal } from "./ItemSelectorModal";
 import { useGetPartyByIdQuery } from "../../../../../features/party/partyApiSlice";
 import { useGetItemByIdQuery } from "../../../../../features/item/itemApiSlice";
-import { useCreateSaleMutation } from "../../../../../features/sales/saleApiSlice";
+import {
+  useCreateSaleMutation,
+  useUpdateSaleMutation,
+  useGetSaleByIdQuery,
+} from "../../../../../features/sales/saleApiSlice";
 import { Button } from "../../../../../components/UI/Button";
 import { Card } from "../../../../../components/UI/Card";
 import { Input } from "../../../../../components/UI/Input";
@@ -18,21 +22,41 @@ import { toast } from "react-toastify";
 import { Table, type Column } from "../../../../../components/Table/Table";
 import * as Yup from "yup";
 
+// Tolerant address formatter — handles the write shape ({ad, st, city, pin})
+// and the older mapped shape ({ miscData: {...} }).
+const formatPartyAddress = (addr: any): string => {
+  if (!addr) return "";
+  const a = addr.miscData || addr;
+  return [a.ad, a.city, a.st, a.pin].filter(Boolean).join(", ");
+};
+
 export const CreateSalesForm: React.FC = () => {
   const navigate = useNavigate();
+  const { id: editId } = useParams();
+  const isEdit = !!editId;
   const [isPartyModalOpen, setPartyModalOpen] = useState(false);
   const [isItemModalOpen, setItemModalOpen] = useState(false);
   const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null);
+  // Ship To is tracked independently from Bill To so picking one never
+  // silently overwrites the other. `partyModalTarget` tells the shared
+  // selector which card the user is changing.
+  const [shipToPartyId, setShipToPartyId] = useState<string | null>(null);
+  const [partyModalTarget, setPartyModalTarget] = useState<"bill" | "ship">(
+    "bill"
+  );
   const [selectedItemTemp, _setSelectedItemTemp] = useState<any | null>(null);
 
-  console.log("[DEBUG] selectedPartyId:", selectedPartyId);
-  console.log("[DEBUG] selectedItemTemp:", selectedItemTemp);
+  const { data: editResponse } = useGetSaleByIdQuery(editId ?? skipToken);
 
   const { data: partyResponse } = useGetPartyByIdQuery(
     selectedPartyId ? selectedPartyId : skipToken
   );
   const partyDetails = partyResponse?.data;
-  console.log("[DEBUG] partyDetails fetched:", partyDetails);
+
+  const { data: shipToResponse } = useGetPartyByIdQuery(
+    shipToPartyId ? shipToPartyId : skipToken
+  );
+  const shipToDetails = shipToResponse?.data;
 
   const { data: itemDetailsResponse } = useGetItemByIdQuery(
     selectedItemTemp
@@ -43,13 +67,14 @@ export const CreateSalesForm: React.FC = () => {
       : skipToken
   );
   const itemDetailsFetch = itemDetailsResponse?.data;
-  console.log("[DEBUG] itemDetailsFetch fetched:", itemDetailsFetch);
 
   const [createSale] = useCreateSaleMutation();
+  const [updateSale] = useUpdateSaleMutation();
 
   const formik = useFormik({
     initialValues: {
       partyId: "",
+      shipToPartyId: "",
       invioceNo: "",
       invioceDate: "",
       paymentTermDays: 0,
@@ -84,37 +109,71 @@ export const CreateSalesForm: React.FC = () => {
         setSubmitting(false);
         return;
       }
-      console.log("[DEBUG] Submitting form with values:", values);
 
       const partialSum = Number(values.cash) + Number(values.online);
       if (partialSum > values.receivedAmount) {
         toast.error(
           "Sum of cash and online payments cannot exceed received amount."
         );
-        console.warn("[DEBUG] Payment validation failed");
         return;
       }
 
       try {
-        await createSale(values).unwrap();
-        console.log("[DEBUG] Sale created successfully");
-        toast.success("Sales invoice created successfully!");
+        if (isEdit) {
+          await updateSale({ id: editId!, ...values }).unwrap();
+          toast.success("Sales invoice updated successfully!");
+        } else {
+          await createSale(values).unwrap();
+          toast.success("Sales invoice created successfully!");
+        }
         navigate("/sales/invoices");
       } catch (error: any) {
-        console.error("[DEBUG] Sale creation error:", error);
         toast.error(
           error?.data?.message ||
-            "Failed to create sales invoice. Please try again."
+            `Failed to ${isEdit ? "update" : "create"} sales invoice. Please try again.`
         );
       }
     },
   });
 
+  // Edit mode: hydrate the form from the existing invoice.
+  useEffect(() => {
+    const inv: any = editResponse?.data;
+    if (!isEdit || !inv) return;
+    const pid =
+      typeof inv.partyId === "object"
+        ? inv.partyId?._id || inv.partyId?.id
+        : inv.partyId;
+    if (pid) setSelectedPartyId(String(pid));
+    if (inv.shipToPartyId) setShipToPartyId(String(inv.shipToPartyId));
+    formik.setValues({
+      partyId: String(pid || ""),
+      shipToPartyId: inv.shipToPartyId ? String(inv.shipToPartyId) : "",
+      invioceNo: inv.invioceNo || "",
+      invioceDate: inv.invioceDate ? String(inv.invioceDate).slice(0, 10) : "",
+      paymentTermDays: inv.paymentTermDays || 0,
+      dueDate: inv.dueDate ? String(inv.dueDate).slice(0, 10) : "",
+      itemDetails: Array.isArray(inv.itemDetails) ? inv.itemDetails : [],
+      totalSaleAmount: inv.totalSaleAmount || 0,
+      totalTaxableSaleAmount: inv.totalTaxableSaleAmount || 0,
+      totalTax: inv.totalTax || 0,
+      notes: inv.notes || "",
+      termsAndConditions: inv.termsAndConditions || "",
+      additionalCharges: inv.additionalCharges || 0,
+      discountAfterTax: inv.discountAfterTax || 0,
+      receivedAmount: inv.receivedAmount || 0,
+      isFullyPaid: inv.isFullyPaid || false,
+      dueAmount: inv.dueAmount || 0,
+      cash: inv.cash || 0,
+      online: inv.online || 0,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editResponse, isEdit]);
+
   const handleAdditionalChargesChange = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const value = e.target.value;
-    console.log("[DEBUG] Additional charges input changed:", value);
     if (value === "") {
       formik.setFieldValue("additionalCharges", "");
       return;
@@ -127,17 +186,18 @@ export const CreateSalesForm: React.FC = () => {
 
   useEffect(() => {
     if (partyDetails) {
-      console.log("[DEBUG] Populating partyId in form:", partyDetails.id);
       formik.setFieldValue("partyId", partyDetails.id);
     }
   }, [partyDetails]);
 
+  // Keep the persisted ship-to id in sync with the separately chosen party.
   useEffect(() => {
-    console.log("***********************************");
-    
-    if (itemDetailsFetch) {
-      console.log("[DEBUG] Adding new fetched item to form:", itemDetailsFetch);
+    formik.setFieldValue("shipToPartyId", shipToDetails?.id || "");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shipToDetails]);
 
+  useEffect(() => {
+    if (itemDetailsFetch) {
       const existing = formik.values.itemDetails.find(
         (i) => i.itemId === itemDetailsFetch.id
       );
@@ -191,15 +251,12 @@ export const CreateSalesForm: React.FC = () => {
           ...formik.values.itemDetails,
           row,
         ]);
-        console.log("*************************************ROW************",row);
       }
     }
     
   }, [itemDetailsFetch]);
 
   useEffect(() => {
-    console.log("[DEBUG] Recalculating totals...");
-
     const sub = formik.values.itemDetails.reduce(
       (a, e) => a + (e.totalAmount || 0),
       0
@@ -221,11 +278,6 @@ export const CreateSalesForm: React.FC = () => {
       Number(formik.values.additionalCharges || 0) -
       Number(formik.values.discountAfterTax || 0);
     const due = totalWithAdd - Number(formik.values.receivedAmount || 0);
-
-    console.log("[DEBUG] sub:", sub);
-    console.log("[DEBUG] totalTaxableSaleAmount:", totalTaxableSaleAmount);
-    console.log("[DEBUG] totalTax:", totalTax);
-    console.log("[DEBUG] totalWithAdd:", totalWithAdd, "due:", due);
 
     formik.setFieldValue(
       "totalSaleAmount",
@@ -317,10 +369,6 @@ export const CreateSalesForm: React.FC = () => {
     e: React.ChangeEvent<HTMLInputElement>,
     fieldName: "cash" | "online"
   ) => {
-    console.log(
-      `[DEBUG] Partial payment change for ${fieldName}:`,
-      e.target.value
-    );
     const val = e.target.value;
     if (val === "") {
       formik.setFieldValue(fieldName, "");
@@ -341,7 +389,6 @@ export const CreateSalesForm: React.FC = () => {
       basePricePerItem: price,
       serialNos: current.serialNos || [],
     };
-    console.log("******************************[DEBUG] Updated item details:", updated);
     if (updated.isPreowned) {
       const priceAfterDiscount = price - (updated.discountBeforeTax || 0);
       updated.taxAmount = parseFloat(
@@ -660,16 +707,14 @@ const handleTaxPercentChange = (index: number, val: string) => {
         isOpen={isPartyModalOpen}
         onClose={() => setPartyModalOpen(false)}
         onSelect={(p) => {
-          console.log("[DEBUG] Party selected from modal:", p);
-          setSelectedPartyId(p.id);
+          if (partyModalTarget === "ship") setShipToPartyId(p.id);
+          else setSelectedPartyId(p.id);
         }}
       />
       <ItemSelectorModal
         isOpen={isItemModalOpen}
         onClose={() => setItemModalOpen(false)}
         onSelect={(items) => {
-          console.log("[DEBUG] Items selected from modal:", items);
-
           const newRows = items.map((it) => {
             const isPreowned = it.itemProductType === "OLD" ? true : false;
             const taxRate = it.taxPercentage || 0;
@@ -727,7 +772,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
       />
 
       <PageHeader
-        title="Create Sales Invoice"
+        title={isEdit ? "Edit Sales Invoice" : "Create Sales Invoice"}
         subtitle="Fill in the details below"
         onBack={() => navigate("/sales/invoices")}
         actions={
@@ -740,7 +785,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               Cancel
             </Button>
             <Button type="submit" form="create-sales-form">
-              Save Sales Invoice
+              {isEdit ? "Update Sales Invoice" : "Save Sales Invoice"}
             </Button>
           </>
         }
@@ -767,7 +812,10 @@ const handleTaxPercentChange = (index: number, val: string) => {
           <div className="border border-dashed border-blue-400 p-4 rounded-md text-center bg-blue-50">
             <p
               className="font-medium text-primary cursor-pointer"
-              onClick={() => setPartyModalOpen(true)}
+              onClick={() => {
+                setPartyModalTarget("bill");
+                setPartyModalOpen(true);
+              }}
             >
               + Add Party
             </p>
@@ -778,23 +826,24 @@ const handleTaxPercentChange = (index: number, val: string) => {
               <label className="input-label">Bill To</label>
               <div className="border rounded-md p-3 bg-gray-50 shadow-sm">
                 <p className="text-sm font-medium mb-1">
-                  {partyDetails?.name || "Select Party"}
+                  {partyDetails?.partyName || partyDetails?.name || "Select Party"}
                 </p>
                 <p className="text-xs text-gray-600">
-                  {partyDetails?.mobileNumber || ""}
+                  {partyDetails?.mobileNo || partyDetails?.mobileNumber || ""}
                 </p>
                 <p className="text-xs text-gray-600">
-                  {partyDetails?.billingAddress
-                    ? Object.values(partyDetails.billingAddress.miscData)
-                        .filter(Boolean)
-                        .join(", ")
-                    : ""}
+                  {formatPartyAddress(
+                    partyDetails?.billingAddressData || partyDetails?.billingAddress
+                  )}
                 </p>
                 <Button
                   variant="outline"
                   className="mt-2 w-full text-sm"
                   type="button"
-                  onClick={() => setPartyModalOpen(true)}
+                  onClick={() => {
+                    setPartyModalTarget("bill");
+                    setPartyModalOpen(true);
+                  }}
                 >
                   Change Party
                 </Button>
@@ -804,29 +853,48 @@ const handleTaxPercentChange = (index: number, val: string) => {
             <div>
               <label className="input-label">Ship To</label>
               <div className="border rounded-md p-3 bg-gray-50 shadow-sm">
-                <p className="text-sm font-medium mb-1">
-                  {partyDetails?.name
-                    // ? `Shipping To: ${partyDetails.name}`
-                    ? `${partyDetails.name}`
-                    : "Select Shipping Party"}
-                </p>
-                <p className="text-xs text-gray-600">
-                  {partyDetails?.mobileNumber || ""}
-                </p>
-                <p className="text-xs text-gray-600">
-                  {partyDetails?.shippingAddress
-                    ? Object.values(partyDetails.shippingAddress.miscData)
-                        .filter(Boolean)
-                        .join(", ")
-                    : ""}
-                </p>
+                {/* Falls back to the Bill To party until a different ship-to
+                    party is explicitly chosen. */}
+                {(() => {
+                  const ship = shipToDetails || partyDetails;
+                  const usingBillTo = !shipToDetails;
+                  return (
+                    <>
+                      <p className="text-sm font-medium mb-1">
+                        {ship?.partyName || ship?.name || "Select Shipping Party"}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {ship?.mobileNo || ship?.mobileNumber || ""}
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {(() => {
+                          const shipping = formatPartyAddress(
+                            ship?.shippingAddressData ||
+                              ship?.shippingAddress ||
+                              ship?.billingAddressData ||
+                              ship?.billingAddress
+                          );
+                          if (shipping) return shipping;
+                          return (
+                            <span className="italic text-gray-400">
+                              {usingBillTo ? "Same as billing address" : "No address"}
+                            </span>
+                          );
+                        })()}
+                      </p>
+                    </>
+                  );
+                })()}
                 <Button
                   variant="outline"
                   className="mt-2 w-full text-sm"
                   type="button"
-                  onClick={() => setPartyModalOpen(true)}
+                  onClick={() => {
+                    setPartyModalTarget("ship");
+                    setPartyModalOpen(true);
+                  }}
                 >
-                  Change Party
+                  {shipToDetails ? "Change Party" : "Set Different Party"}
                 </Button>
               </div>
             </div>

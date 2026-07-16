@@ -1,12 +1,16 @@
 import { useState, useEffect } from "react";
 import { useFormik } from "formik";
 import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { PartySelectorModal } from "../../sales/SalesInvoice/CreateSalesInvoice/PartySelectorModal";
 import { ItemSelectorModal } from "../../sales/SalesInvoice/CreateSalesInvoice/ItemSelectorModal";
 import { useGetPartyByIdQuery } from "../../../../features/party/partyApiSlice";
 import { useGetItemByIdQuery } from "../../../../features/item/itemApiSlice";
-import { useCreatePurchaseMutation } from "../../../../features/purchase/purchaseApiSlice";
+import {
+  useCreatePurchaseMutation,
+  useUpdatePurchaseMutation,
+  useGetPurchaseByIdQuery,
+} from "../../../../features/purchase/purchaseApiSlice";
 import { Button } from "../../../../components/UI/Button";
 import { skipToken } from "@reduxjs/toolkit/query";
 import { toast } from "react-toastify";
@@ -19,10 +23,14 @@ import * as Yup from "yup";
 
 const CreatePurchaseForm: React.FC = () => {
   const navigate = useNavigate();
+  const { id: editId } = useParams();
+  const isEdit = !!editId;
   const [isPartyModalOpen, setPartyModalOpen] = useState(false);
   const [isItemModalOpen, setItemModalOpen] = useState(false);
   const [selectedPartyId, setSelectedPartyId] = useState<string | null>(null);
   const [selectedItemTemp, _setSelectedItemTemp] = useState<any | null>(null);
+
+  const { data: editResponse } = useGetPurchaseByIdQuery(editId ?? skipToken);
 
   const { data: partyResponse } = useGetPartyByIdQuery(
     selectedPartyId ? selectedPartyId : skipToken
@@ -40,6 +48,7 @@ const CreatePurchaseForm: React.FC = () => {
   const itemDetailsFetch = itemDetailsResponse?.data;
 
   const [createPurchase] = useCreatePurchaseMutation();
+  const [updatePurchase] = useUpdatePurchaseMutation();
 
   const formik = useFormik({
     initialValues: {
@@ -68,19 +77,54 @@ const CreatePurchaseForm: React.FC = () => {
     }),
     onSubmit: async (values, { setSubmitting }) => {
       try {
-        await createPurchase(values).unwrap();
-        toast.success("Purchase invoice created successfully!");
+        if (isEdit) {
+          await updatePurchase({ id: editId!, ...values }).unwrap();
+          toast.success("Purchase invoice updated successfully!");
+        } else {
+          await createPurchase(values).unwrap();
+          toast.success("Purchase invoice created successfully!");
+        }
         navigate("/purchases/purchaseInvoice");
       } catch (error: any) {
         toast.error(
           error?.data?.message ||
-            "Failed to create purchase invoice. Please try again."
+            `Failed to ${isEdit ? "update" : "create"} purchase invoice. Please try again.`
         );
       } finally {
         setSubmitting(false);
       }
     },
   });
+
+  // Edit mode: hydrate the form from the existing invoice.
+  useEffect(() => {
+    const inv: any = editResponse?.data;
+    if (!isEdit || !inv) return;
+    const pid =
+      typeof inv.partyId === "object"
+        ? inv.partyId?._id || inv.partyId?.id
+        : inv.partyId;
+    if (pid) setSelectedPartyId(String(pid));
+    formik.setValues({
+      partyId: String(pid || ""),
+      invioceNo: inv.invioceNo || "",
+      invioceDate: inv.invioceDate ? String(inv.invioceDate).slice(0, 10) : "",
+      paymentTermDays: inv.paymentTermDays || 0,
+      dueDate: inv.dueDate ? String(inv.dueDate).slice(0, 10) : "",
+      itemDetails: Array.isArray(inv.itemDetails) ? inv.itemDetails : [],
+      totalPurchaseAmount: inv.totalPurchaseAmount || 0,
+      totalTaxablePurchaseAmount: inv.totalTaxablePurchaseAmount || 0,
+      totalTax: inv.totalTax || 0,
+      notes: inv.notes || "",
+      termsAndConditions: inv.termsAndConditions || "",
+      additionalCharges: inv.additionalCharges || 0,
+      discountAfterTax: inv.discountAfterTax || 0,
+      paidAmount: inv.paidAmount || 0,
+      isFullyPaid: inv.isFullyPaid || false,
+      dueAmount: inv.dueAmount || 0,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editResponse, isEdit]);
 
   useEffect(() => {
     if (partyDetails) {
@@ -331,7 +375,7 @@ const handleTaxChange = (index: number, value: string) => {
       />
 
       <PageHeader
-        title="Create Purchase Invoice"
+        title={isEdit ? "Edit Purchase Invoice" : "Create Purchase Invoice"}
         subtitle="Fill in the details below"
         onBack={() => navigate("/purchases/purchaseInvoice")}
         actions={
@@ -344,7 +388,7 @@ const handleTaxChange = (index: number, value: string) => {
               Cancel
             </Button>
             <Button type="submit" form="create-purchase-form">
-              Save Purchase Invoice
+              {isEdit ? "Update Purchase Invoice" : "Save Purchase Invoice"}
             </Button>
           </>
         }
@@ -352,7 +396,23 @@ const handleTaxChange = (index: number, value: string) => {
 
       <form
         id="create-purchase-form"
-        onSubmit={formik.handleSubmit}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          const errors = await formik.validateForm();
+          if (Object.keys(errors).length) {
+            Object.values(errors).forEach((err) => {
+              if (typeof err === "string") toast.error(err);
+            });
+            formik.setTouched(
+              Object.keys(errors).reduce(
+                (acc, k) => ({ ...acc, [k]: true }),
+                {}
+              )
+            );
+            return;
+          }
+          formik.handleSubmit(e);
+        }}
         className="space-y-5 max-w-5xl"
       >
         {/* supplier selection */}
@@ -369,10 +429,10 @@ const handleTaxChange = (index: number, value: string) => {
             <div className="flex items-center justify-between gap-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
               <div className="min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {partyDetails?.name || "Supplier"}
+                  {partyDetails?.partyName || partyDetails?.name || "Supplier"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {partyDetails?.mobileNumber || ""}
+                  {partyDetails?.mobileNo || partyDetails?.mobileNumber || ""}
                 </p>
               </div>
               <Button

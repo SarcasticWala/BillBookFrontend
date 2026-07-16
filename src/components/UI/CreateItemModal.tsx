@@ -13,6 +13,7 @@ import {
   useGetTaxesQuery,
   useGetUnitsQuery,
   useCreateItemMutation,
+  useUpdateItemMutation,
 } from "../../features/item/itemApiSlice";
 import CreateItemCategoryModal from "./CreateItemCategoryModal";
 import { toast } from "react-toastify";
@@ -21,10 +22,14 @@ import moment from "moment";
 export const CreateItemModal = ({
   isOpen,
   onClose,
+  itemToEdit,
 }: {
   isOpen: boolean;
   onClose: () => void;
+  /** When provided, the modal opens in edit mode and updates this item. */
+  itemToEdit?: any;
 }) => {
+  const isEdit = !!itemToEdit;
   const [itemType, setItemType] = useState<"PRODUCT" | "SERVICE">("PRODUCT");
   const [activeTab, setActiveTab] = useState<
     "BASIC" | "STOCK" | "PRICING" | "OTHER"
@@ -68,15 +73,57 @@ export const CreateItemModal = ({
   });
   useEffect(() => {
     //date should be selected as current date by default and then use can change accordingly
-    if (isOpen) {
+    if (isOpen && !isEdit) {
       setForm((prev) => ({
         ...prev,
         asOfDate: moment().format("YYYY-MM-DD"),
       }));
     }
-  }, [isOpen]);
+  }, [isOpen, isEdit]);
+
+  // Edit mode: prefill the form from the item being edited.
+  useEffect(() => {
+    if (!isOpen || !itemToEdit) return;
+    const it = itemToEdit;
+    setItemType(it.itemType === "SERVICE" ? "SERVICE" : "PRODUCT");
+    setEnableLowStock(!!it.isAlertEnabled);
+    const catId =
+      categoryOptions.find((c: any) => c.name === it.category)?.id || "";
+    setItemCategory(catId);
+    setImages([]);
+    setForm({
+      itemName: it.itemName || it.serviceName || it.name || "",
+      isOnlineVisible: !!it.isOnlineVisible,
+      salePrice: it.salePrice != null ? String(it.salePrice) : "",
+      salePriceTaxType: it.isSaleTaxApplicable ? "WITH_TAX" : "WITHOUT_TAX",
+      gstRate: String(it.gstRate?.value ?? it.gstRate ?? ""),
+      unit: it.unit || "",
+      itemCategory: catId,
+      openingStock: it.openingStock != null ? String(it.openingStock) : "",
+      serviceCode: it.serviceCode || "",
+      itemCode: it.itemCode || "",
+      hsnCode: it.hsnCode || "",
+      asOfDate: it.asOfDate
+        ? moment(it.asOfDate).format("YYYY-MM-DD")
+        : moment().format("YYYY-MM-DD"),
+      lowStockQty: it.productAlertValue != null ? String(it.productAlertValue) : "",
+      description: it.description || "",
+      purchasePrice: it.purchasePrice != null ? String(it.purchasePrice) : "",
+      purchasePriceTaxType: it.isPurchaseTaxApplicable ? "WITH_TAX" : "WITHOUT_TAX",
+      sacCode: it.sacCode || "",
+      itemProductType: it.itemProductType || "NEW",
+      hasSerialisationOn: !!it.hasSerialization,
+      itemSerialNos: Array.isArray(it.serialNos)
+        ? it.serialNos.map((s: any) => (typeof s === "string" ? s : s.serialNo))
+        : [],
+      batteryPercentage: it.batteryPercentage || "",
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, itemToEdit, itemCategoriesData]);
 
   const [createItem, { isLoading }] = useCreateItemMutation();
+  const [updateItem, { isLoading: isUpdating }] = useUpdateItemMutation();
+  const saving = isLoading || isUpdating;
 
   const validateForm = () => {
     const errors: string[] = [];
@@ -172,8 +219,13 @@ export const CreateItemModal = ({
         formData.append("itemImages", file);
       });
 
-      await createItem(formData).unwrap();
-      toast.success("Item created successfully");
+      if (isEdit) {
+        await updateItem({ id: itemToEdit.id || itemToEdit._id, formData }).unwrap();
+        toast.success("Item updated successfully");
+      } else {
+        await createItem(formData).unwrap();
+        toast.success("Item created successfully");
+      }
       resetAll();
       onClose();
     } catch (err: any) {
@@ -284,7 +336,9 @@ export const CreateItemModal = ({
         <div className="bg-white w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto rounded-lg p-4 sm:p-6 relative secondary-font">
           {/* Header */}
           <div className="flex justify-between items-center pb-2 mb-4">
-            <h2 className="text-xl primary-font">Create New Item</h2>
+            <h2 className="text-xl primary-font">
+              {isEdit ? "Edit Item" : "Create New Item"}
+            </h2>
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-black cursor-pointer p-2 -mr-2 flex items-center justify-center min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 sm:p-0 sm:-mr-0"
@@ -928,10 +982,10 @@ export const CreateItemModal = ({
             </Button>
             <Button
               onClick={handleSave}
-              disabled={isLoading}
-              style={{ cursor: isLoading ? "not-allowed" : "pointer" }}
+              disabled={saving}
+              style={{ cursor: saving ? "not-allowed" : "pointer" }}
             >
-              {isLoading ? "Saving..." : "Save"}
+              {saving ? "Saving..." : isEdit ? "Update Item" : "Save"}
             </Button>
           </div>
 

@@ -24,8 +24,38 @@ export const purchaseApi = createApi({
       query: () => "/purchase-invoices",
       providesTags: ["Purchase"],
     }),
+
+    // Get a single purchase invoice
+    getPurchaseById: builder.query({
+      query: (id: string) => `/${id}`,
+      providesTags: ["Purchase"],
+    }),
+
+    // Update a purchase invoice
+    updatePurchase: builder.mutation({
+      query: ({ id, ...body }: { id: string } & Record<string, any>) => ({
+        url: `/${id}`,
+        method: "PUT",
+        body,
+      }),
+      invalidatesTags: ["Purchase"],
+    }),
+
+    // Delete a purchase invoice
+    deletePurchase: builder.mutation({
+      query: (id: string) => ({
+        url: `/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Purchase"],
+    }),
   }),
 });
 
-export const { useCreatePurchaseMutation, useGetPurchaseInvoicesQuery } =
-  purchaseApi;
+export const {
+  useCreatePurchaseMutation,
+  useGetPurchaseInvoicesQuery,
+  useGetPurchaseByIdQuery,
+  useUpdatePurchaseMutation,
+  useDeletePurchaseMutation,
+} = purchaseApi;
