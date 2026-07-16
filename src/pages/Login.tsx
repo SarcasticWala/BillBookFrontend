@@ -82,7 +82,7 @@ export default function AuthPage() {
     try {
       setLoading(true);
       await login(form.email.trim(), form.password);
-      navigate("/parties");
+      navigate("/dashboard");
     } catch (err: any) {
       toast.error(err?.message || "Login failed");
     } finally {
@@ -131,7 +131,7 @@ export default function AuthPage() {
         otp: form.otp,
       });
       toast.success("Account created");
-      navigate("/parties");
+      navigate("/dashboard");
     } catch (err: any) {
       const msg = err?.message || "Verification failed";
       setErrors({ otp: /otp/i.test(msg) ? msg : "" });
@@ -178,7 +178,7 @@ export default function AuthPage() {
         newPassword: form.newPassword,
       });
       toast.success("Password updated");
-      navigate("/parties");
+      navigate("/dashboard");
     } catch (err: any) {
       const msg = err?.message || "Reset failed";
       setErrors({ otp: /otp/i.test(msg) ? msg : "" });

@@ -170,16 +170,6 @@ const CreateParty: React.FC = () => {
             >
               Cancel
             </Button>
-            {!isEditMode && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => doSave(true)}
-                disabled={saving}
-              >
-                Save &amp; New
-              </Button>
-            )}
             <Button type="submit" form="create-party-form" disabled={saving || isFetching}>
               {saving ? "Saving..." : isEditMode ? "Update Party" : "Save Party"}
             </Button>
