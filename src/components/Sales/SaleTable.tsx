@@ -1,7 +1,4 @@
-import {
-  useGetSaleInvoicesQuery,
-  useDeleteSaleMutation,
-} from "../../features/sales/saleApiSlice";
+import { useDeleteSaleMutation } from "../../features/sales/saleApiSlice";
 import { Table } from "../Table/Table";
 import { Badge } from "../UI/Badge";
 import type { Column } from "../Table/Table";
@@ -27,11 +24,16 @@ type SalesInvoice = {
   invioceDate: string;
 };
 
-export const SaleTable = () => {
-  const { data: response, isLoading, isError } = useGetSaleInvoicesQuery(undefined);
+export const SaleTable = ({
+  invoices,
+  isLoading,
+  isError,
+}: {
+  invoices: any[];
+  isLoading: boolean;
+  isError: boolean;
+}) => {
   const navigate = useNavigate();
-  const invoicesData = response?.data || [];
-
   const [deleteSale] = useDeleteSaleMutation();
 
   const handleDelete = async (id: string) => {
@@ -49,10 +51,9 @@ export const SaleTable = () => {
     }
   };
 
-  const tableData: SalesInvoice[] = invoicesData.map((invoice: any) => {
+  const tableData: SalesInvoice[] = invoices.map((invoice: any) => {
     const dueDate = invoice.dueDate ? new Date(invoice.dueDate) : null;
     const invoiceDate = invoice.invioceDate ? new Date(invoice.invioceDate) : null;
-
     return {
       id: invoice.id,
       date: dueDate ? format(dueDate, "dd MMM yyyy") : "-",
@@ -82,7 +83,6 @@ export const SaleTable = () => {
       render: (value) => {
         const variant =
           value === "Paid" ? "success" : value === "Unpaid" ? "warning" : "danger";
-
         return <Badge variant={variant}>{value}</Badge>;
       },
     },
@@ -129,7 +129,7 @@ export const SaleTable = () => {
     );
   }
 
-  if (invoicesData.length === 0) {
+  if (invoices.length === 0) {
     return (
       <div className="flex flex-col items-center py-12 text-gray-500 text-center">
         <MdOutlineFileCopy className="text-5xl text-gray-300 mb-3" />
@@ -145,10 +145,7 @@ export const SaleTable = () => {
       <Table
         columns={columns}
         data={tableData}
-        rowClick={(rowIndex) => {
-          const selectedInvoice = tableData[rowIndex];
-          navigate(`/sales/invoice/${selectedInvoice.id}`);
-        }}
+        rowClick={(rowIndex) => navigate(`/sales/invoice/${tableData[rowIndex].id}`)}
       />
     </div>
   );

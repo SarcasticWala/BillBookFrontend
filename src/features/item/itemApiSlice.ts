@@ -44,6 +44,19 @@ export const itemApi = createApi({
       query: () => "items",
       providesTags: ["Item"],
     }),
+    getItemsPaged: builder.query<
+      any,
+      { page?: number; limit?: number; search?: string; categories?: string; lowStock?: boolean }
+    >({
+      query: ({ page = 1, limit = 10, search = "", categories = "", lowStock = false }) => {
+        const p = new URLSearchParams({ page: String(page), limit: String(limit) });
+        if (search) p.set("search", search);
+        if (categories) p.set("categories", categories);
+        if (lowStock) p.set("lowStock", "true");
+        return `items-paged?${p.toString()}`;
+      },
+      providesTags: ["Item"],
+    }),
     getItemById: builder.query<
       any,
       { id: string; itemType: "PRODUCT" | "SERVICE" }
@@ -87,6 +100,7 @@ export const {
   useGetTaxesQuery,
   useGetUnitsQuery,
   useGetItemsQuery,
+  useGetItemsPagedQuery,
   useGetItemByIdQuery,
   useBulkCreateItemsMutation,
   useUpdateItemStockMutation,

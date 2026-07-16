@@ -25,6 +25,18 @@ export const purchaseApi = createApi({
       providesTags: ["Purchase"],
     }),
 
+    getPurchaseInvoicesPaged: builder.query<
+      any,
+      { page?: number; limit?: number; search?: string }
+    >({
+      query: ({ page = 1, limit = 10, search = "" }) => {
+        const p = new URLSearchParams({ page: String(page), limit: String(limit) });
+        if (search) p.set("search", search);
+        return `/purchase-invoices-paged?${p.toString()}`;
+      },
+      providesTags: ["Purchase"],
+    }),
+
     // Get a single purchase invoice
     getPurchaseById: builder.query({
       query: (id: string) => `/${id}`,
@@ -55,6 +67,7 @@ export const purchaseApi = createApi({
 export const {
   useCreatePurchaseMutation,
   useGetPurchaseInvoicesQuery,
+  useGetPurchaseInvoicesPagedQuery,
   useGetPurchaseByIdQuery,
   useUpdatePurchaseMutation,
   useDeletePurchaseMutation,

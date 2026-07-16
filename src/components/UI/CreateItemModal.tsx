@@ -17,7 +17,7 @@ import {
 } from "../../features/item/itemApiSlice";
 import CreateItemCategoryModal from "./CreateItemCategoryModal";
 import { toast } from "react-toastify";
-import moment from "moment";
+import { format } from "date-fns";
 
 export const CreateItemModal = ({
   isOpen,
@@ -76,7 +76,7 @@ export const CreateItemModal = ({
     if (isOpen && !isEdit) {
       setForm((prev) => ({
         ...prev,
-        asOfDate: moment().format("YYYY-MM-DD"),
+        asOfDate: format(new Date(), "yyyy-MM-dd"),
       }));
     }
   }, [isOpen, isEdit]);
@@ -104,8 +104,8 @@ export const CreateItemModal = ({
       itemCode: it.itemCode || "",
       hsnCode: it.hsnCode || "",
       asOfDate: it.asOfDate
-        ? moment(it.asOfDate).format("YYYY-MM-DD")
-        : moment().format("YYYY-MM-DD"),
+        ? format(new Date(it.asOfDate), "yyyy-MM-dd")
+        : format(new Date(), "yyyy-MM-dd"),
       lowStockQty: it.productAlertValue != null ? String(it.productAlertValue) : "",
       description: it.description || "",
       purchasePrice: it.purchasePrice != null ? String(it.purchasePrice) : "",

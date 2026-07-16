@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { FiDownload, FiSettings } from "react-icons/fi";
 import {
   MdOutlineMoreVert,
@@ -17,10 +17,15 @@ import { format } from "date-fns";
 import { MdOutlineVisibility, MdEdit, MdDeleteOutline } from "react-icons/md";
 import { toast } from "react-toastify";
 import { RowActionsMenu } from "../UI/RowActionsMenu";
+import { Pagination } from "../UI/Pagination";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 import {
-  useGetPurchaseInvoicesQuery,
+  useGetPurchaseInvoicesPagedQuery,
   useDeletePurchaseMutation,
 } from "../../features/purchase/purchaseApiSlice";
+
+const PAGE_SIZE = 10;
+const inr = (v: unknown) => `₹${Number(v || 0).toLocaleString("en-IN")}`;
 
 type PurchaseInvoice = {
   id: string;
@@ -34,14 +39,26 @@ type PurchaseInvoice = {
 
 const PurchasesInvoice = () => {
   const [filter, setFilter] = useState("Last 365 Days");
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
   const navigate = useNavigate();
+
+  const debouncedSearch = useDebouncedValue(search, 350);
 
   const {
     data: response,
     isLoading,
     isError,
-  } = useGetPurchaseInvoicesQuery(undefined);
-  const invoicesData = response?.data || [];
+  } = useGetPurchaseInvoicesPagedQuery({ page, limit: PAGE_SIZE, search: debouncedSearch });
+  const invoicesData = response?.data?.items || [];
+  const summary = response?.data?.summary || { total: 0, paid: 0, due: 0 };
+  const totalPages = response?.data?.totalPages || 1;
+  const total = response?.data?.total || 0;
+
+  const onSearch = (v: string) => {
+    setSearch(v);
+    setPage(1);
+  };
 
   const [deletePurchase] = useDeletePurchaseMutation();
 
@@ -80,21 +97,6 @@ const PurchasesInvoice = () => {
           : "Overdue",
     };
   });
-
-  // Totals for dashboard cards
-  const { totalPurchases, totalPaid, totalUnpaid } = useMemo(() => {
-    let totalPurchases = 0;
-    let totalPaid = 0;
-    let totalUnpaid = 0;
-
-    invoicesData.forEach((inv: any) => {
-      totalPurchases += inv.totalPurchaseAmount || 0;
-      totalPaid += inv.paidAmount || 0;
-      totalUnpaid += inv.dueAmount || 0;
-    });
-
-    return { totalPurchases, totalPaid, totalUnpaid };
-  }, [invoicesData]);
 
   const columns: Column<PurchaseInvoice>[] = [
     { header: "Date", accessor: "date" },
@@ -177,7 +179,7 @@ const PurchasesInvoice = () => {
             <p className="text-sm secondary-font">Total Purchases</p>
           </div>
           <div className="text-gray-900 primary-font text-xl">
-            ₹ {totalPurchases.toFixed(2)}
+            {inr(summary.total)}
           </div>
         </Card>
 
@@ -187,7 +189,7 @@ const PurchasesInvoice = () => {
             <p className="text-sm secondary-font">Paid</p>
           </div>
           <div className="text-gray-900 primary-font text-xl">
-            ₹ {totalPaid.toFixed(2)}
+            {inr(summary.paid)}
           </div>
         </Card>
 
@@ -197,7 +199,7 @@ const PurchasesInvoice = () => {
             <p className="text-sm secondary-font">Unpaid</p>
           </div>
           <div className="text-gray-900 primary-font text-xl">
-            ₹ {totalUnpaid.toFixed(2)}
+            {inr(summary.due)}
           </div>
         </Card>
       </div>
@@ -208,7 +210,9 @@ const PurchasesInvoice = () => {
           <SearchDateFilter
             filterValue={filter}
             onFilterChange={setFilter}
-            placeholder="Search Purchase Invoice"
+            placeholder="Search by invoice no. or party"
+            searchValue={search}
+            onSearchChange={onSearch}
           />
         </div>
         <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
@@ -254,6 +258,13 @@ const PurchasesInvoice = () => {
             />
           </div>
         )}
+        <Pagination
+          page={page}
+          totalPages={totalPages}
+          total={total}
+          limit={PAGE_SIZE}
+          onPageChange={setPage}
+        />
       </Card>
     </div>
   );

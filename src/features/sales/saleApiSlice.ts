@@ -21,6 +21,17 @@ export const saleApi = createApi({
       query: () => "/sale-invoices",
       providesTags: ["Sale"],
     }),
+    getSaleInvoicesPaged: builder.query<
+      any,
+      { page?: number; limit?: number; search?: string }
+    >({
+      query: ({ page = 1, limit = 10, search = "" }) => {
+        const p = new URLSearchParams({ page: String(page), limit: String(limit) });
+        if (search) p.set("search", search);
+        return `/sale-invoices-paged?${p.toString()}`;
+      },
+      providesTags: ["Sale"],
+    }),
     getSaleById: builder.query({
       query: (id: string) => `/${id}`,
       providesTags: ["Sale"],
@@ -46,6 +57,7 @@ export const saleApi = createApi({
 export const {
   useCreateSaleMutation,
   useGetSaleInvoicesQuery,
+  useGetSaleInvoicesPagedQuery,
   useGetSaleByIdQuery,
   useUpdateSaleMutation,
   useDeleteSaleMutation,

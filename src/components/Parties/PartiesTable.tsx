@@ -1,7 +1,4 @@
-import {
-  useGetPartiesQuery,
-  useGetCategoriesQuery,
-} from "../../features/party/partyApiSlice";
+import { useGetCategoriesQuery } from "../../features/party/partyApiSlice";
 import { Table } from "../Table/Table";
 import { Shimmer } from "../UI/Shimmer";
 import type { Column } from "../Table/Table";
@@ -17,8 +14,9 @@ interface Party {
 }
 
 interface PartiesTableProps {
-  selectedCategories: string[];
-  searchTerm?: string;
+  parties: any[];
+  isLoading: boolean;
+  isError: boolean;
 }
 
 // Tolerant field readers — the API may return either the write shape
@@ -37,12 +35,11 @@ const partyCategoryName = (p: any, byId: Record<string, string>): string =>
   "";
 
 export const PartiesTable: React.FC<PartiesTableProps> = ({
-  selectedCategories,
-  searchTerm = "",
+  parties: partiesData,
+  isLoading,
+  isError,
 }) => {
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useGetPartiesQuery(undefined);
-  const partiesData = data?.data || [];
 
   const { data: categoriesData } = useGetCategoriesQuery(undefined);
   const categoryById: Record<string, string> = {};
@@ -50,17 +47,8 @@ export const PartiesTable: React.FC<PartiesTableProps> = ({
     categoryById[c.id] = c.name || c.catagory || c.label || "";
   }
 
-  const query = searchTerm.trim().toLowerCase();
-  const filteredParties = partiesData.filter((p: any) => {
-    const matchesCategory =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(partyCategoryId(p));
-    const matchesSearch =
-      !query ||
-      partyName(p).toLowerCase().includes(query) ||
-      partyMobile(p).toLowerCase().includes(query);
-    return matchesCategory && matchesSearch;
-  });
+  // Filtering/search now happen server-side; render what the server returned.
+  const filteredParties = partiesData;
 
   const parties: Party[] = filteredParties.map((party: any) => ({
     name: partyName(party) || "-",

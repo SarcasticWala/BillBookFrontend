@@ -20,6 +20,20 @@ export const partyApi = createApi({
       providesTags: ["Party"],
     }),
 
+    getPartiesPaged: builder.query<
+      any,
+      { page?: number; limit?: number; search?: string; partyType?: string; categories?: string }
+    >({
+      query: ({ page = 1, limit = 10, search = "", partyType = "", categories = "" }) => {
+        const p = new URLSearchParams({ page: String(page), limit: String(limit) });
+        if (search) p.set("search", search);
+        if (partyType) p.set("partyType", partyType);
+        if (categories) p.set("categories", categories);
+        return `parties-paged?${p.toString()}`;
+      },
+      providesTags: ["Party"],
+    }),
+
     getPartyById: builder.query({
       query: (id: string) => `get-party/${id}`,
       providesTags: ["Party"],
@@ -66,6 +80,7 @@ export const partyApi = createApi({
 export const {
   useCreatePartyMutation,
   useGetPartiesQuery,
+  useGetPartiesPagedQuery,
   useGetPartyByIdQuery,
   useCreateCategoryMutation,
   useGetCategoriesQuery,

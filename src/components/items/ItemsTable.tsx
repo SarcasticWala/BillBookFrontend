@@ -1,7 +1,3 @@
-import {
-  useGetItemsQuery,
-  useGetCategoriesQuery,
-} from "../../features/item/itemApiSlice";
 import { Table } from "../Table/Table";
 import type { Column } from "../Table/Table";
 import { useNavigate } from "react-router-dom";
@@ -20,53 +16,22 @@ interface Item {
 }
 
 interface ItemsTableProps {
-  selectedCategories: string[];
-  showLowStockOnly: boolean;
-  searchTerm: string;
+  items: any[];
+  isLoading: boolean;
+  isError: boolean;
 }
 
 export const ItemsTable: React.FC<ItemsTableProps> = ({
-  selectedCategories,
-  showLowStockOnly,
-  searchTerm,
+  items: itemsData,
+  isLoading,
+  isError,
 }) => {
-  const { data, isLoading, isError } = useGetItemsQuery();
   const navigate = useNavigate();
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [openModal, setOpenModal] = useState(false);
 
-  const itemsData = data?.data || [];
-
-  // Items store their category as a plain name string (item.category), but the
-  // filter passes category ids. Map the selected ids to names to compare.
-  const { data: categoriesData } = useGetCategoriesQuery();
-  const nameById: Record<string, string> = {};
-  for (const c of categoriesData?.data || []) {
-    nameById[c.id] = c.name || c.catagory || c.label || "";
-  }
-  const selectedCategoryNames = selectedCategories
-    .map((id) => nameById[id])
-    .filter(Boolean);
-
-  const filteredItemsData = itemsData.filter((item: any) => {
-    const matchesCategory =
-      selectedCategoryNames.length === 0 ||
-      selectedCategoryNames.includes(item.category);
-
-    const matchesLowStock =
-      !showLowStockOnly ||
-      (item.isAlertEnabled && item.netQuantity <= item.productAlertValue);
-
-    const query = searchTerm.trim().toLowerCase();
-    const matchesSearch =
-      !query ||
-      item.itemName?.toLowerCase().includes(query) ||
-      item.serviceName?.toLowerCase().includes(query) ||
-      item.itemCode?.toLowerCase().includes(query) ||
-      item.serviceCode?.toLowerCase().includes(query);
-
-    return matchesCategory && matchesLowStock && matchesSearch;
-  });
+  // Filtering/search happen server-side now; render what the server returned.
+  const filteredItemsData = itemsData;
 
   const items: Item[] = filteredItemsData.map((item: any) => ({
     name: item.itemName || item.serviceName || "-",

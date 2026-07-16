@@ -8,11 +8,14 @@ import { CreateItemModal } from "../UI/CreateItemModal";
 import {
   useBulkCreateItemsMutation,
   useGetCategoriesQuery,
+  useGetItemsPagedQuery,
 } from "../../features/item/itemApiSlice";
 import CreateItemCategoryModal from "../UI/CreateItemCategoryModal";
 import { ItemsTable } from "../../components/items/ItemsTable";
 import BulkUploadModal from "../UI/BulkUploadModal";
-import { useGetItemsQuery } from "../../features/item/itemApiSlice";
+import { Pagination } from "../UI/Pagination";
+
+const PAGE_SIZE = 10;
 
 const Inventory = () => {
   const [isModalOpen, setModalOpen] = useState(false);
@@ -52,21 +55,37 @@ const Inventory = () => {
     );
   };
 
-  const { data: itemsData, isLoading } = useGetItemsQuery();
-  const items = itemsData?.data || [];
+  const [page, setPage] = useState(1);
 
-  const stockValue = items.reduce((acc: number, item: any) => {
-    const isProduct = !!item.itemName; // products only
-    if (isProduct && item.netQuantity && item.salePrice) {
-      return acc + item.netQuantity * item.salePrice;
-    }
-    return acc;
-  }, 0);
+  // Convert the selected category ids to names for the server filter
+  // (items store their category as a name string).
+  const categoryNames = selectedItemCategories
+    .map((id) => itemCategoryOptions.find((c: any) => c.id === id)?.name)
+    .filter(Boolean)
+    .join(",");
 
-  const lowStockCount = items.filter(
-    (item: any) =>
-      item.isAlertEnabled && item.netQuantity <= item.productAlertValue
-  ).length;
+  const {
+    data: pagedResp,
+    isLoading,
+    isError,
+  } = useGetItemsPagedQuery({
+    page,
+    limit: PAGE_SIZE,
+    search: debouncedSearch,
+    categories: categoryNames,
+    lowStock: showLowStockOnly,
+  });
+
+  const items = pagedResp?.data?.items || [];
+  const totalPages = pagedResp?.data?.totalPages || 1;
+  const total = pagedResp?.data?.total || 0;
+  const stockValue = pagedResp?.data?.stats?.stockValue || 0;
+  const lowStockCount = pagedResp?.data?.stats?.lowStockCount || 0;
+
+  // Reset to the first page whenever a filter changes.
+  useEffect(() => {
+    setPage(1);
+  }, [debouncedSearch, showLowStockOnly, selectedItemCategories.length]);
 
   const StatSkeleton = () => (
     <div className="h-6 w-20 bg-gray-200 rounded animate-pulse" />
@@ -213,10 +232,13 @@ const Inventory = () => {
       </div>
 
       {/* Table */}
-      <ItemsTable
-        selectedCategories={selectedItemCategories}
-        showLowStockOnly={showLowStockOnly}
-        searchTerm={debouncedSearch}
+      <ItemsTable items={items} isLoading={isLoading} isError={isError} />
+      <Pagination
+        page={page}
+        totalPages={totalPages}
+        total={total}
+        limit={PAGE_SIZE}
+        onPageChange={setPage}
       />
     </div>
   );

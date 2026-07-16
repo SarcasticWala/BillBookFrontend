@@ -7,7 +7,6 @@ import { Button } from "../UI/Button";
 import { Card } from "../UI/Card";
 import {
   useGetCategoriesQuery,
-  useGetPartiesQuery,
   useBulkCreatePartiesMutation,
 } from "../../features/party/partyApiSlice";
 import CreateCategoryModal from '../UI/CreateCategoryModal';
@@ -18,6 +17,8 @@ interface Props {
   setSelectedCategories: React.Dispatch<React.SetStateAction<string[]>>;
   searchTerm: string;
   setSearchTerm: React.Dispatch<React.SetStateAction<string>>;
+  stats: { count: number; toCollect: number; toPay: number };
+  statsLoading: boolean;
 }
 
 export const PartiesHeader: React.FC<Props> = ({
@@ -25,28 +26,21 @@ export const PartiesHeader: React.FC<Props> = ({
   setSelectedCategories,
   searchTerm,
   setSearchTerm,
+  stats,
+  statsLoading,
 }) => {
   const navigate = useNavigate();
-  const { data: partiesDataRaw, isLoading } = useGetPartiesQuery(undefined);
   const { data: categoriesData } = useGetCategoriesQuery(undefined);
   const [bulkCreateParties] = useBulkCreatePartiesMutation();
 
-  const partiesData = partiesDataRaw?.data || [];
   const categoryOptions = categoriesData?.data || [];
 
   const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
 
-  const totalParties = partiesData.length;
-  // `balance` is the source of truth: + = to collect, - = to pay.
-  const num = (v: any) => (Number.isFinite(Number(v)) ? Number(v) : 0);
-  const toCollectTotal = partiesData.reduce(
-    (acc: number, p: any) => acc + Math.max(0, num(p.balance)),
-    0
-  );
-  const toPayTotal = partiesData.reduce(
-    (acc: number, p: any) => acc + Math.max(0, -num(p.balance)),
-    0
-  );
+  const isLoading = statsLoading;
+  const totalParties = stats.count;
+  const toCollectTotal = stats.toCollect;
+  const toPayTotal = stats.toPay;
 
   const handleCategorySelect = (val: string) => {
     if (!selectedCategories.includes(val)) {
