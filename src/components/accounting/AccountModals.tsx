@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "react-toastify";
+import { newIdempotencyKey } from "../../lib/idempotency";
 import { Modal } from "../UI/Modal";
 import { Input } from "../UI/Input";
 import { Button } from "../UI/Button";
 import {
   useCreateAccountMutation,
+  useUpdateAccountMutation,
   useAdjustMoneyMutation,
   useTransferMoneyMutation,
 } from "../../features/account/accountApiSlice";
@@ -12,38 +14,64 @@ import {
 type Account = { id: string; name: string; type: string; balance: number };
 
 /* ------------------------------------------------------------------ */
-/* Add New Account                                                    */
+/* Add / Edit Account                                                 */
 /* ------------------------------------------------------------------ */
-export const AddAccountModal: React.FC<{ onClose: () => void }> = ({
-  onClose,
-}) => {
-  const [type, setType] = useState<"BANK" | "CASH">("BANK");
-  const [name, setName] = useState("");
-  const [openingBalance, setOpeningBalance] = useState("");
-  const [bankName, setBankName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
-  const [ifsc, setIfsc] = useState("");
-  const [upiId, setUpiId] = useState("");
+export const AddAccountModal: React.FC<{
+  onClose: () => void;
+  /** When provided, the modal edits this account instead of creating one. */
+  accountToEdit?: any;
+}> = ({ onClose, accountToEdit }) => {
+  const isEdit = !!accountToEdit;
+  const [type, setType] = useState<"BANK" | "CASH">(
+    accountToEdit?.type === "CASH" ? "CASH" : "BANK"
+  );
+  const [name, setName] = useState(accountToEdit?.name || "");
+  const [openingBalance, setOpeningBalance] = useState(
+    accountToEdit?.openingBalance != null ? String(accountToEdit.openingBalance) : ""
+  );
+  const [bankName, setBankName] = useState(accountToEdit?.bankName || "");
+  const [accountNumber, setAccountNumber] = useState(
+    accountToEdit?.accountNumber || ""
+  );
+  const [ifsc, setIfsc] = useState(accountToEdit?.ifsc || "");
+  const [upiId, setUpiId] = useState(accountToEdit?.upiId || "");
 
-  const [createAccount, { isLoading }] = useCreateAccountMutation();
+  const [createAccount, { isLoading: creating }] = useCreateAccountMutation();
+  const [updateAccount, { isLoading: updating }] = useUpdateAccountMutation();
+  const isLoading = creating || updating;
+  const idempotencyKey = useRef(newIdempotencyKey()).current;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return toast.error("Account name is required");
+    if (Number.isNaN(Number(openingBalance || 0)))
+      return toast.error("Opening balance must be a number");
+    if (type === "BANK") {
+      if (accountNumber && !/^\d{9,18}$/.test(accountNumber))
+        return toast.error("Account number must be 9 to 18 digits");
+      if (ifsc && !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifsc))
+        return toast.error("Enter a valid IFSC code, e.g. HDFC0001234");
+    }
+    const payload = {
+      name: name.trim(),
+      type,
+      openingBalance: Number(openingBalance) || 0,
+      bankName,
+      accountNumber,
+      ifsc,
+      upiId,
+    };
     try {
-      await createAccount({
-        name: name.trim(),
-        type,
-        openingBalance: Number(openingBalance) || 0,
-        bankName,
-        accountNumber,
-        ifsc,
-        upiId,
-      }).unwrap();
-      toast.success("Account created");
+      if (isEdit) {
+        await updateAccount({ id: accountToEdit.id, ...payload }).unwrap();
+        toast.success("Account updated");
+      } else {
+        await createAccount({ ...payload, __idempotencyKey: idempotencyKey }).unwrap();
+        toast.success("Account created");
+      }
       onClose();
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to create account");
+      toast.error(err?.data?.message || `Failed to ${isEdit ? "update" : "create"} account`);
     }
   };
 
@@ -51,14 +79,14 @@ export const AddAccountModal: React.FC<{ onClose: () => void }> = ({
     <Modal
       isOpen
       onClose={onClose}
-      title="Add New Account"
+      title={isEdit ? "Edit Account" : "Add New Account"}
       footer={
         <>
           <Button variant="outline" type="button" onClick={onClose}>
             Cancel
           </Button>
           <Button type="submit" form="add-account-form" disabled={isLoading}>
-            {isLoading ? "Saving…" : "Save Account"}
+            {isLoading ? "Saving…" : isEdit ? "Update Account" : "Save Account"}
           </Button>
         </>
       }
@@ -110,16 +138,21 @@ export const AddAccountModal: React.FC<{ onClose: () => void }> = ({
             />
             <Input
               label="Account Number"
-              placeholder="Account number"
+              placeholder="9–18 digits"
+              inputMode="numeric"
+              maxLength={18}
               value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value)}
+              onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ""))}
             />
             <Input
               label="IFSC Code"
               placeholder="ex: HDFC0001234"
+              maxLength={11}
               className="uppercase placeholder:normal-case"
               value={ifsc}
-              onChange={(e) => setIfsc(e.target.value.toUpperCase())}
+              onChange={(e) =>
+                setIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))
+              }
             />
             <Input
               label="UPI ID"
@@ -158,6 +191,18 @@ export const MoneyModal: React.FC<{
     e.preventDefault();
     if (!accountId) return toast.error("Select an account");
     if (!(Number(amount) > 0)) return toast.error("Enter an amount greater than zero");
+    const selectedAccount = accounts.find((a) => a.id === accountId);
+    if (
+      direction === "OUT" &&
+      selectedAccount &&
+      Number(amount) > Number(selectedAccount.balance)
+    ) {
+      return toast.error(
+        `Amount exceeds available balance (₹${Number(
+          selectedAccount.balance
+        ).toLocaleString("en-IN")})`
+      );
+    }
     try {
       await adjustMoney({
         id: accountId,
@@ -271,6 +316,14 @@ export const TransferModal: React.FC<{
     if (fromAccountId === toAccountId)
       return toast.error("Choose two different accounts");
     if (!(Number(amount) > 0)) return toast.error("Enter an amount greater than zero");
+    const fromAcc = accounts.find((a) => a.id === fromAccountId);
+    if (fromAcc && Number(amount) > Number(fromAcc.balance)) {
+      return toast.error(
+        `Insufficient balance in ${fromAcc.name} (₹${Number(
+          fromAcc.balance
+        ).toLocaleString("en-IN")})`
+      );
+    }
     try {
       await transferMoney({
         fromAccountId,

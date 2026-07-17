@@ -10,10 +10,11 @@ export const saleApi = createApi({
   tagTypes: ["Sale"],
   endpoints: (builder) => ({
     createSale: builder.mutation({
-      query: (saleData) => ({
+      query: ({ __idempotencyKey, ...saleData }: any) => ({
         url: "/create-sale",
         method: "POST",
         body: saleData,
+        headers: __idempotencyKey ? { "Idempotency-Key": __idempotencyKey } : {},
       }),
       invalidatesTags: ["Sale"],
     }),

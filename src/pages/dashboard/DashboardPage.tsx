@@ -10,15 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/UI/Button";
 import { Card } from "../../components/UI/Card";
 import { Shimmer } from "../../components/UI/Shimmer";
-import { useGetPartiesQuery } from "../../features/party/partyApiSlice";
-import { useGetSaleInvoicesQuery } from "../../features/sales/saleApiSlice";
-import { useGetPurchaseInvoicesQuery } from "../../features/purchase/purchaseApiSlice";
-import { useGetPaymentsQuery } from "../../features/payment/paymentApiSlice";
+import { useGetDashboardSummaryQuery } from "../../features/dashboard/dashboardApiSlice";
 
-const num = (v: unknown): number => {
-  const n = Number(v);
-  return Number.isFinite(n) ? n : 0;
-};
 const inr = (n: number): string => `₹ ${Math.round(n).toLocaleString("en-IN")}`;
 
 interface Txn {
@@ -33,79 +26,14 @@ interface Txn {
 const DashboardPage = () => {
   const navigate = useNavigate();
 
-  const { data: partiesRes, isLoading: lP } = useGetPartiesQuery(undefined);
-  const { data: salesRes, isLoading: lS } = useGetSaleInvoicesQuery(undefined);
-  const { data: purchasesRes, isLoading: lPu } = useGetPurchaseInvoicesQuery(undefined);
-  const { data: payInRes, isLoading: lIn } = useGetPaymentsQuery("PAYMENT_IN");
-  const { data: payOutRes, isLoading: lOut } = useGetPaymentsQuery("PAYMENT_OUT");
-  const loading = lP || lS || lPu || lIn || lOut;
-
-  const parties: any[] = partiesRes?.data || [];
-  const sales: any[] = salesRes?.data || [];
-  const purchases: any[] = purchasesRes?.data || [];
-  const paymentsIn: any[] = payInRes?.data || [];
-  const paymentsOut: any[] = payOutRes?.data || [];
-
-  // `balance` is the single source of truth for each party's net position
-  // (it starts at the signed opening balance and moves with invoices/payments):
-  // positive = they owe us (to collect), negative = we owe them (to pay).
-  let toCollect = 0;
-  let toPay = 0;
-  for (const p of parties) {
-    const net = num(p.balance);
-    if (net > 0) toCollect += net;
-    else if (net < 0) toPay += -net;
-  }
-
-  // Cash position: money received in vs paid out.
-  const moneyIn =
-    sales.reduce((a, s) => a + num(s.receivedAmount), 0) +
-    paymentsIn.reduce((a, p) => a + num(p.amount), 0);
-  const moneyOut =
-    purchases.reduce((a, s) => a + num(s.receivedAmount), 0) +
-    paymentsOut.reduce((a, p) => a + num(p.amount), 0);
-  const cashBalance = moneyIn - moneyOut;
-
-  // Merge all transactions, newest first.
-  const partyName = (x: any): string =>
-    x.partyName || x.partyId?.partyName || "-";
-  const txns: Txn[] = [
-    ...sales.map((s) => ({
-      date: s.createdAt,
-      type: "Sale",
-      no: s.invioceNo || "-",
-      party: partyName(s),
-      amount: num(s.totalSaleAmount),
-      sign: 1 as const,
-    })),
-    ...purchases.map((s) => ({
-      date: s.createdAt,
-      type: "Purchase",
-      no: s.invioceNo || "-",
-      party: partyName(s),
-      amount: num(s.totalSaleAmount),
-      sign: -1 as const,
-    })),
-    ...paymentsIn.map((p) => ({
-      date: p.paymentDate || p.createdAt,
-      type: "Payment In",
-      no: p.paymentNo || "-",
-      party: partyName(p),
-      amount: num(p.amount),
-      sign: 1 as const,
-    })),
-    ...paymentsOut.map((p) => ({
-      date: p.paymentDate || p.createdAt,
-      type: "Payment Out",
-      no: p.paymentNo || "-",
-      party: partyName(p),
-      amount: num(p.amount),
-      sign: -1 as const,
-    })),
-  ]
-    .filter((t) => t.date)
-    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-    .slice(0, 8);
+  // Server-side aggregate: spans ALL records (not a capped page) and excludes
+  // voided invoices, so these totals are accurate at any scale.
+  const { data: summaryRes, isLoading: loading } = useGetDashboardSummaryQuery();
+  const summary = summaryRes?.data || {};
+  const toCollect: number = summary.toCollect || 0;
+  const toPay: number = summary.toPay || 0;
+  const cashBalance: number = summary.cashBank || 0;
+  const txns: Txn[] = summary.recent || [];
 
   const fmtDate = (d: string) =>
     d

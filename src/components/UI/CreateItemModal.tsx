@@ -1,5 +1,5 @@
 import { Dialog } from "@headlessui/react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { FaTimes, FaBatteryFull } from "react-icons/fa";
 import {
   MdInfo,
@@ -18,6 +18,20 @@ import {
 import CreateItemCategoryModal from "./CreateItemCategoryModal";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
+
+// Images over this size can't be inlined if the image host is unavailable, so
+// the server would drop them. Filter them out up-front and tell the user.
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
+function filterImagesBySize(files: File[]): File[] {
+  const ok = files.filter((f) => f.size <= MAX_IMAGE_BYTES);
+  const tooBig = files.length - ok.length;
+  if (tooBig > 0) {
+    toast.error(
+      `${tooBig} image${tooBig > 1 ? "s" : ""} skipped — each image must be 2MB or smaller.`
+    );
+  }
+  return ok;
+}
 
 export const CreateItemModal = ({
   isOpen,
@@ -81,9 +95,19 @@ export const CreateItemModal = ({
     }
   }, [isOpen, isEdit]);
 
-  // Edit mode: prefill the form from the item being edited.
+  // Edit mode: prefill the form ONCE per open. Guarded by a ref so that a
+  // later categories refetch (e.g. after creating a new category) doesn't
+  // re-run this and clobber the user's current selection.
+  const hydratedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (!isOpen || !itemToEdit) return;
+    if (!isOpen) {
+      hydratedRef.current = null;
+      return;
+    }
+    if (!itemToEdit || !itemCategoriesData) return;
+    const key = String(itemToEdit.id || itemToEdit._id || "edit");
+    if (hydratedRef.current === key) return;
+    hydratedRef.current = key;
     const it = itemToEdit;
     setItemType(it.itemType === "SERVICE" ? "SERVICE" : "PRODUCT");
     setEnableLowStock(!!it.isAlertEnabled);
@@ -349,12 +373,12 @@ export const CreateItemModal = ({
 
           {/* Content */}
           <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
-            {/* Sidebar Tabs */}
-            <div className="w-full lg:w-1/4 border border-gray-200 rounded-md p-4 shadow-sm">
-              <ul className="space-y-2">
+            {/* Sidebar Tabs — horizontal row on mobile, vertical sidebar on desktop */}
+            <div className="w-full lg:w-1/4 lg:border lg:border-gray-200 rounded-md p-0 lg:p-4 lg:shadow-sm">
+              <ul className="flex gap-2 overflow-x-auto pb-1 border-b border-gray-200 lg:flex-col lg:gap-0 lg:space-y-2 lg:overflow-visible lg:pb-0 lg:border-b-0">
                 <li
                   onClick={() => setActiveTab("BASIC")}
-                  className={`cursor-pointer flex-tab p-2 ${
+                  className={`cursor-pointer flex-tab p-2 whitespace-nowrap shrink-0 ${
                     activeTab === "BASIC"
                       ? "bg-blue-50 text-primary font-medium rounded-md"
                       : "text-gray-700"
@@ -366,7 +390,7 @@ export const CreateItemModal = ({
                 {isService ? (
                   <li
                     onClick={() => setActiveTab("OTHER")}
-                    className={`cursor-pointer flex-tab p-2 ${
+                    className={`cursor-pointer flex-tab p-2 whitespace-nowrap shrink-0 ${
                       activeTab === "OTHER"
                         ? "bg-blue-50 text-primary font-medium rounded-md"
                         : "text-gray-700"
@@ -379,7 +403,7 @@ export const CreateItemModal = ({
                   <>
                     <li
                       onClick={() => setActiveTab("STOCK")}
-                      className={`cursor-pointer flex-tab p-2 ${
+                      className={`cursor-pointer flex-tab p-2 whitespace-nowrap shrink-0 ${
                         activeTab === "STOCK"
                           ? "bg-blue-50 text-primary font-medium rounded-md"
                           : "text-gray-700"
@@ -390,7 +414,7 @@ export const CreateItemModal = ({
                     </li>
                     <li
                       onClick={() => setActiveTab("PRICING")}
-                      className={`cursor-pointer flex-tab p-2 ${
+                      className={`cursor-pointer flex-tab p-2 whitespace-nowrap shrink-0 ${
                         activeTab === "PRICING"
                           ? "bg-blue-50 text-primary font-medium rounded-md"
                           : "text-gray-700"
@@ -843,11 +867,11 @@ export const CreateItemModal = ({
                       onDragOver={(e) => e.preventDefault()}
                       onDrop={(e) => {
                         e.preventDefault();
-                        const droppedFiles = Array.from(
-                          e.dataTransfer.files
-                        ).filter((file) =>
-                          ["image/png", "image/jpeg", "image/jpg"].includes(
-                            file.type
+                        const droppedFiles = filterImagesBySize(
+                          Array.from(e.dataTransfer.files).filter((file) =>
+                            ["image/png", "image/jpeg", "image/jpg"].includes(
+                              file.type
+                            )
                           )
                         );
                         if (images.length + droppedFiles.length > 5) {
@@ -875,7 +899,9 @@ export const CreateItemModal = ({
                       accept=".png, .jpg, .jpeg"
                       className="hidden"
                       onChange={(e) => {
-                        const selectedFiles = Array.from(e.target.files || []);
+                        const selectedFiles = filterImagesBySize(
+                          Array.from(e.target.files || [])
+                        );
                         if (images.length + selectedFiles.length > 5) {
                           toast.error("Maximum 5 images allowed");
                           return;

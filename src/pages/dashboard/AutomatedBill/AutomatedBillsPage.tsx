@@ -1,7 +1,11 @@
 import React from "react";
 import { FiHelpCircle } from "react-icons/fi";
+import { toast } from "react-toastify";
 import { Button } from "../../../components/UI/Button";
 import { Card } from "../../../components/UI/Card";
+
+const comingSoon = () =>
+  toast.info("Automated Bills is coming soon — we'll notify you when it's ready.");
 
 const AutomatedBillsPage = () => {
   return (
@@ -39,7 +43,7 @@ const AutomatedBillsPage = () => {
           <p className="text-gray-600 text-lg mb-4 primary-font">
             Schedule your repeated bills hassle-free
           </p>
-          <Button className="w-full sm:w-auto primary-font">
+          <Button className="w-full sm:w-auto primary-font" onClick={comingSoon}>
             Create Automated Bill
           </Button>
         </div>

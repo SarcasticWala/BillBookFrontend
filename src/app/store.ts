@@ -9,6 +9,8 @@ import { documentApi } from "../features/document/documentApiSlice";
 import { paymentApi } from "../features/payment/paymentApiSlice";
 import { demoApi } from "../features/demo/demoApiSlice";
 import { accountApi } from "../features/account/accountApiSlice";
+import { dashboardApi } from "../features/dashboard/dashboardApiSlice";
+import { expenseApi } from "../features/expense/expenseApiSlice";
 import { authErrorMiddleware } from "./authErrorMiddleware";
 
 export const store = configureStore({
@@ -22,6 +24,8 @@ export const store = configureStore({
     [paymentApi.reducerPath]: paymentApi.reducer,
     [demoApi.reducerPath]: demoApi.reducer,
     [accountApi.reducerPath]: accountApi.reducer,
+    [dashboardApi.reducerPath]: dashboardApi.reducer,
+    [expenseApi.reducerPath]: expenseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -34,6 +38,8 @@ export const store = configureStore({
       paymentApi.middleware,
       demoApi.middleware,
       accountApi.middleware,
+      dashboardApi.middleware,
+      expenseApi.middleware,
       authErrorMiddleware,
     ),
 });

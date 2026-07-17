@@ -11,10 +11,11 @@ export const purchaseApi = createApi({
   endpoints: (builder) => ({
     // Create purchase invoice
     createPurchase: builder.mutation({
-      query: (purchaseData) => ({
+      query: ({ __idempotencyKey, ...purchaseData }: any) => ({
         url: "/create-purchase",
         method: "POST",
         body: purchaseData,
+        headers: __idempotencyKey ? { "Idempotency-Key": __idempotencyKey } : {},
       }),
       invalidatesTags: ["Purchase"],
     }),

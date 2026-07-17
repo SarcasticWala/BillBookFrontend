@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { newIdempotencyKey } from "../../../lib/idempotency";
 import { MdCheckCircle, MdSupportAgent, MdSchedule } from "react-icons/md";
 import { Button } from "../../../components/UI/Button";
 import { Card } from "../../../components/UI/Card";
@@ -84,6 +85,7 @@ const BookDemoPage: React.FC = () => {
   const { data: demosData, isLoading: isLoadingDemos } = useGetDemosQuery();
   const demos: DemoRow[] = demosData?.data ?? [];
   const [bookDemo, { isLoading }] = useBookDemoMutation();
+  const idempotencyKey = useRef(newIdempotencyKey());
 
   const [form, setForm] = useState({
     name: "",
@@ -124,8 +126,11 @@ const BookDemoPage: React.FC = () => {
       await bookDemo({
         ...form,
         attendees: Number(form.attendees) || 1,
+        __idempotencyKey: idempotencyKey.current,
       }).unwrap();
       toast.success("Demo booked! Our team will reach out to confirm.");
+      // Fresh key for any subsequent booking attempt.
+      idempotencyKey.current = newIdempotencyKey();
       // Stay on the page and clear the free-text field so the new request
       // shows up in the "My Demo Requests" table below (auto-refetched).
       setForm((prev) => ({ ...prev, message: "" }));

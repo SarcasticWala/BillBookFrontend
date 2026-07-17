@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
+import { newIdempotencyKey } from "../../../../../lib/idempotency";
 import { FaExclamationTriangle, FaTrash } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { PartySelectorModal } from "./PartySelectorModal";
@@ -70,6 +71,8 @@ export const CreateSalesForm: React.FC = () => {
 
   const [createSale] = useCreateSaleMutation();
   const [updateSale] = useUpdateSaleMutation();
+  // Stable per form mount → guards against duplicate creates on double-submit.
+  const idempotencyKey = useRef(newIdempotencyKey()).current;
 
   const formik = useFormik({
     initialValues: {
@@ -123,7 +126,7 @@ export const CreateSalesForm: React.FC = () => {
           await updateSale({ id: editId!, ...values }).unwrap();
           toast.success("Sales invoice updated successfully!");
         } else {
-          await createSale(values).unwrap();
+          await createSale({ ...values, __idempotencyKey: idempotencyKey }).unwrap();
           toast.success("Sales invoice created successfully!");
         }
         navigate("/sales/invoices");

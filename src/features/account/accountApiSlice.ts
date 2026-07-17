@@ -14,7 +14,24 @@ export const accountApi = createApi({
       providesTags: ["Account"],
     }),
     createAccount: builder.mutation({
-      query: (body) => ({ url: "/accounts", method: "POST", body }),
+      query: ({ __idempotencyKey, ...body }: any) => ({
+        url: "/accounts",
+        method: "POST",
+        body,
+        headers: __idempotencyKey ? { "Idempotency-Key": __idempotencyKey } : {},
+      }),
+      invalidatesTags: ["Account", "AccountTxn"],
+    }),
+    getAccountById: builder.query({
+      query: (id: string) => `/accounts/${id}`,
+      providesTags: ["Account"],
+    }),
+    updateAccount: builder.mutation({
+      query: ({ id, ...body }: { id: string } & Record<string, any>) => ({
+        url: `/accounts/${id}`,
+        method: "PUT",
+        body,
+      }),
       invalidatesTags: ["Account", "AccountTxn"],
     }),
     adjustMoney: builder.mutation({
@@ -44,6 +61,8 @@ export const accountApi = createApi({
 export const {
   useGetAccountsQuery,
   useCreateAccountMutation,
+  useGetAccountByIdQuery,
+  useUpdateAccountMutation,
   useAdjustMoneyMutation,
   useTransferMoneyMutation,
   useGetTransactionsQuery,

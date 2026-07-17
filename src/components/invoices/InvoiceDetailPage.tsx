@@ -45,20 +45,20 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
     ? `/sales/invoice/${id}/edit`
     : `/purchases/invoice/${id}/edit`;
 
-  const handleDelete = async () => {
+  const handleVoid = async () => {
     if (
       !window.confirm(
-        "Delete this invoice? This reverses its stock and party-balance effects and cannot be undone."
+        "Void this invoice? It will be kept for your records but its stock and party-balance effects will be reversed. This can't be undone."
       )
     )
       return;
     try {
       if (isSale) await deleteSale(id!).unwrap();
       else await deletePurchase(id!).unwrap();
-      toast.success("Invoice deleted");
+      toast.success("Invoice voided");
       navigate(listPath);
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to delete invoice");
+      toast.error(err?.data?.message || "Failed to void invoice");
     }
   };
 
@@ -95,8 +95,15 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
   const discountAfterTax = inv.discountAfterTax ?? 0;
 
   const status: string = inv.status || (inv.isFullyPaid ? "PAID" : "UNPAID");
+  const isVoid = status === "VOID";
   const statusVariant =
-    status === "PAID" ? "success" : status === "PARTIAL" ? "warning" : "danger";
+    status === "PAID"
+      ? "success"
+      : status === "PARTIAL"
+      ? "warning"
+      : isVoid
+      ? "neutral"
+      : "danger";
 
   const items: any[] = Array.isArray(inv.itemDetails) ? inv.itemDetails : [];
 
@@ -138,24 +145,28 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
         actions={
           <>
             <Badge variant={statusVariant as any}>{status}</Badge>
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              onClick={() => navigate(editPath)}
-            >
-              <MdEdit /> Edit
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              type="button"
-              onClick={handleDelete}
-              disabled={deleting}
-              className="!text-red-600 !border-red-200 hover:!bg-red-50"
-            >
-              <MdDeleteOutline /> {deleting ? "Deleting…" : "Delete"}
-            </Button>
+            {!isVoid && (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={() => navigate(editPath)}
+                >
+                  <MdEdit /> Edit
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  type="button"
+                  onClick={handleVoid}
+                  disabled={deleting}
+                  className="!text-red-600 !border-red-200 hover:!bg-red-50"
+                >
+                  <MdDeleteOutline /> {deleting ? "Voiding…" : "Void"}
+                </Button>
+              </>
+            )}
           </>
         }
       />

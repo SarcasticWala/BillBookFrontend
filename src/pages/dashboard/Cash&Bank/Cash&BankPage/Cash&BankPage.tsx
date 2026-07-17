@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { FiPlus, FiRepeat } from "react-icons/fi";
 import {
   MdOutlineAccountBalanceWallet,
@@ -28,6 +29,7 @@ const inr = (v: unknown) => `₹${Number(v || 0).toLocaleString("en-IN")}`;
 
 type TxnRow = {
   id: string;
+  accountId: string;
   date: string;
   accountName: string;
   type: string;
@@ -43,6 +45,7 @@ const TYPE_LABEL: Record<string, string> = {
 };
 
 const CashAndBankPage = () => {
+  const navigate = useNavigate();
   const [filter, setFilter] = useState("Last 365 Days");
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
   const [showAddAccount, setShowAddAccount] = useState(false);
@@ -82,6 +85,7 @@ const CashAndBankPage = () => {
     const isCredit = t.type === "IN" || t.type === "TRANSFER_IN";
     return {
       id: t.id,
+      accountId: t.account?._id || t.account?.id || "",
       date: t.date ? format(new Date(t.date), "dd MMM yyyy") : "-",
       accountName: t.account?.name || "-",
       type: t.type,
@@ -199,12 +203,9 @@ const CashAndBankPage = () => {
                 accounts.map((a) => (
                   <div
                     key={a.id}
-                    onClick={() => setSelectedAccountId(a.id)}
-                    className={`group rounded-lg border px-3 py-2.5 flex items-center justify-between gap-2 cursor-pointer transition-colors ${
-                      selectedAccountId === a.id
-                        ? "border-primary bg-primary/5"
-                        : "border-gray-200 hover:border-primary"
-                    }`}
+                    onClick={() => navigate(`/cash-bank/account/${a.id}`)}
+                    title="View account details"
+                    className="group rounded-lg border border-gray-200 px-3 py-2.5 flex items-center justify-between gap-2 cursor-pointer transition-colors hover:border-primary"
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <span className="text-gray-400 shrink-0">
@@ -271,7 +272,14 @@ const CashAndBankPage = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <Table columns={columns} data={tableData} />
+              <Table
+                columns={columns}
+                data={tableData}
+                rowClick={(rowIndex) => {
+                  const aid = tableData[rowIndex].accountId;
+                  if (aid) navigate(`/cash-bank/account/${aid}`);
+                }}
+              />
             </div>
           )}
         </Card>

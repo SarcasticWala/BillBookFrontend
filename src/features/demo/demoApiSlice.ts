@@ -10,7 +10,12 @@ export const demoApi = createApi({
   tagTypes: ["Demo", "AdminDemo"],
   endpoints: (builder) => ({
     bookDemo: builder.mutation<any, Record<string, unknown>>({
-      query: (body) => ({ url: "/book", method: "POST", body }),
+      query: ({ __idempotencyKey, ...body }: any) => ({
+        url: "/book",
+        method: "POST",
+        body,
+        headers: __idempotencyKey ? { "Idempotency-Key": __idempotencyKey } : {},
+      }),
       invalidatesTags: ["Demo", "AdminDemo"],
     }),
     getDemos: builder.query<any, void>({

@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFormik } from "formik";
+import { newIdempotencyKey } from "../../../../lib/idempotency";
 import { FaTrash, FaExclamationTriangle } from "react-icons/fa";
 import { useNavigate, useParams } from "react-router-dom";
 import { PartySelectorModal } from "../../sales/SalesInvoice/CreateSalesInvoice/PartySelectorModal";
@@ -49,6 +50,8 @@ const CreatePurchaseForm: React.FC = () => {
 
   const [createPurchase] = useCreatePurchaseMutation();
   const [updatePurchase] = useUpdatePurchaseMutation();
+  // Stable per form mount → guards against duplicate creates on double-submit.
+  const idempotencyKey = useRef(newIdempotencyKey()).current;
 
   const formik = useFormik({
     initialValues: {
@@ -81,7 +84,7 @@ const CreatePurchaseForm: React.FC = () => {
           await updatePurchase({ id: editId!, ...values }).unwrap();
           toast.success("Purchase invoice updated successfully!");
         } else {
-          await createPurchase(values).unwrap();
+          await createPurchase({ ...values, __idempotencyKey: idempotencyKey }).unwrap();
           toast.success("Purchase invoice created successfully!");
         }
         navigate("/purchases/purchaseInvoice");

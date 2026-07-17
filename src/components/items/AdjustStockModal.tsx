@@ -11,8 +11,7 @@ import {
   itemApi,
 } from "../../features/item/itemApiSlice";
 import { toast } from "react-toastify";
-import { useDispatch } from "react-redux";
-import type { AppDispatch } from "../../app/store";
+import { useAppDispatch } from "../../app/hooks";
 
 interface AdjustStockModalProps {
   open: boolean;
@@ -41,7 +40,7 @@ const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
   const [itemSerialNos, setItemSerialNos] = useState<string[]>([]);
   const [selectedSerials, setSelectedSerials] = useState<string[]>([]);
 
-  const dispatch = useDispatch<AppDispatch>();
+  const dispatch = useAppDispatch();
   const [updateItemStock] = useUpdateItemStockMutation();
 
   // Subscribe to the latest item so netQuantity is always up-to-date

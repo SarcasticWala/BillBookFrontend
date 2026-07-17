@@ -1,7 +1,8 @@
 import { Dialog } from "@headlessui/react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import { useGetItemsQuery } from "../../../../../features/item/itemApiSlice";
+import { useGetItemsPagedQuery } from "../../../../../features/item/itemApiSlice";
+import { useDebouncedValue } from "../../../../../hooks/useDebouncedValue";
 import {
   FaTimes,
   FaPlus,
@@ -26,15 +27,20 @@ export const ItemSelectorModal: React.FC<{
   onSelect: (items: any[]) => void;
   onCreateNewItem?: () => void;
 }> = ({ isOpen, onClose, onSelect }) => {
-  const { data, isLoading, error, refetch } = useGetItemsQuery(undefined, {
-    refetchOnMountOrArgChange: true,
-  });
-  const items = data?.data || [];
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 350);
+
+  // Server-side search + pagination so items beyond the first page are still
+  // findable (a large catalogue isn't capped at one client-side page).
+  const { data, isLoading, error, refetch } = useGetItemsPagedQuery(
+    { page: 1, limit: 30, search: debouncedSearch },
+    { refetchOnMountOrArgChange: true }
+  );
+  const items = data?.data?.items || [];
+  const filteredItems = items;
 
   const location = useLocation();
   const isPurchasePage = location.pathname.includes("/purchase");
-
-  const [search, setSearch] = useState("");
   const [isCreateItemModalOpen, setCreateItemModalOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<
     {
@@ -61,15 +67,6 @@ export const ItemSelectorModal: React.FC<{
       refetch();
     }
   }, [isOpen, refetch]);
-
-  const filteredItems = useMemo(() => {
-    if (!search.trim()) return items;
-    return items.filter((it: any) =>
-      (it.itemName || it.serviceName || "")
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    );
-  }, [items, search]);
 
   if (!isOpen) return null;
 

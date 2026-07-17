@@ -4,7 +4,9 @@ import { BrandLoader } from "./components/UI/BrandLoader.tsx";
 import PartyDetail from "./components/Parties/PartyDetail.tsx";
 import { ItemDetailsPage } from "./components/items/ItemDetailsPage.tsx";
 import { InvoiceDetailPage } from "./components/invoices/InvoiceDetailPage.tsx";
+import { AccountDetailPage } from "./components/accounting/AccountDetailPage.tsx";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute.tsx";
+import { ErrorBoundary } from "./components/ErrorBoundary.tsx";
 
 // Lazy components
 const CreateCategory = lazy(
@@ -42,6 +44,7 @@ const CreateSalesForm = lazy(() => import("./pages/dashboard/sales/SalesInvoice/
 const ExpensesPage = lazy(() => import("./pages/dashboard/Expenss/ExpensesPage"));
 const SettingsPage = lazy(() => import("./pages/dashboard/Settings/Settings"));
 const BookDemoPage = lazy(() => import("./pages/dashboard/BookDemo/BookDemoPage"));
+const PosBillingPage = lazy(() => import("./pages/dashboard/PosBilling/PosBillingPage"));
 const AdminDemoRequests = lazy(() => import("./pages/dashboard/Admin/AdminDemoRequests"));
 function App() {
   // Brief branded splash on initial app load, with a smooth fade-out.
@@ -54,6 +57,7 @@ function App() {
   return (
     <Router>
       <BrandLoader visible={booting} />
+      <ErrorBoundary>
       <Suspense fallback={<BrandLoader visible />}>
       <Routes>
         <Route path="/" element={<Home />} />
@@ -78,11 +82,13 @@ function App() {
                     <Route path="purchases/*" element={<PurchasePage />} />
                     <Route path="reports" element={<ReportsPage />} />
                     <Route path="cash-bank" element={<CashAndBankPage />} />
+                    <Route path="cash-bank/account/:id" element={<AccountDetailPage />} />
                     <Route path="e-invoicing" element={<EInvoicingPage />} />
                      <Route path="automated-bills" element={<AutomatedBillsPage />} />
                      <Route path="expenses" element={<ExpensesPage />} />
                     <Route path="settings" element={<SettingsPage />} />
                     <Route path="book-demo" element={<BookDemoPage />} />
+                    <Route path="pos-billing" element={<PosBillingPage />} />
                     <Route path="admin/demo-requests" element={<AdminDemoRequests />} />
                     <Route
                       path="create-category"
@@ -104,6 +110,7 @@ function App() {
         />
       </Routes>
       </Suspense>
+      </ErrorBoundary>
     </Router>
   );
 }

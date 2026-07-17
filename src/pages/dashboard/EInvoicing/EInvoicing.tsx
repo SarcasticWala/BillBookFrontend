@@ -1,7 +1,11 @@
 import React from "react";
 import { FiHelpCircle } from "react-icons/fi";
+import { toast } from "react-toastify";
 import { Button } from "../../../components/UI/Button";
 import { Card } from "../../../components/UI/Card";
+
+const comingSoon = () =>
+  toast.info("e-Invoicing is coming soon — we'll notify you when it's ready.");
 
 const EInvoicingPage = () => {
     return (
@@ -37,7 +41,7 @@ const EInvoicingPage = () => {
                     <p className="text-gray-700 text-xl sm:text-2xl primary-font mb-4">
                         Try India's easiest and fastest e-invoicing solution today
                     </p>
-                    <Button size="lg" className="w-full sm:w-auto">
+                    <Button size="lg" className="w-full sm:w-auto" onClick={comingSoon}>
                         Start Generating e-Invoices
                     </Button>
                 </div>

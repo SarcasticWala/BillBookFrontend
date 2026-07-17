@@ -1,32 +1,33 @@
 import { Dialog } from "@headlessui/react";
-import { useGetPartiesQuery } from "../../../../../features/party/partyApiSlice";
-import { FaTimes } from "react-icons/fa";
-import { useLocation } from "react-router-dom";
+import { useState } from "react";
+import { useGetPartiesPagedQuery } from "../../../../../features/party/partyApiSlice";
+import { FaTimes, FaSearch } from "react-icons/fa";
+import { useDebouncedValue } from "../../../../../hooks/useDebouncedValue";
 
 export const PartySelectorModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
   onSelect: (party: any) => void;
 }> = ({ isOpen, onClose, onSelect }) => {
-  const { data, isLoading, isError } = useGetPartiesQuery(undefined);
-  const parties = data?.data || [];
-  const location = useLocation();
-  const pathname = location.pathname;
+  const [search, setSearch] = useState("");
+  const debouncedSearch = useDebouncedValue(search, 350);
 
-  // Tolerant field readers — the API returns the write shape (partyName/mobileNo/
-  // billingAddressData), matching PartiesTable. Fall back to mapped read shapes too.
+  // Server-side search + pagination so a party beyond the first page is still
+  // findable (previously the picker only saw a capped client-side list).
+  const { data, isLoading, isError } = useGetPartiesPagedQuery({
+    page: 1,
+    limit: 30,
+    search: debouncedSearch,
+  });
+  const parties = data?.data?.items || [];
+
+  // Tolerant field readers — API returns the write shape (partyName/mobileNo/
+  // billingAddressData).
   const partyName = (p: any): string => p.partyName || p.name || "";
   const partyAddress = (p: any): string => {
     const a = p.billingAddressData || p.billingAddress || {};
     return [a.ad, a.city, a.st, a.pin].filter(Boolean).join(", ") || p.address || "";
   };
-
-  const wantedType = pathname.includes("purchase") ? "SUPPLIER" : "CUSTOMER";
-  // Prefer parties of the expected type, but if the user has none of that type
-  // yet, fall back to showing all parties so they're never blocked from
-  // picking a party they've already created.
-  const preferred = parties.filter((p: any) => p.partyType === wantedType);
-  const filteredParties = preferred.length ? preferred : parties;
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0">
@@ -44,18 +45,33 @@ export const PartySelectorModal: React.FC<{
               <FaTimes />
             </button>
           </div>
-          <ul className="max-h-60 overflow-auto">
+
+          {/* Search */}
+          <div className="relative mb-3">
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              autoFocus
+              placeholder="Search by name or mobile…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full border border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20 rounded-lg pl-10 pr-3 py-2 text-sm outline-none"
+            />
+          </div>
+
+          <ul className="max-h-72 overflow-auto">
             {isLoading && <li className="py-3 px-2 text-gray-500">Loading…</li>}
             {isError && (
               <li className="py-3 px-2 text-red-600">Failed to load parties.</li>
             )}
-            {!isLoading && !isError && filteredParties.length === 0 && (
+            {!isLoading && !isError && parties.length === 0 && (
               <li className="py-3 px-2 text-gray-500">
-                No {wantedType === "SUPPLIER" ? "suppliers" : "customers"} found.
-                Create one from the Parties page first.
+                {debouncedSearch
+                  ? "No parties match your search."
+                  : "No parties found. Create one from the Parties page first."}
               </li>
             )}
-            {filteredParties.map((party: any) => (
+            {parties.map((party: any) => (
               <li
                 key={party.id}
                 className="cursor-pointer py-3 px-2 hover:bg-blue-50 border-b"
@@ -65,7 +81,12 @@ export const PartySelectorModal: React.FC<{
                 }}
               >
                 <div className="font-medium">{partyName(party)}</div>
-                <div className="text-xs text-gray-600">{partyAddress(party)}</div>
+                <div className="text-xs text-gray-600">
+                  {party.mobileNo || party.mobileNumber
+                    ? `${party.mobileNo || party.mobileNumber} · `
+                    : ""}
+                  {partyAddress(party)}
+                </div>
               </li>
             ))}
           </ul>

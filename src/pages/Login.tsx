@@ -9,15 +9,33 @@ import {
   FiEyeOff,
   FiArrowRight,
   FiArrowLeft,
+  FiMessageSquare,
+  FiCheck,
 } from "react-icons/fi";
 import { BsClock } from "react-icons/bs";
 import { toast } from "react-toastify";
 import { Button } from "../components/UI/Button";
 import { Card } from "../components/UI/Card";
+import { OtpInput } from "../components/UI/OtpInput";
 import { useAuth } from "../hooks/useAuth";
 
+/** Mask an email for display: keep the first 2 chars of the local part. */
+function maskEmail(email: string): string {
+  const [local, domain] = String(email).split("@");
+  if (!domain) return email;
+  const head = local.slice(0, 2);
+  return `${head}${"•".repeat(Math.max(2, local.length - 2))}@${domain}`;
+}
+
+/** Seconds → m:ss (e.g. 26 → "00:26"). */
+function formatTimer(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
 type Mode = "login" | "signup" | "forgot";
-type Step = "details" | "verify";
+type Step = "details" | "verify" | "reset" | "done";
 
 const emailOk = (v: string) => /\S+@\S+\.\S+/.test(v);
 // Minimum acceptable password: 8+ chars with lower, upper and a number.
@@ -26,7 +44,7 @@ const WEAK_MSG = "Use 8+ characters with upper, lower and a number";
 
 export default function AuthPage() {
   const navigate = useNavigate();
-  const { login, register, sendOtp, resetPassword } = useAuth();
+  const { login, register, sendOtp, verifyOtp, resetPassword, logout } = useAuth();
 
   // In dev the backend returns the OTP (no SMS provider); surface it so the
   // flow is testable, and prefill the field for convenience.
@@ -49,6 +67,7 @@ export default function AuthPage() {
     mobile: "",
     otp: "",
     newPassword: "",
+    confirmPassword: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -68,6 +87,15 @@ export default function AuthPage() {
     setMode(m);
     setStep("details");
     setErrors({});
+    setOtpTimer(0);
+    // Clear transient credentials, but keep the email prefilled for convenience.
+    setForm((f) => ({
+      ...f,
+      otp: "",
+      password: "",
+      newPassword: "",
+      confirmPassword: "",
+    }));
   };
 
   // ---- Login (email + password) ----
@@ -162,11 +190,32 @@ export default function AuthPage() {
     }
   };
 
-  // ---- Forgot step 2: verify OTP + set the new password ----
+  // ---- Forgot step 2: verify the OTP (non-consuming), then advance ----
   const handleForgotVerify = async () => {
+    if (form.otp.length < 6) {
+      setErrors({ otp: "Enter the 6-digit code" });
+      return;
+    }
+    try {
+      setLoading(true);
+      await verifyOtp(form.email.trim(), form.otp);
+      setErrors({});
+      setStep("reset");
+    } catch (err: any) {
+      const msg = err?.message || "Invalid code";
+      setErrors({ otp: msg });
+      toast.error(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ---- Forgot step 3: set the new password, then show the success screen ----
+  const handleResetSubmit = async () => {
     const next: Record<string, string> = {};
-    if (form.otp.length < 6) next.otp = "Enter the 6-digit code";
     if (!strongEnough(form.newPassword)) next.newPassword = WEAK_MSG;
+    if (form.confirmPassword !== form.newPassword)
+      next.confirmPassword = "Passwords do not match";
     setErrors(next);
     if (Object.keys(next).length) return;
 
@@ -177,12 +226,15 @@ export default function AuthPage() {
         otp: form.otp,
         newPassword: form.newPassword,
       });
-      toast.success("Password updated");
-      navigate("/dashboard");
+      // Don't auto-login — the user asked to land on login and sign in fresh.
+      logout();
+      setStep("done");
     } catch (err: any) {
       const msg = err?.message || "Reset failed";
-      setErrors({ otp: /otp/i.test(msg) ? msg : "" });
+      // A consumed/expired OTP means they must restart the flow.
+      setErrors({ newPassword: /otp|code/i.test(msg) ? "" : msg });
       toast.error(msg);
+      if (/otp|code|expire/i.test(msg)) setStep("verify");
     } finally {
       setLoading(false);
     }
@@ -232,26 +284,29 @@ export default function AuthPage() {
 
         {/* Auth card */}
         <section className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-md w-full mx-auto overflow-hidden">
-          {/* Tabs */}
-          <div className="grid grid-cols-2 border-b border-gray-200">
-            {(["login", "signup"] as Mode[]).map((m) => (
-              <button
-                key={m}
-                type="button"
-                onClick={() => switchMode(m)}
-                className={`relative py-3.5 text-sm secondary-font transition-colors cursor-pointer ${
-                  mode === m
-                    ? "text-gray-900"
-                    : "text-gray-400 hover:text-gray-600"
-                }`}
-              >
-                {m === "login" ? "Sign in" : "Create account"}
-                {mode === m && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
-                )}
-              </button>
-            ))}
-          </div>
+          {/* Tabs — only on the first step; hidden mid-flow (OTP / reset /
+              success) so a stray click can't blow away the process. */}
+          {step === "details" && (
+            <div className="grid grid-cols-2 border-b border-gray-200">
+              {(["login", "signup"] as Mode[]).map((m) => (
+                <button
+                  key={m}
+                  type="button"
+                  onClick={() => switchMode(m)}
+                  className={`relative py-3.5 text-sm secondary-font transition-colors cursor-pointer ${
+                    mode === m
+                      ? "text-gray-900"
+                      : "text-gray-400 hover:text-gray-600"
+                  }`}
+                >
+                  {m === "login" ? "Sign in" : "Create account"}
+                  {mode === m && (
+                    <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary" />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
 
           <div className="p-6 sm:p-8">
             {/* ---------- LOGIN ---------- */}
@@ -388,50 +443,36 @@ export default function AuthPage() {
                   e.preventDefault();
                   handleVerifySubmit();
                 }}
-                className="space-y-4"
+                className="space-y-5"
               >
-                <Header
-                  title="Verify your email"
-                  subtitle={`Enter the code sent to ${form.email}`}
+                <VerifyHero
+                  title="Verify OTP"
+                  email={form.email}
+                  onChangeEmail={() => {
+                    setStep("details");
+                    set("otp")("");
+                    setOtpTimer(0);
+                  }}
                 />
-                <div>
-                  <label className="input-label">OTP Code</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={form.otp}
-                    onChange={(e) =>
-                      set("otp")(e.target.value.replace(/\D/g, "").slice(0, 6))
-                    }
-                    placeholder="6-digit code"
-                    className={`input-field text-center text-xl font-mono tracking-widest ${
-                      errors.otp ? "border-red-500" : ""
-                    }`}
-                    autoFocus
-                  />
-                  {errors.otp && (
-                    <p className="mt-1 text-sm text-red-500">{errors.otp}</p>
-                  )}
-                  <div className="mt-2 flex justify-between items-center text-sm light-font text-gray-600">
-                    {otpTimer > 0 ? (
-                      <span className="inline-flex items-center gap-1">
-                        <BsClock /> Resend in {otpTimer}s
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleResend}
-                        disabled={loading}
-                        className="text-primary hover:text-primary-hover font-medium cursor-pointer disabled:opacity-50"
-                      >
-                        Resend OTP
-                      </button>
-                    )}
-                  </div>
-                </div>
+
+                <OtpInput
+                  value={form.otp}
+                  onChange={set("otp")}
+                  hasError={!!errors.otp}
+                  autoFocus
+                />
+                {errors.otp && (
+                  <p className="text-center text-sm text-red-500">{errors.otp}</p>
+                )}
+
+                <ResendControl
+                  seconds={otpTimer}
+                  onResend={handleResend}
+                  disabled={loading}
+                />
+
                 <Button type="submit" fullWidth disabled={loading || form.otp.length < 6}>
-                  {loading ? "Verifying..." : "Verify & Create account"}
+                  {loading ? "Verifying..." : "Verify & continue"}
                 </Button>
                 <button
                   type="button"
@@ -440,7 +481,7 @@ export default function AuthPage() {
                     set("otp")("");
                     setOtpTimer(0);
                   }}
-                  className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 cursor-pointer"
+                  className="mx-auto flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 cursor-pointer"
                 >
                   <FiArrowLeft /> Change details
                 </button>
@@ -488,48 +529,76 @@ export default function AuthPage() {
                   e.preventDefault();
                   handleForgotVerify();
                 }}
+                className="space-y-5"
+              >
+                <VerifyHero
+                  title="Verify OTP"
+                  email={form.email}
+                  onChangeEmail={() => {
+                    setStep("details");
+                    set("otp")("");
+                    setOtpTimer(0);
+                  }}
+                />
+
+                <OtpInput
+                  value={form.otp}
+                  onChange={set("otp")}
+                  hasError={!!errors.otp}
+                  autoFocus
+                />
+                {errors.otp && (
+                  <p className="text-center text-sm text-red-500">{errors.otp}</p>
+                )}
+
+                <ResendControl
+                  seconds={otpTimer}
+                  onResend={handleResend}
+                  disabled={loading}
+                />
+
+                <Button
+                  type="submit"
+                  fullWidth
+                  disabled={loading || form.otp.length < 6}
+                >
+                  {loading ? "Verifying..." : "Verify & continue"}
+                </Button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setStep("details");
+                    set("otp")("");
+                    setOtpTimer(0);
+                  }}
+                  className="mx-auto flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 cursor-pointer"
+                >
+                  <FiArrowLeft /> Back
+                </button>
+              </form>
+            )}
+
+            {/* ---------- FORGOT: set new password ---------- */}
+            {mode === "forgot" && step === "reset" && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleResetSubmit();
+                }}
                 className="space-y-4"
               >
-                <Header
-                  title="Set a new password"
-                  subtitle={`Enter the code sent to ${form.email}`}
-                />
-                <div>
-                  <label className="input-label">OTP Code</label>
-                  <input
-                    type="text"
-                    inputMode="numeric"
-                    maxLength={6}
-                    value={form.otp}
-                    onChange={(e) =>
-                      set("otp")(e.target.value.replace(/\D/g, "").slice(0, 6))
-                    }
-                    placeholder="6-digit code"
-                    className={`input-field text-center text-xl font-mono tracking-widest ${
-                      errors.otp ? "border-red-500" : ""
-                    }`}
-                    autoFocus
-                  />
-                  {errors.otp && (
-                    <p className="mt-1 text-sm text-red-500">{errors.otp}</p>
-                  )}
-                  <div className="mt-2 flex justify-between items-center text-sm light-font text-gray-600">
-                    {otpTimer > 0 ? (
-                      <span className="inline-flex items-center gap-1">
-                        <BsClock /> Resend in {otpTimer}s
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={handleResend}
-                        disabled={loading}
-                        className="text-primary hover:text-primary-hover font-medium cursor-pointer disabled:opacity-50"
-                      >
-                        Resend OTP
-                      </button>
-                    )}
+                <div className="flex flex-col items-center text-center gap-2 mb-1">
+                  <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center text-primary text-2xl">
+                    <FiLock />
                   </div>
+                  <h1 className="text-xl primary-font text-gray-900">
+                    Set a new password
+                  </h1>
+                  <p className="text-sm light-font text-gray-500">
+                    Choose a strong password for your account.
+                  </p>
                 </div>
+
                 <PasswordField
                   label="New Password"
                   value={form.newPassword}
@@ -540,26 +609,60 @@ export default function AuthPage() {
                   autoComplete="new-password"
                 />
                 <PasswordStrength value={form.newPassword} />
-                <Button
-                  type="submit"
-                  fullWidth
-                  disabled={loading || form.otp.length < 6}
-                >
+                <PasswordField
+                  label="Confirm Password"
+                  value={form.confirmPassword}
+                  onChange={set("confirmPassword")}
+                  error={errors.confirmPassword}
+                  show={showPassword}
+                  toggle={() => setShowPassword((s) => !s)}
+                  autoComplete="new-password"
+                />
+
+                <Button type="submit" fullWidth disabled={loading}>
                   {loading ? "Updating..." : "Update password"}
                 </Button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setStep("details");
-                    set("otp")("");
-                    set("newPassword")("");
-                    setOtpTimer(0);
-                  }}
-                  className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 cursor-pointer"
+                  onClick={() => setStep("verify")}
+                  className="mx-auto flex items-center gap-1 text-xs text-gray-600 hover:text-gray-800 cursor-pointer"
                 >
                   <FiArrowLeft /> Back
                 </button>
               </form>
+            )}
+
+            {/* ---------- FORGOT: success ---------- */}
+            {mode === "forgot" && step === "done" && (
+              <div className="flex flex-col items-center text-center gap-5 py-6">
+                {/* Layered check badge with a soft halo */}
+                <div className="relative flex items-center justify-center">
+                  <span className="absolute inline-flex h-24 w-24 rounded-full bg-green-100/70" />
+                  <span className="absolute inline-flex h-[4.5rem] w-[4.5rem] rounded-full bg-green-200/70" />
+                  <span className="relative inline-flex h-14 w-14 items-center justify-center rounded-full bg-green-500 text-white text-3xl shadow-lg shadow-green-500/30">
+                    <FiCheck strokeWidth={3} />
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <h1 className="text-2xl primary-font text-gray-900">
+                    Password updated
+                  </h1>
+                  <p className="text-sm light-font text-gray-500 max-w-xs mx-auto leading-relaxed">
+                    Your password has been changed successfully. Use your new
+                    password to sign in.
+                  </p>
+                </div>
+
+                <div className="w-full space-y-2 pt-1">
+                  <Button fullWidth onClick={() => switchMode("login")}>
+                    Continue to login <FiArrowRight />
+                  </Button>
+                  <p className="text-xs light-font text-gray-400">
+                    You can safely close this tab.
+                  </p>
+                </div>
+              </div>
             )}
           </div>
         </section>
@@ -573,6 +676,80 @@ function Header({ title, subtitle }: { title: string; subtitle: string }) {
     <div>
       <h1 className="text-lg primary-font text-gray-900">{title}</h1>
       <p className="text-sm light-font text-gray-500 mt-0.5">{subtitle}</p>
+    </div>
+  );
+}
+
+/** Centered icon + heading + masked email + info banner for the verify step. */
+function VerifyHero({
+  title,
+  email,
+  onChangeEmail,
+}: {
+  title: string;
+  email: string;
+  onChangeEmail?: () => void;
+}) {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-col items-center text-center gap-2">
+        <div className="w-14 h-14 rounded-2xl bg-indigo-100 flex items-center justify-center text-primary text-2xl">
+          <FiMessageSquare />
+        </div>
+        <h1 className="text-xl primary-font text-gray-900">{title}</h1>
+        <p className="text-sm light-font text-gray-500">
+          Enter the 6-digit code we sent to your email.
+        </p>
+        <p className="text-sm primary-font text-gray-900 tracking-wide">
+          {maskEmail(email)}
+        </p>
+        {onChangeEmail && (
+          <button
+            type="button"
+            onClick={onChangeEmail}
+            className="inline-flex items-center gap-1 text-xs text-primary hover:text-primary-hover font-medium cursor-pointer"
+          >
+            <FiArrowLeft className="text-[0.7rem]" /> Wrong email? Change it
+          </button>
+        )}
+      </div>
+      <div className="flex items-start gap-2 rounded-xl bg-gray-50 border border-gray-100 px-3 py-2.5 text-sm text-gray-600">
+        <FiMail className="mt-0.5 shrink-0 text-gray-400" />
+        <span>
+          The code usually arrives within a minute. If not, wait for the timer
+          and tap Resend OTP.
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** Resend-cooldown pill / resend button, centered. */
+function ResendControl({
+  seconds,
+  onResend,
+  disabled,
+}: {
+  seconds: number;
+  onResend: () => void;
+  disabled?: boolean;
+}) {
+  return (
+    <div className="flex justify-center">
+      {seconds > 0 ? (
+        <span className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 px-4 py-1.5 text-sm text-gray-500">
+          <BsClock /> Resend in {formatTimer(seconds)}
+        </span>
+      ) : (
+        <button
+          type="button"
+          onClick={onResend}
+          disabled={disabled}
+          className="inline-flex items-center gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 px-4 py-1.5 text-sm text-primary font-medium cursor-pointer disabled:opacity-50 transition-colors"
+        >
+          Resend OTP
+        </button>
+      )}
     </div>
   );
 }

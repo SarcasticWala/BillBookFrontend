@@ -1,4 +1,5 @@
 import { API_BASE_URL, setToken, clearToken } from "../config/api";
+import { resetAllApiCache } from "../app/resetCache";
 
 async function postJson(path: string, body: unknown) {
   // Abort if the server doesn't respond in time (e.g. a cold-started or
@@ -50,6 +51,11 @@ export const useAuth = () => {
     return { devCode: res.devCode };
   };
 
+  /** Verify an email OTP without consuming it (dedicated verify step). */
+  const verifyOtp = async (email: string, otp: string): Promise<void> => {
+    await postJson("/api/auth/verify-otp", { email, otp });
+  };
+
   /** Create the account after the email OTP is verified server-side. */
   const register = async (payload: {
     name: string;
@@ -79,7 +85,9 @@ export const useAuth = () => {
 
   const logout = () => {
     clearToken();
+    // Drop all cached server data so the next user on this tab starts clean.
+    resetAllApiCache();
   };
 
-  return { login, sendOtp, register, resetPassword, logout };
+  return { login, sendOtp, verifyOtp, register, resetPassword, logout };
 };
