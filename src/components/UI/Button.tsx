@@ -35,9 +35,11 @@ export const Button: React.FC<ButtonProps> = ({
   }
 
   const baseStyle =
-    "inline-flex items-center justify-center gap-2 rounded-md font-medium transition whitespace-nowrap shadow-sm " +
+    "inline-flex items-center justify-center gap-2 rounded-xl font-medium transition whitespace-nowrap shadow-sm " +
     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 " +
     "disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none";
+
+
 
   return (
     <button

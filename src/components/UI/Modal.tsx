@@ -29,7 +29,8 @@ export const Modal: React.FC<ModalProps> = ({
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel
           className={cn(
-            "w-full bg-white rounded-lg shadow-lg p-4 sm:p-6 max-h-[90vh] overflow-y-auto",
+            "w-full bg-white rounded-2xl shadow-xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto border border-slate-200",
+
             maxWidthClassName
           )}
         >

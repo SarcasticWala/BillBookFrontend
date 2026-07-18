@@ -47,8 +47,9 @@ export const Reveal: React.FC<RevealProps> = ({
     <div
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-700 ease-out will-change-transform ${
-        shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
+      className={`transition-all duration-200 ease-out will-change-transform ${
+          shown ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
+
       } ${className}`}
     >
       {children}
