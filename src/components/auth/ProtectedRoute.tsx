@@ -6,7 +6,7 @@ import { useGetMeQuery } from "../../features/auth/authApiSlice";
 /**
  * Gate for authenticated areas. Requires a stored JWT AND validates it against
  * `/api/auth/me` on load:
- *  - no token, or token rejected (401/403) -> clear it and send to "/" (landing).
+ *  - no token, or token rejected (401/403) -> clear it and send to "/login".
  *  - transient errors (network/5xx) are tolerated so an outage doesn't log users out.
  * The protected path is never rendered unless the session is valid.
  */
@@ -26,7 +26,7 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [authRejected]);
 
   if (!token || authRejected) {
-    return <Navigate to="/" replace state={{ from: location.pathname }} />;
+    return <Navigate to="/login" replace state={{ from: location.pathname }} />;
   }
 
   if (isLoading) {

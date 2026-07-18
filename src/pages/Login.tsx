@@ -255,8 +255,8 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 secondary-font">
-      <main className="max-w-6xl mx-auto px-4 py-8 sm:px-6 sm:py-12 grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
+    <div className="min-h-screen overflow-x-clip bg-gradient-to-br from-blue-50 via-white to-indigo-50 secondary-font">
+      <main className="max-w-6xl mx-auto px-4 py-8 sm:px-6 sm:py-12 grid grid-cols-1 lg:grid-cols-2 gap-8 sm:gap-12 items-center">
         {/* Marketing panel */}
         <section className="space-y-6 sm:space-y-10 hidden lg:block">
           <h2 className="text-3xl sm:text-4xl lg:text-5xl primary-font text-gray-900 leading-tight">
@@ -283,7 +283,7 @@ export default function AuthPage() {
         </section>
 
         {/* Auth card */}
-        <section className="bg-white rounded-lg shadow-lg border border-gray-200 max-w-md w-full mx-auto overflow-hidden">
+        <section className="bg-white rounded-2xl shadow-[var(--shadow-overlay)] border border-slate-200/80 max-w-md w-full min-w-0 mx-auto overflow-hidden">
           {/* Tabs — only on the first step; hidden mid-flow (OTP / reset /
               success) so a stray click can't blow away the process. */}
           {step === "details" && (
@@ -404,8 +404,10 @@ export default function AuthPage() {
                 <div>
                   <label className="input-label">Mobile Number</label>
                   <div
-                    className={`flex items-center gap-2 rounded-lg border px-3 bg-white ${
-                      errors.mobile ? "border-red-400" : "border-gray-300"
+                    className={`flex items-center gap-2 rounded-xl border px-3 bg-white transition-all focus-within:ring-2 ${
+                      errors.mobile
+                        ? "border-red-400 focus-within:ring-red-500/15"
+                        : "border-gray-300 focus-within:border-primary focus-within:ring-primary/15"
                     }`}
                   >
                     <span className="text-sm text-gray-500 shrink-0">🇮🇳 +91</span>
@@ -843,10 +845,10 @@ function Field({
     <div>
       <label className="input-label">{label}</label>
       <div
-        className={`flex items-center gap-2 rounded-lg border px-3 bg-white transition-colors ${
+        className={`flex items-center gap-2 rounded-xl border px-3 bg-white transition-all ${
           error
-            ? "border-red-400"
-            : "border-gray-300 focus-within:border-primary"
+            ? "border-red-400 focus-within:ring-2 focus-within:ring-red-500/15"
+            : "border-gray-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
         }`}
       >
         <span className="text-gray-400">{icon}</span>
@@ -882,8 +884,10 @@ function PasswordField({
     <div>
       <label className="input-label">{label}</label>
       <div
-        className={`flex items-center gap-2 rounded-lg border px-3 bg-white transition-colors ${
-          error ? "border-red-400" : "border-gray-300 focus-within:border-primary"
+        className={`flex items-center gap-2 rounded-xl border px-3 bg-white transition-all ${
+          error
+            ? "border-red-400 focus-within:ring-2 focus-within:ring-red-500/15"
+            : "border-gray-300 focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/15"
         }`}
       >
         <span className="text-gray-400">

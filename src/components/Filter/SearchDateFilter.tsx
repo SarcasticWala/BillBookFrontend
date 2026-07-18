@@ -21,24 +21,24 @@ export const SearchDateFilter: React.FC<SearchDateFilterProps> = ({
     <div className="flex flex-col sm:flex-row gap-3 w-full light-font">
       {/* Search Input */}
       <div className="relative w-full sm:w-auto flex-1">
-        <FiSearch className="absolute left-3 top-3 text-gray-400" />
+        <FiSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
         <input
           type="text"
           name="search"
           placeholder={placeholder}
           value={searchValue ?? ''}
           onChange={(e) => onSearchChange?.(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
+          className="input-field pl-10"
         />
       </div>
 
       {/* Date Filter */}
       <div className="relative w-full sm:w-auto flex-1">
-        <FiCalendar className="absolute left-3 top-3 text-gray-400" />
+        <FiCalendar className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 z-10" />
         <select
           value={filterValue}
           onChange={(e) => onFilterChange(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md text-sm bg-white focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/40"
+          className="input-field bg-white pl-10"
         >
           <option>Today</option>
           <option>Yesterday</option>

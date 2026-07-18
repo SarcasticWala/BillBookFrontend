@@ -53,9 +53,14 @@ const QuotationEstimate = () => {
   return (
     <div className="secondary-font min-h-screen bg-slate-50 p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-xl primary-font text-gray-900">Quotation / Estimate</h1>
+        <div className="pr-10 md:pr-0">
+          <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Quotation / Estimate</h1>
+          <p className="text-sm light-font text-gray-500 mt-0.5">
+            Create, track and manage your quotations and estimates
+          </p>
+        </div>
         <Button
-          className="w-full sm:w-auto cursor-pointer"
+          className="secondary-font w-full sm:w-auto cursor-pointer"
           onClick={() => navigate("/sales/quotation/create")}
         >
           Create Quotation
@@ -80,8 +85,8 @@ const QuotationEstimate = () => {
 
       <Card>
         {data.length === 0 ? (
-          <div className="flex flex-col items-center py-12 text-gray-500 text-center">
-            <MdOutlineFileCopy className="text-4xl text-gray-300 mb-2" />
+          <div className="flex flex-col items-center py-12 text-slate-400 text-center">
+            <MdOutlineFileCopy className="text-4xl text-slate-300 mb-2" />
             <p className="text-sm secondary-font">No Transactions Matching the current filter</p>
           </div>
         ) : (

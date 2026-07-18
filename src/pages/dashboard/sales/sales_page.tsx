@@ -11,7 +11,7 @@ import PaymentForm from "../../../components/Documents/PaymentForm";
 
 const SalesPage = () => {
   return (
-    <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1 min-w-[200px]">
+    <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200/80 shadow-[var(--shadow-card)]">
       <Routes>
         <Route path="invoices" element={<SalesInvoices />} />
         <Route path="creditnote" element={<CreditNote />} />

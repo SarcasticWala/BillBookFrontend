@@ -180,28 +180,39 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
 
       <div className="space-y-5 max-w-5xl">
         {/* Summary card */}
-        <section className="bg-white rounded-xl border border-gray-200 shadow-[0_1px_2px_rgba(16,24,40,0.04)] p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <section className="bg-white rounded-xl border border-slate-200/80 shadow-[var(--shadow-card)] p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="min-w-0">
-              <p className="text-xs light-font text-gray-500">
+              <p className="text-xs secondary-font text-gray-500 uppercase tracking-wide">
                 {isSale ? "Bill To" : "Supplier"}
               </p>
-              <h2 className="text-lg primary-font text-gray-900 truncate">
+              <h2 className="mt-1 text-xl primary-font text-gray-900 truncate">
                 {partyName}
               </h2>
-              <div className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-gray-500">
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
                 {partyMobile && <span>{partyMobile}</span>}
+                {partyMobile && partyGst && (
+                  <span className="text-gray-300">•</span>
+                )}
                 {partyGst && <span>GSTIN: {partyGst}</span>}
               </div>
             </div>
-            <div className="text-sm text-gray-500 sm:text-right">
-              <div>
-                Invoice Date:{" "}
-                <span className="text-gray-800">{fmtDate(inv.invioceDate)}</span>
+            <div className="sm:text-right space-y-1.5">
+              <div className="flex items-center justify-between gap-4 sm:justify-end text-sm">
+                <span className="text-xs secondary-font text-gray-500 uppercase tracking-wide">
+                  Invoice Date
+                </span>
+                <span className="secondary-font text-gray-800">
+                  {fmtDate(inv.invioceDate)}
+                </span>
               </div>
-              <div>
-                Due Date:{" "}
-                <span className="text-gray-800">{fmtDate(inv.dueDate)}</span>
+              <div className="flex items-center justify-between gap-4 sm:justify-end text-sm">
+                <span className="text-xs secondary-font text-gray-500 uppercase tracking-wide">
+                  Due Date
+                </span>
+                <span className="secondary-font text-gray-800">
+                  {fmtDate(inv.dueDate)}
+                </span>
               </div>
             </div>
           </div>
@@ -222,14 +233,19 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
         {/* Totals */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
           <FormSection title="Amount Summary" layout="plain">
-            <div className="divide-y divide-gray-100">
+            <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-4 space-y-2">
               <Row label="Taxable Amount" value={inr(taxable)} />
               <Row label="Total Tax" value={inr(tax)} />
               <Row label="Additional Charges" value={inr(additionalCharges)} />
               <Row label="Discount After Tax" value={`- ${inr(discountAfterTax)}`} />
-              <Row label="Grand Total" value={inr(total)} strong />
+              <Row label="Grand Total" value={inr(total)} grand />
               <Row label={isSale ? "Received" : "Paid"} value={inr(paid)} />
-              <Row label="Balance Due" value={inr(due)} strong />
+              <Row
+                label="Balance Due"
+                value={inr(due)}
+                strong
+                danger={Number(due) > 0}
+              />
             </div>
           </FormSection>
 
@@ -283,17 +299,19 @@ const Metric = ({
   danger?: boolean;
 }) => (
   <div
-    className={`rounded-lg border px-3 py-2.5 ${
+    className={`rounded-xl border px-3.5 py-3 ${
       danger
         ? "border-red-200 bg-red-50"
         : accent
-        ? "border-indigo-100 bg-indigo-50/60"
-        : "border-gray-200 bg-gray-50/60"
+        ? "border-primary/15 bg-primary/5"
+        : "border-slate-200/80 bg-slate-50"
     }`}
   >
-    <span className="block text-xs light-font text-gray-500">{label}</span>
+    <span className="block text-xs secondary-font text-gray-500 uppercase tracking-wide">
+      {label}
+    </span>
     <span
-      className={`block text-base primary-font mt-0.5 ${
+      className={`block text-base primary-font mt-1 ${
         danger ? "text-red-600" : accent ? "text-primary" : "text-gray-900"
       }`}
     >
@@ -306,16 +324,36 @@ const Row = ({
   label,
   value,
   strong,
+  grand,
+  danger,
 }: {
   label: string;
   value: string;
   strong?: boolean;
+  grand?: boolean;
+  danger?: boolean;
 }) => (
-  <div className="flex items-center justify-between gap-4 py-2.5 text-sm">
-    <span className="text-gray-500 light-font shrink-0">{label}</span>
+  <div
+    className={`flex items-center justify-between gap-4 py-2.5 text-sm ${
+      grand ? "mt-0.5 border-t border-slate-200 pt-3" : ""
+    }`}
+  >
+    <span
+      className={`shrink-0 ${
+        grand ? "primary-font text-gray-900" : "text-gray-500 light-font"
+      }`}
+    >
+      {label}
+    </span>
     <span
       className={`text-right ${
-        strong ? "primary-font text-gray-900" : "secondary-font text-gray-800"
+        grand
+          ? "text-lg primary-font text-primary"
+          : danger
+          ? "primary-font text-red-600"
+          : strong
+          ? "primary-font text-gray-900"
+          : "secondary-font text-gray-800"
       }`}
     >
       {value}

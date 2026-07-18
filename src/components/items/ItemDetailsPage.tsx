@@ -96,7 +96,7 @@ export const ItemDetailsPage = () => {
 
       <div className="space-y-5 max-w-5xl">
         {/* Summary / hero card */}
-        <section className="bg-white rounded-xl border border-gray-200 shadow-[0_1px_2px_rgba(16,24,40,0.04)] p-4 sm:p-5">
+        <section className="bg-white rounded-xl border border-slate-200/80 shadow-[var(--shadow-card)] p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row gap-5">
             {/* Image / placeholder */}
             <div className="shrink-0">
@@ -104,10 +104,10 @@ export const ItemDetailsPage = () => {
                 <img
                   src={images[0]}
                   alt={name}
-                  className="w-24 h-24 rounded-xl object-cover border border-gray-200"
+                  className="w-24 h-24 rounded-2xl object-cover border border-slate-200/80"
                 />
               ) : (
-                <div className="w-24 h-24 rounded-xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-gray-200 flex items-center justify-center text-2xl primary-font text-primary">
+                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-indigo-50 to-purple-50 border border-slate-200/80 flex items-center justify-center text-3xl primary-font text-primary">
                   {name.charAt(0).toUpperCase()}
                 </div>
               )}
@@ -116,11 +116,12 @@ export const ItemDetailsPage = () => {
             {/* Title block */}
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <h2 className="text-lg primary-font text-gray-900 truncate">{name}</h2>
-                {lowStock && <Badge variant="danger">Low stock</Badge>}
+                <h2 className="text-xl primary-font text-gray-900 truncate">{name}</h2>
+                {lowStock && <Badge variant="danger" dot>Low stock</Badge>}
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-500">
+              <div className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-gray-500">
                 {code && <span>Code: <span className="text-gray-800">{code}</span></span>}
+                {code && categoryName && <span className="text-gray-300">•</span>}
                 {categoryName && (
                   <span>Category: <span className="text-gray-800">{categoryName}</span></span>
                 )}
@@ -274,17 +275,19 @@ const Metric = ({
   danger?: boolean;
 }) => (
   <div
-    className={`rounded-lg border px-3 py-2.5 ${
+    className={`rounded-xl border px-3.5 py-3 ${
       danger
         ? "border-red-200 bg-red-50"
         : accent
-        ? "border-indigo-100 bg-indigo-50/60"
-        : "border-gray-200 bg-gray-50/60"
+        ? "border-primary/15 bg-primary/5"
+        : "border-slate-200/80 bg-slate-50"
     }`}
   >
-    <span className="block text-xs light-font text-gray-500">{label}</span>
+    <span className="block text-xs secondary-font text-gray-500 uppercase tracking-wide">
+      {label}
+    </span>
     <span
-      className={`block text-base primary-font mt-0.5 ${
+      className={`block text-base primary-font mt-1 ${
         danger ? "text-red-600" : accent ? "text-primary" : "text-gray-900"
       }`}
     >

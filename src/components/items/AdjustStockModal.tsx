@@ -138,9 +138,9 @@ const AdjustStockModal: React.FC<AdjustStockModalProps> = ({
       onClose={() => setOpen(false)}
       className="relative z-50"
     >
-      <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm animate-overlay-in" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="secondary-font bg-white rounded-xl border border-gray-200 shadow-xl w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
+        <Dialog.Panel className="secondary-font bg-white rounded-2xl border border-slate-200/80 shadow-[var(--shadow-overlay)] animate-modal-in w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center px-4 sm:px-6 py-4 border-b border-gray-200">
             <Dialog.Title className="text-lg primary-font text-gray-900">
               Adjust Stock Quantity

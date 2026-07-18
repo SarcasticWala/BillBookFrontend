@@ -530,27 +530,38 @@ const handleTaxChange = (index: number, value: string) => {
                 label="Additional Charges"
                 type="number"
                 name="additionalCharges"
+                min={0}
                 value={formik.values.additionalCharges}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  // Charges can't be negative; strip any minus sign before it reaches formik.
+                  e.target.value = e.target.value.replace(/-/g, "");
+                  formik.handleChange(e);
+                }}
               />
               <Input
                 label="Discount After Tax"
                 type="number"
                 name="discountAfterTax"
+                min={0}
                 value={formik.values.discountAfterTax}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  // A discount can never be negative (a negative discount would
+                  // silently act as a surcharge and inflate the total).
+                  e.target.value = e.target.value.replace(/-/g, "");
+                  formik.handleChange(e);
+                }}
               />
 
-              <div className="rounded-lg border border-gray-200 bg-gray-50 p-3 text-sm text-gray-700">
+              <div className="rounded-xl border border-slate-200/80 bg-slate-50 p-4 text-sm text-gray-600 space-y-2">
                 <div className="flex justify-between">
                   <span>Taxable Amount</span>
-                  <span className="font-medium">
+                  <span className="secondary-font text-gray-800">
                     ₹{formik.values.totalTaxablePurchaseAmount.toFixed(2)}
                   </span>
                 </div>
-                <div className="flex justify-between mt-1">
-                  <span>Total Amount</span>
-                  <span className="font-medium">
+                <div className="flex justify-between items-center pt-2.5 border-t border-slate-200 text-gray-900">
+                  <span className="secondary-font">Total Amount</span>
+                  <span className="text-lg primary-font text-primary">
                     ₹{formik.values.totalPurchaseAmount.toFixed(2)}
                   </span>
                 </div>
@@ -570,8 +581,13 @@ const handleTaxChange = (index: number, value: string) => {
                 label="Paid Amount"
                 type="number"
                 name="paidAmount"
+                min={0}
                 value={formik.values.paidAmount}
-                onChange={formik.handleChange}
+                onChange={(e) => {
+                  // Paid amount can't be negative.
+                  e.target.value = e.target.value.replace(/-/g, "");
+                  formik.handleChange(e);
+                }}
               />
               {warningText && (
                 <div className="flex items-center gap-1.5 text-yellow-600 text-sm">

@@ -31,9 +31,9 @@ export const PartySelectorModal: React.FC<{
 
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0">
-      <div className="fixed inset-0 bg-black/40" />
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm animate-overlay-in" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white max-w-md w-full rounded shadow-lg p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
+        <Dialog.Panel className="bg-white max-w-md w-full rounded-2xl shadow-[var(--shadow-overlay)] border border-slate-200/80 animate-modal-in p-4 sm:p-6 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-lg font-bold">Select Party</h2>
             <button

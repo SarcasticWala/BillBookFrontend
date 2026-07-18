@@ -1,13 +1,28 @@
 @import "tailwindcss";
 
-/* Design tokens — single source of truth for brand colors.
+/* Design tokens — single source of truth for brand colors + elevation.
    Primary = blue-600 (the dominant existing pattern); accent = the purple
    used for active tabs/section headers. These generate Tailwind utilities:
-   bg-primary, text-primary, hover:bg-primary-hover, text-accent, border-accent. */
+   bg-primary, text-primary, hover:bg-primary-hover, text-accent, border-accent,
+   and the elevation scale below generates shadow-card / shadow-elevated etc. */
 @theme {
   --color-primary: #2563eb;        /* blue-600 */
   --color-primary-hover: #1d4ed8;  /* blue-700 */
+  --color-primary-soft: #eff4ff;   /* blue-50-ish tint for soft fills */
   --color-accent: #5c27fe;         /* tab / section-header accent */
+
+  /* Layered, low-contrast elevation — the Stripe/Linear look. Soft and cool
+     rather than a single hard drop shadow. */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.04);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.04), 0 1px 3px rgba(16, 24, 40, 0.06);
+  --shadow-card-hover: 0 2px 4px rgba(16, 24, 40, 0.05), 0 8px 20px -6px rgba(16, 24, 40, 0.12);
+  --shadow-elevated: 0 6px 16px -4px rgba(16, 24, 40, 0.1), 0 2px 6px -2px rgba(16, 24, 40, 0.06);
+  --shadow-overlay: 0 16px 40px -8px rgba(16, 24, 40, 0.22), 0 4px 12px -4px rgba(16, 24, 40, 0.1);
+  --shadow-btn: 0 1px 2px rgba(16, 24, 40, 0.06);
+  --shadow-btn-primary: 0 1px 2px rgba(37, 99, 235, 0.28), 0 1px 3px rgba(16, 24, 40, 0.08);
+
+  /* Standardized easing/duration for the 150–250ms micro-interactions. */
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 /* Professional base: crisp text rendering + consistent body color/background. */
@@ -40,36 +55,46 @@ body {
   font-weight: 400;
 }
 
-.input-field {
-  width: 100%;
-  min-width: 0;
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 0.55rem 0.75rem;
-  background-color: #ffffff;
-  font-size: 0.875rem;
-  color: #111827;
-  outline: none;
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
-}
+/* Kept in @layer components so Tailwind utilities (in the later utilities layer)
+   can override individual properties — e.g. `pl-10` to make room for a leading
+   icon. Unlayered rules would otherwise beat those utilities and the padding
+   override would silently do nothing. */
+@layer components {
+  .input-field {
+    width: 100%;
+    min-width: 0;
+    border: 1px solid #d5dae1;      /* slightly cooler, softer than gray-300 */
+    border-radius: 10px;
+    padding: 0.575rem 0.8rem;
+    background-color: #ffffff;
+    font-size: 0.875rem;
+    line-height: 1.35;
+    color: #111827;
+    outline: none;
+    box-shadow: 0 1px 1px rgba(16, 24, 40, 0.03); /* faint inner lift */
+    transition: box-shadow 0.16s var(--ease-out-soft), border-color 0.16s var(--ease-out-soft);
+  }
 
-.input-field::placeholder {
-  color: #9ca3af;
-  font-size: 0.875rem;
-}
+  .input-field::placeholder {
+    color: #9ca3af;
+    font-size: 0.875rem;
+  }
 
-.input-field:hover:not(:disabled):not(:focus) {
-  border-color: #9ca3af; /* gray-400 — subtle hover affordance */
-}
+  .input-field:hover:not(:disabled):not(:focus) {
+    border-color: #9aa3af; /* subtle hover affordance */
+  }
 
-.input-field:focus {
-  border-color: #2563eb; /* blue-600 */
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
-}
+  .input-field:focus {
+    border-color: #2563eb; /* blue-600 */
+    box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.14);
+  }
 
-.input-field:disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  .input-field:disabled {
+    cursor: not-allowed;
+    background-color: #f8fafc;
+    color: #94a3b8;
+    opacity: 1;
+  }
 }
 
 .input-label {
@@ -101,6 +126,63 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
+}
+
+/* Invalid input state — pairs with the aria-invalid attribute or .is-invalid. */
+.input-field.is-invalid,
+.input-field[aria-invalid="true"] {
+  border-color: #ef4444;
+}
+.input-field.is-invalid:focus,
+.input-field[aria-invalid="true"]:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3.5px rgba(239, 68, 68, 0.14);
+}
+
+/* Interactive surface: lifts gently on hover. Add to any Card/tile that is
+   clickable so the whole app shares one hover language. */
+.card-interactive {
+  transition: box-shadow 0.18s var(--ease-out-soft),
+              transform 0.18s var(--ease-out-soft),
+              border-color 0.18s var(--ease-out-soft);
+}
+.card-interactive:hover {
+  box-shadow: var(--shadow-card-hover);
+  border-color: #cbd5e1;
+  transform: translateY(-1px);
+}
+
+/* Shared entrance animations for menus, dropdowns, popovers and modals. */
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(4px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-pop-in {
+  animation: popIn 0.16s var(--ease-out-soft);
+  transform-origin: top;
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-overlay-in {
+  animation: overlayIn 0.18s ease-out;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.animate-modal-in {
+  animation: modalIn 0.2s var(--ease-out-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pop-in,
+  .animate-overlay-in,
+  .animate-modal-in { animation: none; }
+  .card-interactive:hover { transform: none; }
 }
 
 /* Landing page animations */

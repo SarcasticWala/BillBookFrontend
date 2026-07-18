@@ -812,22 +812,24 @@ const handleTaxPercentChange = (index: number, val: string) => {
         {/* Party Selection */}
         <Card className="p-4 sm:p-6">
         {!selectedPartyId ? (
-          <div className="border border-dashed border-blue-400 p-4 rounded-md text-center bg-blue-50">
-            <p
-              className="font-medium text-primary cursor-pointer"
-              onClick={() => {
-                setPartyModalTarget("bill");
-                setPartyModalOpen(true);
-              }}
-            >
-              + Add Party
-            </p>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setPartyModalTarget("bill");
+              setPartyModalOpen(true);
+            }}
+            className="group w-full border-2 border-dashed border-blue-300 hover:border-blue-500 p-6 rounded-xl text-center bg-blue-50/60 hover:bg-blue-50 transition-colors cursor-pointer"
+          >
+            <span className="inline-flex items-center gap-2 font-medium text-primary group-hover:text-primary-hover">
+              <FiPlus className="text-lg" /> Add Party
+            </span>
+            <p className="text-xs text-gray-500 mt-1">Select a customer to bill this invoice to</p>
+          </button>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
               <label className="input-label">Bill To</label>
-              <div className="border rounded-md p-3 bg-gray-50 shadow-sm">
+              <div className="border border-slate-200 rounded-xl p-3.5 bg-slate-50/70">
                 <p className="text-sm font-medium mb-1">
                   {partyDetails?.partyName || partyDetails?.name || "Select Party"}
                 </p>
@@ -855,7 +857,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
 
             <div>
               <label className="input-label">Ship To</label>
-              <div className="border rounded-md p-3 bg-gray-50 shadow-sm">
+              <div className="border border-slate-200 rounded-xl p-3.5 bg-slate-50/70">
                 {/* Falls back to the Bill To party until a different ship-to
                     party is explicitly chosen. */}
                 {(() => {
@@ -1005,16 +1007,21 @@ const handleTaxPercentChange = (index: number, val: string) => {
             <input
               type="number"
               name="discountAfterTax"
+              min={0}
               value={formik.values.discountAfterTax}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                // A discount can never be negative (it would act as a surcharge).
+                e.target.value = e.target.value.replace(/-/g, "");
+                formik.handleChange(e);
+              }}
               className="input-field"
               placeholder="- Discount After Tax"
             />
 
-            <div className="text-sm">
-              <div className="flex justify-between">
+            <div className="rounded-xl bg-slate-50 border border-slate-200/80 p-4 text-sm space-y-2">
+              <div className="flex justify-between text-gray-600">
                 <span>Taxable Amount</span>
-                <span>
+                <span className="secondary-font text-gray-800">
                   ₹
                   {formik.values.itemDetails
                     .reduce((acc, row) => {
@@ -1026,9 +1033,9 @@ const handleTaxPercentChange = (index: number, val: string) => {
                     .toFixed(2)}
                 </span>
               </div>
-              <div className="flex justify-between mt-1">
-                <span>Total Amount</span>
-                <span>
+              <div className="flex justify-between items-center pt-2.5 border-t border-slate-200 text-gray-900">
+                <span className="secondary-font">Total Amount</span>
+                <span className="text-lg primary-font text-primary">
                   ₹
                   {formik.values.totalSaleAmount.toFixed(2)}
                 </span>
@@ -1049,8 +1056,13 @@ const handleTaxPercentChange = (index: number, val: string) => {
             <input
               type="number"
               name="receivedAmount"
+              min={0}
               value={formik.values.receivedAmount}
-              onChange={formik.handleChange}
+              onChange={(e) => {
+                // Received amount can't be negative.
+                e.target.value = e.target.value.replace(/-/g, "");
+                formik.handleChange(e);
+              }}
               className="input-field mt-2"
               placeholder="Received Amount"
             />
@@ -1083,11 +1095,9 @@ const handleTaxPercentChange = (index: number, val: string) => {
               min={0}
             />
 
-            <div className="text-sm text-green-600 font-semibold mt-2">
-              <div className="flex justify-between">
-                <span>Balance Amount</span>
-                <span>₹{formik.values.dueAmount.toFixed(2)}</span>
-              </div>
+            <div className="flex justify-between items-center mt-3 rounded-xl bg-emerald-50 border border-emerald-200/70 px-4 py-3 text-sm">
+              <span className="secondary-font text-emerald-800">Balance Amount</span>
+              <span className="text-base primary-font text-emerald-600">₹{formik.values.dueAmount.toFixed(2)}</span>
             </div>
           </div>
         </div>

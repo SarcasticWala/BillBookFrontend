@@ -66,11 +66,11 @@ export const SerialSelectorModal: React.FC<SerialSelectorModalProps> = ({
   return (
     <Dialog open={isOpen} onClose={onClose} className="fixed z-50 inset-0">
       {/* Overlay */}
-      <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm animate-overlay-in" />
 
       {/* Modal Container */}
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white w-full max-w-lg mx-4 rounded-xl shadow-2xl border border-gray-200 p-4 sm:p-6 flex flex-col max-h-[90vh] overflow-y-auto">
+        <Dialog.Panel className="bg-white w-full max-w-lg mx-4 rounded-2xl shadow-[var(--shadow-overlay)] border border-slate-200/80 animate-modal-in p-4 sm:p-6 flex flex-col max-h-[90vh] overflow-y-auto">
           {/* Header */}
           <div className="flex justify-between items-center border-b border-gray-200 pb-3 mb-4">
             <h2 className="text-lg sm:text-xl font-semibold text-gray-800">

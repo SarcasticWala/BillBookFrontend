@@ -89,8 +89,8 @@ const AddressModal: React.FC<AddressModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm flex justify-center items-center z-50 p-4 animate-overlay-in">
+      <div className="bg-white rounded-2xl shadow-[var(--shadow-overlay)] border border-slate-200/80 p-4 sm:p-6 w-full max-w-md max-h-[90vh] overflow-y-auto animate-modal-in">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg primary-font text-gray-900">Enter Address</h2>
           <button

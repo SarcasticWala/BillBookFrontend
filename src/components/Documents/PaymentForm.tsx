@@ -99,7 +99,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             >
               Cancel
             </Button>
-            <Button type="submit" form="payment-form" disabled={isLoading}>
+            <Button type="submit" form="payment-form" loading={isLoading}>
               {isLoading ? "Saving..." : `Save ${title}`}
             </Button>
           </>

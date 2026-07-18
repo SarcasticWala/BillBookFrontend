@@ -54,9 +54,14 @@ const SalesReturn = () => {
   return (
     <div className="bg-slate-50 min-h-screen px-2 py-2 md:px-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="primary-font text-xl text-gray-900">Sales Return</h1>
+        <div className="pr-10 md:pr-0">
+          <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Sales Return</h1>
+          <p className="text-sm light-font text-gray-500 mt-0.5">
+            Track and manage your sales return documents
+          </p>
+        </div>
         <Button
-          className="w-full sm:w-auto cursor-pointer"
+          className="secondary-font w-full sm:w-auto cursor-pointer"
           onClick={() => navigate("/sales/return/create")}
         >
           Create Sales Return

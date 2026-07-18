@@ -4,6 +4,7 @@ import { MdOutlineMoreVert, MdAttachMoney, MdOutlinePayment, MdMoneyOff } from "
 import { SearchDateFilter } from "../Filter/SearchDateFilter";
 import { Button } from "../UI/Button";
 import { Card } from "../UI/Card";
+import { StatCard } from "../UI/StatCard";
 import { Pagination } from "../UI/Pagination";
 import { useNavigate } from "react-router-dom";
 import { SaleTable } from "./SaleTable";
@@ -39,43 +40,28 @@ const SalesInvoices = () => {
 
   return (
     <div className="min-h-screen px-2 py-2 lg:px-2 md:py-2">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-6">
-        <h1 className="text-xl primary-font text-gray-900">Sales Invoices</h1>
-        <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-          <Button variant="outline" className="flex items-center secondary-font gap-2 justify-center w-full sm:w-auto cursor-pointer">
-            <FiDownload className="text-gray-500 " /> Reports
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div className="pr-10 md:pr-0">
+          <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Sales Invoices</h1>
+          <p className="text-sm light-font text-gray-500 mt-0.5">Track, filter and manage your sales invoices</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-2.5 w-full md:w-auto">
+          <Button variant="outline" className="secondary-font w-full sm:w-auto cursor-pointer">
+            <FiDownload className="text-gray-500" /> Reports
           </Button>
-          <Button variant="outline" className="flex items-center secondary-font gap-2 justify-center w-full sm:w-auto cursor-pointer">
-            <FiSettings className="text-gray-500 " /> Settings
+          <Button variant="outline" className="secondary-font w-full sm:w-auto cursor-pointer">
+            <FiSettings className="text-gray-500" /> Settings
           </Button>
-          <Button variant="outline" className="flex items-center secondary-font gap-2 justify-center w-full sm:w-auto cursor-pointer">
-            <MdOutlineMoreVert className="text-gray-500 " /> More
+          <Button variant="outline" className="secondary-font w-full sm:w-auto cursor-pointer">
+            <MdOutlineMoreVert className="text-gray-500" /> More
           </Button>
         </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <Card className="hover:border-primary transition-colors cursor-pointer">
-          <div className="flex items-center gap-1.5 text-primary mb-1">
-            <MdAttachMoney className="text-base" />
-            <p className="text-sm secondary-font">Total Sales</p>
-          </div>
-          <div className="text-gray-900 primary-font text-lg">{inr(summary.total)}</div>
-        </Card>
-        <Card className="hover:border-primary transition-colors cursor-pointer">
-          <div className="flex items-center gap-1.5 text-emerald-600 mb-1">
-            <MdOutlinePayment className="text-base" />
-            <p className="text-sm secondary-font">Paid</p>
-          </div>
-          <div className="text-gray-900 primary-font text-lg">{inr(summary.paid)}</div>
-        </Card>
-        <Card className="hover:border-primary transition-colors cursor-pointer">
-          <div className="flex items-center gap-1.5 text-red-500 mb-1">
-            <MdMoneyOff className="text-base" />
-            <p className="text-sm secondary-font">Unpaid</p>
-          </div>
-          <div className="text-gray-900 primary-font text-lg">{inr(summary.due)}</div>
-        </Card>
+        <StatCard label="Total Sales" tone="primary" icon={<MdAttachMoney />} value={inr(summary.total)} />
+        <StatCard label="Paid" tone="success" colorValue icon={<MdOutlinePayment />} value={inr(summary.paid)} />
+        <StatCard label="Unpaid" tone="danger" colorValue icon={<MdMoneyOff />} value={inr(summary.due)} />
       </div>
 
       <div className="flex flex-col lg:flex-row gap-4 mb-6">

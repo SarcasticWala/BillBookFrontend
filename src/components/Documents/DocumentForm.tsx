@@ -151,7 +151,7 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
             >
               Cancel
             </Button>
-            <Button type="submit" form="document-form" disabled={isLoading}>
+            <Button type="submit" form="document-form" loading={isLoading}>
               {isLoading ? "Saving..." : `Save ${title}`}
             </Button>
           </>
@@ -214,13 +214,13 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="text-left text-xs font-semibold uppercase tracking-wider text-gray-500 border-b border-gray-200">
-                  <th className="py-2 pr-2 min-w-[220px]">Item</th>
-                  <th className="py-2 px-2 w-20">Qty</th>
-                  <th className="py-2 px-2 w-28">Price</th>
-                  <th className="py-2 px-2 w-24">Tax %</th>
-                  <th className="py-2 px-2 w-28 text-right">Amount</th>
-                  <th className="py-2 pl-2 w-10"></th>
+                <tr className="text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500 border-b border-slate-200">
+                  <th className="py-2.5 pr-2 min-w-[220px]">Item</th>
+                  <th className="py-2.5 px-2 w-20">Qty</th>
+                  <th className="py-2.5 px-2 w-28">Price</th>
+                  <th className="py-2.5 px-2 w-24">Tax %</th>
+                  <th className="py-2.5 px-2 w-28 text-right">Amount</th>
+                  <th className="py-2.5 pl-2 w-10"></th>
                 </tr>
               </thead>
               <tbody>
@@ -304,19 +304,19 @@ const DocumentForm: React.FC<DocumentFormProps> = ({
           </div>
 
           {/* Totals */}
-          <div className="flex justify-end mt-4">
-            <div className="w-full max-w-xs space-y-1.5 text-sm">
+          <div className="flex justify-end mt-5">
+            <div className="w-full max-w-xs rounded-xl bg-slate-50 border border-slate-200/80 p-4 space-y-2 text-sm">
               <div className="flex justify-between text-gray-600">
                 <span>Sub Total</span>
-                <span>₹{totals.subTotal.toLocaleString("en-IN")}</span>
+                <span className="secondary-font text-gray-800">₹{totals.subTotal.toLocaleString("en-IN")}</span>
               </div>
               <div className="flex justify-between text-gray-600">
                 <span>Tax</span>
-                <span>₹{totals.totalTax.toLocaleString("en-IN")}</span>
+                <span className="secondary-font text-gray-800">₹{totals.totalTax.toLocaleString("en-IN")}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-gray-200 text-base primary-font text-gray-900">
-                <span>Grand Total</span>
-                <span>₹{totals.grandTotal.toLocaleString("en-IN")}</span>
+              <div className="flex justify-between items-center pt-2.5 mt-0.5 border-t border-slate-200 text-gray-900">
+                <span className="secondary-font">Grand Total</span>
+                <span className="text-lg primary-font text-primary">₹{totals.grandTotal.toLocaleString("en-IN")}</span>
               </div>
             </div>
           </div>

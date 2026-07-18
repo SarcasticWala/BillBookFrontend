@@ -70,9 +70,9 @@ const ReportPage = () => {
   return (
     <div className="p-4 sm:p-6 min-h-screen secondary-font">
       {/* Page header */}
-      <div className="mb-6">
-        <h1 className="text-xl primary-font text-gray-900">Reports</h1>
-        <p className="text-sm light-font text-gray-500 mt-1">
+      <div className="mb-6 pr-10 sm:pr-0">
+        <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Reports</h1>
+        <p className="text-sm light-font text-gray-500 mt-0.5">
           Browse and generate detailed business reports
         </p>
       </div>
@@ -85,7 +85,7 @@ const ReportPage = () => {
         {categories.map((cat) => (
           <span
             key={cat}
-            className="px-3 py-1 border border-gray-200 rounded-full text-sm text-gray-700 bg-white hover:border-primary hover:text-primary transition-colors cursor-pointer"
+            className="px-3 py-1.5 border border-slate-200 rounded-full text-xs font-medium text-gray-600 bg-white shadow-[var(--shadow-xs)] hover:border-primary hover:text-primary hover:bg-primary/[0.03] transition-colors cursor-pointer"
           >
             {cat}
           </span>
@@ -100,9 +100,9 @@ const ReportPage = () => {
 
           return (
             <Card key={section.title} className="p-5 flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2 primary-font text-gray-800">
-                  {section.icon}
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2 primary-font text-gray-900">
+                  {section.icon || <span className="h-1.5 w-1.5 rounded-full bg-primary" />}
                   {section.title}
                 </div>
                 {section.items.length > 5 && (

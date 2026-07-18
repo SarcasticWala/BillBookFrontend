@@ -1,8 +1,8 @@
-import { MdAutoGraph } from "react-icons/md";
-import { FaBoxOpen, FaRupeeSign, FaTimes, FaFileExcel } from "react-icons/fa";
+import { MdAutoGraph, MdSearch } from "react-icons/md";
+import { FaBoxOpen, FaTimes, FaFileExcel } from "react-icons/fa";
 import { CategorySelector } from "../Category/CategorySelector";
 import { Button } from "../UI/Button";
-import { Card } from "../UI/Card";
+import { StatCard } from "../UI/StatCard";
 import { useEffect, useState } from "react";
 import { CreateItemModal } from "../UI/CreateItemModal";
 import {
@@ -87,10 +87,6 @@ const Inventory = () => {
     setPage(1);
   }, [debouncedSearch, showLowStockOnly, selectedItemCategories.length]);
 
-  const StatSkeleton = () => (
-    <div className="h-6 w-20 bg-gray-200 rounded animate-pulse" />
-  );
-
   useEffect(() => {
     const interval = setInterval(() => {
       setPlaceholderIndex((prev) => (prev + 1) % rotatingPlaceholders.length);
@@ -109,51 +105,46 @@ const Inventory = () => {
 
   return (
     <div className="secondary-font p-4 sm:p-6">
-      <h1 className="text-xl primary-font mb-5 sm:mb-6 text-gray-900">Items</h1>
+      <div className="mb-5 sm:mb-6 pr-10 md:pr-0">
+        <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Items</h1>
+        <p className="text-sm light-font text-gray-500 mt-0.5">Manage your inventory, stock value and low-stock alerts</p>
+      </div>
 
       {/* Stat Cards */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <Card className="w-full md:w-1/2">
-          <div className="flex items-center gap-1.5 text-primary mb-1">
-            <MdAutoGraph className="text-base" />
-            <p className="text-sm secondary-font">Stock Value</p>
-          </div>
-          <div className="flex items-baseline gap-1 text-gray-900 primary-font text-xl">
-            <FaRupeeSign className="text-base" />
-            {isLoading ? (
-              <StatSkeleton />
-            ) : (
-              <span>{stockValue.toLocaleString("en-IN")}</span>
-            )}
-          </div>
-        </Card>
-
-        <Card className="w-full md:w-1/2">
-          <div className="flex items-center gap-1.5 text-yellow-500 mb-1">
-            <FaBoxOpen className="text-base" />
-            <p className="text-sm secondary-font">Low Stock</p>
-          </div>
-          <div className="text-gray-900 primary-font text-xl">
-            {isLoading ? <StatSkeleton /> : lowStockCount}
-          </div>
-        </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <StatCard
+          label="Stock Value"
+          tone="primary"
+          icon={<MdAutoGraph />}
+          loading={isLoading}
+          value={`₹${stockValue.toLocaleString("en-IN")}`}
+        />
+        <StatCard
+          label="Low Stock"
+          tone="warning"
+          colorValue
+          icon={<FaBoxOpen />}
+          loading={isLoading}
+          value={lowStockCount}
+        />
       </div>
 
       {/* Filters Row */}
       <div className="flex flex-wrap items-center gap-4 mb-6">
-        <div className="relative w-full sm:w-[200px]">
+        <div className="relative w-full sm:w-[240px]">
+          <MdSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-lg text-gray-400" />
           <input
             type="text"
             name="inventory-search"
             placeholder={rotatingPlaceholders[placeholderIndex]}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input-field pr-8"
+            className="input-field pl-9 pr-8"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery("")}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 cursor-pointer"
             >
               <FaTimes />
             </button>
@@ -174,12 +165,13 @@ const Inventory = () => {
             return (
               <span
                 key={id}
-                className="flex items-center bg-blue-50 text-primary border border-blue-100 px-2.5 py-1 rounded-full text-sm secondary-font"
+                className="inline-flex items-center gap-1.5 bg-blue-50 text-blue-700 ring-1 ring-inset ring-blue-600/15 pl-2.5 pr-1.5 py-1 rounded-full text-xs font-medium"
               >
                 {category?.name || category?.catagory || category?.label || "Unknown"}
                 <button
                   onClick={() => handleCategoryRemove(id)}
-                  className="ml-2 text-primary hover:text-primary-hover cursor-pointer"
+                  aria-label="Remove filter"
+                  className="inline-flex items-center justify-center h-4 w-4 rounded-full text-blue-500 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer"
                 >
                   &times;
                 </button>

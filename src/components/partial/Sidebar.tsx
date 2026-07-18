@@ -145,7 +145,7 @@ const Sidebar = () => {
   return (
     <>
       <button
-        className="fixed top-3 right-3 z-50 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center bg-slate-800 text-white rounded-md shadow sm:hidden cursor-pointer"
+        className="fixed top-3 right-3 z-50 p-2.5 min-h-[44px] min-w-[44px] flex items-center justify-center bg-slate-900 text-white rounded-xl shadow-lg sm:hidden cursor-pointer"
         onClick={toggleMobile}
       >
         <MdMenu size={24} />
@@ -161,8 +161,8 @@ const Sidebar = () => {
 
       <div
         className={`
-    fixed top-0 left-0 z-50 bg-slate-800 w-[85vw] max-w-[16rem] sm:w-60 flex flex-col
-    h-[100dvh] shadow-2xl
+    fixed top-0 left-0 z-50 bg-gradient-to-b from-slate-900 to-slate-800 w-[85vw] max-w-[16rem] sm:w-60 flex flex-col
+    h-[100dvh] shadow-2xl border-r border-slate-700/50
     transform transition-transform duration-300 ease-in-out
     ${isMobileOpen ? "translate-x-0" : "-translate-x-full"}
     sm:translate-x-0
@@ -188,9 +188,9 @@ const Sidebar = () => {
           <Link
             to="/sales/create-invoice"
             onClick={closeMobile}
-            className="block text-center w-full bg-primary hover:bg-primary-hover text-white text-sm font-medium py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl cursor-pointer"
+            className="flex items-center justify-center gap-2 w-full bg-primary hover:bg-primary-hover text-white text-sm font-medium py-2.5 px-4 rounded-xl transition-all duration-200 shadow-[0_4px_14px_-2px_rgba(37,99,235,0.5)] hover:shadow-[0_6px_20px_-2px_rgba(37,99,235,0.6)] active:scale-[0.98] cursor-pointer"
           >
-            + Create Sales Invoice
+            <span className="text-lg leading-none">+</span> Create Sales Invoice
           </Link>
 
           {/* General Section */}

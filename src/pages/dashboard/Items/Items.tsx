@@ -4,7 +4,7 @@ import Inventory from "../../../components/items/Inventory";
 
 export const Items_page = () => {
   return (
-    <div className="secondary-font bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1 min-w-[200px]">
+    <div className="secondary-font bg-white p-4 sm:p-5 rounded-xl border border-slate-200/80 shadow-[var(--shadow-card)]">
       <Routes>
         <Route path="inventory" element={<Inventory />} />
         <Route path="godown" element={<Godown />} />

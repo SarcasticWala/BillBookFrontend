@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { MdOutlineFileCopy, MdDeleteOutline } from "react-icons/md";
+import { MdOutlineFileCopy, MdDeleteOutline, MdReceiptLong, MdOutlineNumbers } from "react-icons/md";
 import { format } from "date-fns";
 import { toast } from "react-toastify";
 import { SearchDateFilter } from "../../../components/Filter/SearchDateFilter";
@@ -7,6 +7,7 @@ import { Table } from "../../../components/Table/Table";
 import type { Column } from "../../../components/Table/Table";
 import { Button } from "../../../components/UI/Button";
 import { Card } from "../../../components/UI/Card";
+import { StatCard } from "../../../components/UI/StatCard";
 import { Pagination } from "../../../components/UI/Pagination";
 import { RowActionsMenu } from "../../../components/UI/RowActionsMenu";
 import { CreateExpenseModal } from "../../../components/expenses/CreateExpenseModal";
@@ -102,21 +103,18 @@ const ExpensesPage = () => {
   return (
     <div className="secondary-font space-y-4">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <h1 className="text-xl primary-font text-gray-900">Expenses</h1>
-        <Button size="sm" onClick={() => setShowCreate(true)} className="w-full sm:w-auto">
+        <div className="pr-10 lg:pr-0">
+          <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Expenses</h1>
+          <p className="text-sm light-font text-gray-500 mt-0.5">Record and track your business expenses</p>
+        </div>
+        <Button onClick={() => setShowCreate(true)} className="w-full sm:w-auto">
           + Create Expense
         </Button>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card>
-          <p className="text-sm secondary-font text-gray-500 mb-1">Total Expenses</p>
-          <p className="text-xl primary-font text-red-600">{inr(summaryTotal)}</p>
-        </Card>
-        <Card>
-          <p className="text-sm secondary-font text-gray-500 mb-1">Records</p>
-          <p className="text-xl primary-font text-gray-900">{total}</p>
-        </Card>
+        <StatCard label="Total Expenses" tone="danger" colorValue icon={<MdReceiptLong />} value={inr(summaryTotal)} />
+        <StatCard label="Records" tone="neutral" icon={<MdOutlineNumbers />} value={total} />
       </div>
 
       <Card>

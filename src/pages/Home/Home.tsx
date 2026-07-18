@@ -10,7 +10,7 @@ import { DotBackground } from "../../components/UI/DotBackground";
 
 const Home: React.FC = () => {
   return (
-    <div className="relative isolate min-h-screen w-full bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex flex-col">
+    <div className="relative isolate min-h-screen w-full overflow-x-clip bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex flex-col">
       {/* Dot grid spans the whole page, behind every section. */}
       <DotBackground className="-z-10" />
       <Navbar />

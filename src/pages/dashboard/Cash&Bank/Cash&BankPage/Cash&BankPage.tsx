@@ -132,7 +132,10 @@ const CashAndBankPage = () => {
     <div className="secondary-font space-y-5 sm:space-y-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-xl primary-font text-gray-900">Cash &amp; Bank</h1>
+        <div className="pr-10 sm:pr-0">
+          <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Cash &amp; Bank</h1>
+          <p className="text-sm light-font text-gray-500 mt-0.5">Track balances, accounts and money movements</p>
+        </div>
         <div className="flex gap-3 flex-wrap">
           <Button
             variant="outline"

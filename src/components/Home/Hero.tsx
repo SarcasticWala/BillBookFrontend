@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "../UI/Button";
 import InvoiceCardSkeleton from "./InvoiceCardSkeleton";
 
 const stats = [
@@ -63,13 +62,13 @@ const Hero: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-20 pb-16">
         <div className="flex flex-col lg:flex-row items-center gap-14 lg:gap-10">
           {/* LEFT: copy */}
-          <div className="flex-1 text-center lg:text-left max-w-2xl">
+          <div className="flex-1 w-full min-w-0 text-center lg:text-left max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold rounded-full mb-6">
               <span className="w-1.5 h-1.5 rounded-full bg-indigo-600" />
               Trusted by 1 Crore+ Indian businesses
             </div>
 
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl primary-font text-slate-900 mb-5 leading-[1.1] tracking-tight">
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl primary-font text-slate-900 mb-5 leading-[1.1] tracking-tight break-words">
               GST billing software,
               <br />
               built for how India invoices
@@ -82,8 +81,13 @@ const Hero: React.FC = () => {
             </p>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-3 mb-10">
-              <Button>Start Free Billing</Button>
-              <button className="inline-flex items-center gap-1.5 px-5 py-2.5 text-sm font-semibold text-slate-700 hover:text-slate-900 transition-colors">
+              <a
+                href="/login"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold shadow-[0_6px_16px_-4px_rgba(79,70,229,0.5)] hover:bg-indigo-700 active:scale-[0.98] transition-all"
+              >
+                Start Free Billing
+              </a>
+              <button className="inline-flex items-center gap-1.5 px-5 py-3 rounded-xl text-sm font-semibold text-slate-700 hover:text-slate-900 hover:bg-white/70 transition-colors">
                 Watch product tour
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
@@ -103,7 +107,7 @@ const Hero: React.FC = () => {
           </div>
 
           {/* RIGHT: real invoice mockup instead of decorative blobs */}
-          <div className="flex-1 flex justify-center lg:justify-end w-full">
+          <div className="flex-1 flex justify-center lg:justify-end w-full min-w-0">
             <div className="relative w-full max-w-sm">
               <div className="absolute -top-3 -right-3 w-full h-full rounded-2xl bg-indigo-100 -z-10" />
               {cardLoading ? (

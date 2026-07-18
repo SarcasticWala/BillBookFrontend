@@ -150,7 +150,7 @@ const SettingsPage: React.FC = () => {
           >
             Cancel
           </Button>
-          <Button type="submit" form="settings-form" disabled={isSaving || isLoading}>
+          <Button type="submit" form="settings-form" loading={isSaving} disabled={isLoading}>
             {isSaving ? "Saving..." : "Save Changes"}
           </Button>
         </div>

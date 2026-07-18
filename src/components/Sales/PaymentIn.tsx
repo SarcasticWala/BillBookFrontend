@@ -37,9 +37,12 @@ const PaymentIn = () => {
   return (
     <div className="secondary-font min-h-screen bg-slate-50 px-2 py-2 md:px-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-xl primary-font text-gray-900">Payment In</h1>
+        <div className="pr-10 md:pr-0">
+          <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Payment In</h1>
+          <p className="text-sm light-font text-gray-500 mt-0.5">Track payments received from your parties</p>
+        </div>
         <Button
-          className="w-full sm:w-auto"
+          className="secondary-font w-full sm:w-auto cursor-pointer"
           onClick={() => navigate("/sales/paymentin/create")}
         >
           Create Payment In
@@ -62,9 +65,11 @@ const PaymentIn = () => {
 
       <Card>
         {data.length === 0 ? (
-          <div className="flex flex-col items-center py-12 text-gray-500 text-center">
-            <MdOutlineFileCopy className="text-4xl text-gray-300 mb-3" />
-            <p className="text-sm secondary-font">No Transactions Matching the current filter</p>
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <span className="flex h-14 w-14 items-center justify-center rounded-full bg-slate-100 mb-4">
+              <MdOutlineFileCopy className="text-2xl text-gray-400" />
+            </span>
+            <p className="text-sm secondary-font text-gray-500">No Transactions Matching the current filter</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

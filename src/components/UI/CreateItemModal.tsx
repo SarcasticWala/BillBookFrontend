@@ -356,8 +356,8 @@ export const CreateItemModal = ({
       onClose={onClose}
       className="fixed inset-0 z-50 overflow-y-auto"
     >
-      <div className="flex items-center justify-center min-h-screen bg-black/40 p-4">
-        <div className="bg-white w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto rounded-lg p-4 sm:p-6 relative secondary-font">
+      <div className="flex items-center justify-center min-h-screen bg-slate-900/50 backdrop-blur-sm animate-overlay-in p-4">
+        <div className="bg-white w-full max-w-6xl mx-4 max-h-[90vh] overflow-y-auto rounded-2xl border border-slate-200/80 shadow-[var(--shadow-overlay)] animate-modal-in p-4 sm:p-6 relative secondary-font">
           {/* Header */}
           <div className="flex justify-between items-center pb-2 mb-4">
             <h2 className="text-xl primary-font">

@@ -25,11 +25,11 @@ export const Modal: React.FC<ModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onClose={onClose} className="relative z-50">
-      <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm animate-overlay-in" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
         <Dialog.Panel
           className={cn(
-            "w-full bg-white rounded-2xl shadow-xl p-4 sm:p-6 max-h-[90vh] overflow-y-auto border border-slate-200",
+            "w-full bg-white rounded-2xl shadow-[var(--shadow-overlay)] p-4 sm:p-6 max-h-[90vh] overflow-y-auto border border-slate-200/80 animate-modal-in",
 
             maxWidthClassName
           )}

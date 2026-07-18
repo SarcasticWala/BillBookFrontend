@@ -43,9 +43,9 @@ const AdjustStockPurchaseModal: React.FC<AdjustStockPurchaseModalProps> = ({
 
   return (
     <Dialog open={open} onClose={() => setOpen(false)} className="relative z-50">
-      <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm animate-overlay-in" aria-hidden="true" />
       <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="bg-white rounded-xl p-4 sm:p-6 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
+        <Dialog.Panel className="bg-white rounded-2xl border border-slate-200/80 shadow-[var(--shadow-overlay)] animate-modal-in p-4 sm:p-6 w-full max-w-xl mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <Dialog.Title className="text-lg font-bold">
               Add Stock for Purchase

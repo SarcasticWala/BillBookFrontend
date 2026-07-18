@@ -51,9 +51,14 @@ const DebitNote = () => {
   return (
     <div className="secondary-font bg-[#f9fafc] min-h-screen px-2 py-2 md:px-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-xl primary-font text-gray-900">Debit Note</h1>
+        <div className="pr-10 md:pr-0">
+          <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Debit Note</h1>
+          <p className="text-sm light-font text-gray-500 mt-0.5">
+            Track debit notes issued to your suppliers
+          </p>
+        </div>
         <Button
-          className="w-full sm:w-auto cursor-pointer"
+          className="secondary-font w-full sm:w-auto cursor-pointer"
           onClick={() => navigate("/purchases/debitnote/create")}
         >
           Create Debit Note
@@ -74,8 +79,8 @@ const DebitNote = () => {
       </div>
       <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
         {data.length === 0 ? (
-          <div className="flex flex-col items-center py-12 text-gray-500 text-center">
-            <LuShoppingCart className="text-5xl text-gray-300 mb-3" />
+          <div className="flex flex-col items-center py-12 text-slate-400 text-center">
+            <LuShoppingCart className="text-5xl text-slate-300 mb-3" />
             <p className="text-sm secondary-font">No Transactions Matching the current filter</p>
           </div>
         ) : (

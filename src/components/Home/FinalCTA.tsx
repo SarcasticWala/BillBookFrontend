@@ -29,7 +29,7 @@ const FinalCTA: React.FC = () => {
                 Start Free Billing
               </a>
               <a
-                href="/book-demo"
+                href="/login"
                 className="inline-flex items-center justify-center px-6 py-3 rounded-lg border border-white/40 text-white text-sm font-semibold hover:bg-white/10 transition-colors"
               >
                 Book a demo
