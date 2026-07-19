@@ -50,7 +50,7 @@ const PurchaseOrder = () => {
   ];
 
   return (
-    <div className="secondary-font bg-slate-50 min-h-screen p-4 md:p-6">
+    <div className="secondary-font bg-slate-50 min-h-full p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h1 className="text-xl primary-font text-gray-900">Purchase Orders</h1>

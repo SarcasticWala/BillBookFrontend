@@ -51,7 +51,7 @@ const QuotationEstimate = () => {
   ];
 
   return (
-    <div className="secondary-font min-h-screen bg-slate-50 p-4 md:p-6">
+    <div className="secondary-font min-h-full bg-slate-50 p-4 md:p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="pr-10 md:pr-0">
           <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Quotation / Estimate</h1>

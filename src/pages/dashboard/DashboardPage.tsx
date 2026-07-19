@@ -56,7 +56,7 @@ const DashboardPage = () => {
   });
 
   return (
-    <div className="secondary-font min-h-screen bg-slate-50 p-4 sm:p-6 space-y-6">
+    <div className="secondary-font min-h-full bg-slate-50 p-4 sm:p-6 space-y-6">
       {/* HEADER */}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div className="pr-10 sm:pr-0">

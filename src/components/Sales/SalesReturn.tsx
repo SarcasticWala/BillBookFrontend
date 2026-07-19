@@ -52,7 +52,7 @@ const SalesReturn = () => {
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen px-2 py-2 md:px-2">
+    <div className="bg-slate-50 min-h-full px-2 py-2 md:px-2">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="pr-10 md:pr-0">
           <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Sales Return</h1>

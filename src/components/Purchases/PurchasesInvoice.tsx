@@ -159,7 +159,7 @@ const PurchasesInvoice = () => {
   ];
 
   return (
-    <div className="secondary-font min-h-screen px-2 py-2 lg:px-2 md:py-2">
+    <div className="secondary-font min-h-full px-2 py-2 lg:px-2 md:py-2">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="pr-10 md:pr-0">

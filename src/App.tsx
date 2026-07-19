@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { lazy, Suspense, useState, useEffect } from "react";
 import { BrandLoader } from "./components/UI/BrandLoader.tsx";
 import PartyDetail from "./components/Parties/PartyDetail.tsx";
@@ -46,6 +46,14 @@ const SettingsPage = lazy(() => import("./pages/dashboard/Settings/Settings"));
 const BookDemoPage = lazy(() => import("./pages/dashboard/BookDemo/BookDemoPage"));
 const PosBillingPage = lazy(() => import("./pages/dashboard/PosBilling/PosBillingPage"));
 const AdminDemoRequests = lazy(() => import("./pages/dashboard/Admin/AdminDemoRequests"));
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+  }, [pathname]);
+  return null;
+}
+
 function App() {
   // Brief branded splash on initial app load, with a smooth fade-out.
   const [booting, setBooting] = useState(true);
@@ -56,6 +64,7 @@ function App() {
 
   return (
     <Router>
+      <ScrollToTop />
       <BrandLoader visible={booting} />
       <ErrorBoundary>
       <Suspense fallback={<BrandLoader visible />}>
@@ -66,10 +75,10 @@ function App() {
           path="/*"
           element={
             <ProtectedRoute>
-            <div className="flex ">
+            <div className="flex h-screen overflow-hidden">
               <Sidebar />
-              <div className="flex-1 min-w-0 min-h-screen sm:ml-60  flex flex-col bg-white pb-8">
-                <div className="flex-grow p-4 sm:p-6 w-full max-w-9xl mx-auto">
+              <div className="flex-1 min-w-0 h-screen overflow-hidden sm:ml-60 flex flex-col bg-white">
+                <div className="app-content flex-1 overflow-y-auto p-4 sm:p-6 w-full max-w-9xl mx-auto">
                   <Routes>
                     <Route path="dashboard" element={<DashboardPage />} />
                     <Route path="parties" element={<Parties_Page />} />

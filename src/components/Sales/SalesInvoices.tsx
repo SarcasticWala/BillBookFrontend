@@ -39,7 +39,7 @@ const SalesInvoices = () => {
   };
 
   return (
-    <div className="min-h-screen px-2 py-2 lg:px-2 md:py-2">
+    <div className="min-h-full px-2 py-2 lg:px-2 md:py-2">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <div className="pr-10 md:pr-0">
           <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Sales Invoices</h1>
