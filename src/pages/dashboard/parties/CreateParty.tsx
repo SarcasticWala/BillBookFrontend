@@ -27,7 +27,7 @@ const CreateParty: React.FC = () => {
   const [email, setEmail] = useState("");
   const [gstNumber, setGstNumber] = useState("");
   const [panNumber, setPanNumber] = useState("");
-const [openingBalance, setOpeningBalance] = useState("");
+  const [openingBalance, setOpeningBalance] = useState<string>("0");
   const [openingBalanceType, setOpeningBalanceType] = useState("TO_COLLECT");
   const [partyType, setPartyType] = useState("CUSTOMER");
   const [partyCategory, setPartyCategory] = useState("");
@@ -67,7 +67,7 @@ const [openingBalance, setOpeningBalance] = useState("");
     setEmail("");
     setGstNumber("");
     setPanNumber("");
-    setOpeningBalance(0);
+    setOpeningBalance("0");
     setOpeningBalanceType("TO_COLLECT");
     setPartyType("CUSTOMER");
     setPartyCategory("");
@@ -213,7 +213,7 @@ const [openingBalance, setOpeningBalance] = useState("");
                   placeholder="0"
                   className="w-full outline-none border-0 bg-transparent p-0 text-[0.95rem]"
                   value={openingBalance}
-                  onChange={(e) => setOpeningBalance(Number(e.target.value))}
+                  onChange={(e) => setOpeningBalance(e.target.value === "" ? "0" : e.target.value)}
                 />
               </div>
               <select
