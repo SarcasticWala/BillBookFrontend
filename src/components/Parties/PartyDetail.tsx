@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { useGetPartyByIdQuery } from "../../features/party/partyApiSlice";
+import { useGetPartyByIdQuery, useGetCategoriesQuery } from "../../features/party/partyApiSlice";
 import { MdEdit } from "react-icons/md";
 import { Button } from "../UI/Button";
 import { PageHeader } from "../UI/PageHeader";
@@ -10,6 +10,7 @@ export default function PartyDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { data, isLoading, isError } = useGetPartyByIdQuery(id || "");
+  const { data: categoriesData } = useGetCategoriesQuery(undefined);
 
   if (isLoading)
     return <div className="p-4 sm:p-6 text-gray-500 secondary-font">Loading party…</div>;
@@ -21,6 +22,10 @@ export default function PartyDetail() {
     );
 
   const party = data.data;
+  const categoryById: Record<string, string> = {};
+  for (const c of categoriesData?.data || []) {
+    categoryById[c.id] = c.name || c.catagory || c.label || "";
+  }
 
   // Tolerant readers — API may return the write shape (partyName/gstNumber/
   // billingAddressData) or a mapped read shape (name/gstin/billingAddress).
@@ -30,7 +35,7 @@ export default function PartyDetail() {
   const categoryName =
     party.partyCatagory?.catagory ||
     party.partyCatagory?.name ||
-    (typeof party.partyCatagory === "string" ? party.partyCatagory : undefined);
+    (typeof party.partyCatagory === "string" ? categoryById[party.partyCatagory] || party.partyCatagory : undefined);
 
   const formatAddress = (addr: any) => {
     const a = addr?.miscData || addr;

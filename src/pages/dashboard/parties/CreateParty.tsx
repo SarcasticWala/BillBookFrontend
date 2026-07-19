@@ -27,7 +27,7 @@ const CreateParty: React.FC = () => {
   const [email, setEmail] = useState("");
   const [gstNumber, setGstNumber] = useState("");
   const [panNumber, setPanNumber] = useState("");
-  const [openingBalance, setOpeningBalance] = useState<number>(0);
+const [openingBalance, setOpeningBalance] = useState("");
   const [openingBalanceType, setOpeningBalanceType] = useState("TO_COLLECT");
   const [partyType, setPartyType] = useState("CUSTOMER");
   const [partyCategory, setPartyCategory] = useState("");
