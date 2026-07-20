@@ -133,12 +133,12 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 max-w-3xl mx-auto secondary-font">
+    <div className="p-4 sm:p-6 w-full secondary-font">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-xl primary-font text-gray-900">Settings</h1>
+          <h1 className="text-2xl primary-font text-gray-900 tracking-tight">Settings</h1>
           <p className="text-sm light-font text-gray-500 mt-1">
-            Manage your business profile
+            Manage your business profile and branding
           </p>
         </div>
         <div className="flex items-center gap-3 shrink-0 w-full sm:w-auto">
@@ -164,47 +164,60 @@ const SettingsPage: React.FC = () => {
         </Card>
       ) : (
         <form id="settings-form" onSubmit={handleSubmit} noValidate className="space-y-5">
-          {/* Business logo — click the avatar to upload */}
-          <FormSection title="Business Logo" layout="plain">
-            <div className="flex flex-col items-center text-center">
-              <label className="relative cursor-pointer group" title="Upload logo">
-                <div className="w-24 h-24 rounded-full bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
-                  {logoPreview ? (
-                    <img
-                      src={logoPreview}
-                      alt="Business logo"
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <span className="text-3xl primary-font text-gray-400">
-                      {(form.businessName.charAt(0) || "B").toUpperCase()}
-                    </span>
-                  )}
-                  <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
-                    <MdPhotoCamera className="w-6 h-6 text-white" />
-                  </div>
+          {/* Business logo — click anywhere in the block to upload */}
+          <FormSection
+            title="Business Logo"
+            description="Appears on your invoices and in the sidebar."
+            layout="plain"
+          >
+            <label
+              className="group flex flex-col items-center gap-5 text-center sm:flex-row sm:text-left cursor-pointer"
+              title="Upload logo"
+            >
+              <div className="relative w-20 h-20 shrink-0 rounded-full bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                {logoPreview ? (
+                  <img
+                    src={logoPreview}
+                    alt="Business logo"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span className="text-3xl primary-font text-slate-400">
+                    {(form.businessName.charAt(0) || "B").toUpperCase()}
+                  </span>
+                )}
+                <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                  <MdPhotoCamera className="w-6 h-6 text-white" />
                 </div>
-                <span className="absolute bottom-0 right-0 bg-primary text-white rounded-full p-1.5 shadow ring-2 ring-white">
-                  <MdPhotoCamera className="w-3.5 h-3.5" />
+              </div>
+
+              <div>
+                <p className="text-sm secondary-font text-gray-800 font-medium">
+                  {logoPreview ? "Change business logo" : "Add a business logo"}
+                </p>
+                <p className="text-xs light-font text-gray-400 mt-0.5">
+                  PNG, JPG or WEBP · up to 2MB · square images look best
+                </p>
+                <span className="mt-3 inline-flex items-center gap-1.5 rounded-[10px] border border-slate-300 bg-white px-3.5 py-2 text-sm font-medium text-slate-700 shadow-[0_1px_1px_rgba(16,24,40,0.04)] transition-colors group-hover:bg-slate-50 group-hover:border-slate-400">
+                  <MdPhotoCamera className="w-4 h-4" />
+                  Upload image
                 </span>
-                <input
-                  type="file"
-                  accept="image/png,image/jpeg,image/webp"
-                  className="hidden"
-                  onChange={handleLogoChange}
-                />
-              </label>
-              <p className="mt-3 text-sm secondary-font text-gray-700">
-                {logoPreview ? "Change business logo" : "Add a business logo"}
-              </p>
-              <p className="text-xs light-font text-gray-400">
-                PNG, JPG or WEBP · up to 2MB
-              </p>
-            </div>
+              </div>
+
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                className="hidden"
+                onChange={handleLogoChange}
+              />
+            </label>
           </FormSection>
 
           {/* Business details */}
-          <FormSection title="Business Details">
+          <FormSection
+            title="Business Details"
+            description="Used on your invoices and GST documents."
+          >
             <Input
               label="Business Name"
               value={form.businessName}
@@ -225,6 +238,7 @@ const SettingsPage: React.FC = () => {
               label="Phone"
               value={user?.phone || ""}
               disabled
+              hint="Linked to your account — can't be changed here."
               containerClassName="opacity-90"
             />
             <Input
@@ -242,6 +256,7 @@ const SettingsPage: React.FC = () => {
               onChange={setField("gstin")}
               error={errors.gstin}
               placeholder="22AAAAA0000A1Z5"
+              hint="15-character GST identification number."
               maxLength={15}
             />
             <Input

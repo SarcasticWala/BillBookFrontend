@@ -64,7 +64,7 @@ const SalesInvoices = () => {
         <StatCard label="Unpaid" tone="danger" colorValue icon={<MdMoneyOff />} value={inr(summary.due)} />
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div className="w-full lg:w-1/2">
           <SearchDateFilter
             filterValue={filter}

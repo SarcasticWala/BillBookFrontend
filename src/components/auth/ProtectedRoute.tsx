@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { getToken, clearToken } from "../../config/api";
 import { useGetMeQuery } from "../../features/auth/authApiSlice";
+import { BrandLoader } from "../UI/BrandLoader";
 
 /**
  * Gate for authenticated areas. Requires a stored JWT AND validates it against
@@ -30,11 +31,9 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 secondary-font text-gray-500">
-        Loading…
-      </div>
-    );
+    // Use the same branded loader as boot/Suspense so only one loader style
+    // is ever shown (no plain "Loading…" text flashing alongside it).
+    return <BrandLoader visible />;
   }
 
   return <>{children}</>;

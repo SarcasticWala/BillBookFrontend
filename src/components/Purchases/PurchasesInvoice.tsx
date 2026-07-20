@@ -188,7 +188,7 @@ const PurchasesInvoice = () => {
       </div>
 
       {/* Filters + Actions */}
-      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
         <div className="w-full lg:w-1/2">
           <SearchDateFilter
             filterValue={filter}
