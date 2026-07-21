@@ -18,6 +18,7 @@ import {
 import CreateItemCategoryModal from "./CreateItemCategoryModal";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
+import { newIdempotencyKey } from "../../lib/idempotency";
 
 // Images over this size can't be inlined if the image host is unavailable, so
 // the server would drop them. Filter them out up-front and tell the user.
@@ -52,6 +53,9 @@ export const CreateItemModal = ({
   const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [enableLowStock, setEnableLowStock] = useState(false);
   const [images, setImages] = useState<File[]>([]);
+  // One key per create attempt — survives double-clicks, regenerated after each
+  // successful create so the next item isn't deduped against the last.
+  const idempotencyKey = useRef(newIdempotencyKey());
 
   const { data: itemCategoriesData } = useGetCategoriesQuery(undefined);
   const categoryOptions = itemCategoriesData?.data || [];
@@ -247,8 +251,10 @@ export const CreateItemModal = ({
         await updateItem({ id: itemToEdit.id || itemToEdit._id, formData }).unwrap();
         toast.success("Item updated successfully");
       } else {
+        formData.append("__idempotencyKey", idempotencyKey.current);
         await createItem(formData).unwrap();
         toast.success("Item created successfully");
+        idempotencyKey.current = newIdempotencyKey();
       }
       resetAll();
       onClose();

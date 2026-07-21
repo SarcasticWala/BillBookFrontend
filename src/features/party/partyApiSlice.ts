@@ -7,10 +7,12 @@ export const partyApi = createApi({
   tagTypes: ["Party"],
   endpoints: (builder) => ({
     createParty: builder.mutation({
-      query: (partyData) => ({
+      query: ({ __idempotencyKey, ...partyData }: any) => ({
         url: "create",
         method: "POST",
         body: partyData,
+        // Guard against double-submit / retries creating duplicate parties.
+        headers: __idempotencyKey ? { "Idempotency-Key": __idempotencyKey } : {},
       }),
       invalidatesTags: ["Party"],
     }),

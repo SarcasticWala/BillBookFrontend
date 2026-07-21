@@ -7,12 +7,18 @@ export const itemApi = createApi({
   tagTypes: ["Item"],
   endpoints: (builder) => ({
     createItem: builder.mutation({
-      query: (itemData: FormData) => ({
-        url: "create",
-        method: "POST",
-        body: itemData,
-        headers: {}, // browser sets content-type
-      }),
+      query: (itemData: FormData) => {
+        // Double-submit guard: the key rides in the FormData; lift it into the
+        // Idempotency-Key header and drop it from the body before sending.
+        const key = itemData.get("__idempotencyKey");
+        if (key) itemData.delete("__idempotencyKey");
+        return {
+          url: "create",
+          method: "POST",
+          body: itemData,
+          headers: key ? { "Idempotency-Key": String(key) } : {}, // browser sets content-type
+        };
+      },
       invalidatesTags: ["Item"],
     }),
 

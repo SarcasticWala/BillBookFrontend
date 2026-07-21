@@ -601,7 +601,23 @@ const handleTaxPercentChange = (index: number, val: string) => {
   const columns: Column<(typeof formik.values.itemDetails)[0]>[] = [
     { header: "Item", accessor: "itemName" },
     { header: "HSN", accessor: "hsnCode" },
-    { header: "Qty", accessor: "quantity" },
+    {
+      header: "Qty",
+      render: (_, row) => {
+        const stock = (row as any).availableStock;
+        const oversold = typeof stock === "number" && (row.quantity || 0) > stock;
+        return (
+          <div className="min-w-[3rem]">
+            <span>{row.quantity}</span>
+            {oversold && (
+              <span className="mt-0.5 block text-[11px] font-medium text-amber-600 whitespace-nowrap">
+                Only {stock} in stock
+              </span>
+            )}
+          </div>
+        );
+      },
+    },
     {
       header: "Price/Item",
       render: (_, row, index) => (
@@ -764,6 +780,11 @@ const handleTaxPercentChange = (index: number, val: string) => {
               isSaleTaxApplicable: Boolean(it.isSaleTaxApplicable),
               isPreowned,
               purchasePrice,
+              // On-hand stock at add time — used only for a non-blocking oversell
+              // warning (null for services / items without tracked stock).
+              availableStock: Number.isFinite(Number(it.stock))
+                ? Number(it.stock)
+                : null,
             };
           });
 

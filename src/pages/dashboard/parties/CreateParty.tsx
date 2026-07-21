@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { newIdempotencyKey } from "../../../lib/idempotency";
 import AddressModal from "../../../components/UI/AddressModal";
 import CreateCategoryModal from "../../../components/UI/CreateCategoryModal";
 import {
@@ -8,6 +9,7 @@ import {
   useUpdatePartyMutation,
   useGetPartyByIdQuery,
   useGetCategoriesQuery,
+  useGetPartiesQuery,
 } from "../../../features/party/partyApiSlice";
 import { Button } from "../../../components/UI/Button";
 import { Input } from "../../../components/UI/Input";
@@ -48,6 +50,24 @@ const CreateParty: React.FC = () => {
   });
 
   const [createParty, { isLoading }] = useCreatePartyMutation();
+  // Double-submit guard: stable across a double-click, refreshed after each
+  // successful create (so "Save & New" isn't deduped against the last party).
+  const idempotencyKey = useRef(newIdempotencyKey());
+
+  // Non-blocking duplicate check: warn (don't block) if the entered mobile
+  // number already belongs to another party.
+  const { data: partiesResp } = useGetPartiesQuery(undefined);
+  const existingParties: any[] = Array.isArray(partiesResp)
+    ? partiesResp
+    : partiesResp?.data ?? [];
+  const duplicateParty =
+    mobileNo.length === 10
+      ? existingParties.find(
+          (p) =>
+            (p.mobileNo || p.mobileNumber) === mobileNo &&
+            String(p._id || p.id) !== String(id)
+        )
+      : null;
   const [updateParty, { isLoading: isUpdating }] = useUpdatePartyMutation();
   const saving = isLoading || isUpdating;
 
@@ -111,8 +131,9 @@ const CreateParty: React.FC = () => {
         toast.success("Party updated successfully");
         navigate("/parties");
       } else {
-        await createParty(payload).unwrap();
+        await createParty({ ...payload, __idempotencyKey: idempotencyKey.current }).unwrap();
         toast.success("Party created successfully");
+        idempotencyKey.current = newIdempotencyKey();
         if (saveAndNew) resetForm();
         else navigate("/parties");
       }
@@ -187,14 +208,26 @@ const CreateParty: React.FC = () => {
             value={partyName}
             onChange={(e) => setPartyName(e.target.value)}
           />
-          <Input
-            label="Mobile Number"
-            required
-            placeholder="Enter mobile number"
-            maxLength={10}
-            value={mobileNo}
-            onChange={(e) => setMobileNo(e.target.value.replace(/\D/g, ""))}
-          />
+          <div>
+            <Input
+              label="Mobile Number"
+              required
+              placeholder="Enter mobile number"
+              maxLength={10}
+              value={mobileNo}
+              onChange={(e) => setMobileNo(e.target.value.replace(/\D/g, ""))}
+            />
+            {duplicateParty && (
+              <p className="mt-1 flex items-start gap-1 text-xs text-amber-600">
+                <span className="shrink-0">⚠</span>
+                <span>
+                  <span className="font-medium">{duplicateParty.partyName}</span>{" "}
+                  already uses this mobile number. You can still save if this is
+                  intentional.
+                </span>
+              </p>
+            )}
+          </div>
           <Input
             label="Email"
             type="email"
