@@ -49,7 +49,15 @@ export const ItemDetailsPage = () => {
     item.itemCatagory?.catagory ||
     item.itemCatagory?.name ||
     (typeof item.itemCatagory === "string" ? item.itemCatagory : undefined);
-  const images: string[] = item.itemImage || [];
+  // Backend returns uploaded images under `images` (array of URLs/data-URIs),
+  // with `imageUrl` as a single fallback. (`itemImage` kept for any legacy shape.)
+  const images: string[] = Array.isArray(item.images)
+    ? item.images
+    : Array.isArray(item.itemImage)
+    ? item.itemImage
+    : item.imageUrl
+    ? [item.imageUrl]
+    : [];
 
   // Stock status (products only)
   const qty = Number(item.netQuantity ?? 0);
