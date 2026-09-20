@@ -20,7 +20,7 @@ type SalesInvoice = {
   partyName: string;
   dueIn: string;
   amount: string;
-  status: "Paid" | "Unpaid" | "Overdue" | "Void";
+  status: "Paid" | "Partial" | "Unpaid" | "Void";
   invioceDate: string;
 };
 
@@ -62,14 +62,20 @@ export const SaleTable = ({
         invoice.partyName || invoice.partyId?.partyName || invoice.party?.name || "-",
       dueIn: dueDate ? format(dueDate, "PPP") : "No Due Date",
       amount: `₹${invoice.totalSaleAmount ?? "-"}`,
+      // Server-computed `status` (PAID/PARTIAL/UNPAID/VOID) is always correct
+      // and kept up to date on every create/edit/void. `isFullyPaid` is a
+      // separate, form-only checkbox that's never set by POS checkout (or by
+      // a manual invoice paid in full without that specific box ticked) — so
+      // it's not a reliable "is this paid" signal and was showing every such
+      // invoice as "Overdue" instead of "Paid".
       status:
         invoice.status === "VOID"
           ? "Void"
-          : invoice.isFullyPaid
+          : invoice.status === "PAID"
           ? "Paid"
-          : invoice.dueAmount > 0
-          ? "Unpaid"
-          : "Overdue",
+          : invoice.status === "PARTIAL"
+          ? "Partial"
+          : "Unpaid",
       invioceDate: invoiceDate ? format(invoiceDate, "dd MMM yyyy") : "-",
     };
   });
@@ -87,7 +93,7 @@ export const SaleTable = ({
         const variant =
           value === "Paid"
             ? "success"
-            : value === "Unpaid"
+            : value === "Partial"
             ? "warning"
             : value === "Void"
             ? "neutral"

@@ -113,10 +113,15 @@ export const CreateSalesForm: React.FC = () => {
         return;
       }
 
+      // Cash + Online is meant to be a breakdown of Received Amount, not an
+      // independent figure — previously this only rejected a sum that
+      // *exceeded* Received Amount, so e.g. Received=68999 with Cash=0,
+      // Online=0 passed silently and saved an invoice whose payment-method
+      // split didn't actually account for the amount marked as received.
       const partialSum = Number(values.cash) + Number(values.online);
-      if (partialSum > values.receivedAmount) {
+      if (Math.abs(partialSum - Number(values.receivedAmount)) > 0.01) {
         toast.error(
-          "Sum of cash and online payments cannot exceed received amount."
+          "Cash + Online payment must add up to the received amount."
         );
         return;
       }

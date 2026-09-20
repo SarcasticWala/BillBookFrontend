@@ -47,12 +47,39 @@ const PosBillingPage = lazy(() => import("./pages/dashboard/PosBilling/PosBillin
 const AdminDemoRequests = lazy(() => import("./pages/dashboard/Admin/AdminDemoRequests"));
 const PrivacyPolicy = lazy(() => import("./pages/Legal/PrivacyPolicy"));
 const TermsAndConditions = lazy(() => import("./pages/Legal/TermsAndConditions"));
+const RefundPolicy = lazy(() => import("./pages/Legal/RefundPolicy"));
+const Features = lazy(() => import("./pages/Info/Features"));
+const EInvoicingInfo = lazy(() => import("./pages/Info/EInvoicingInfo"));
+const InventoryInfo = lazy(() => import("./pages/Info/InventoryInfo"));
+const About = lazy(() => import("./pages/Info/About"));
+const Blog = lazy(() => import("./pages/Info/Blog"));
+const Contact = lazy(() => import("./pages/Info/Contact"));
 const NotFoundPage = lazy(() => import("./pages/NotFound"));
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   useEffect(() => {
+    if (hash) {
+      // The target section (e.g. Pricing on Home) may still be behind a lazy
+      // chunk that hasn't rendered yet, so the element might not exist in the
+      // DOM the instant this effect runs — poll a few frames until it does
+      // instead of giving up (or, worse, forcing scroll back to 0,0 below).
+      const id = hash.slice(1);
+      let attempts = 0;
+      let frame: number;
+      const tryScroll = () => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else if (attempts < 50) {
+          attempts += 1;
+          frame = requestAnimationFrame(tryScroll);
+        }
+      };
+      tryScroll();
+      return () => cancelAnimationFrame(frame);
+    }
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-  }, [pathname]);
+  }, [pathname, hash]);
   return null;
 }
 
@@ -75,6 +102,13 @@ function App() {
         <Route path="login" element={<Login />} />
         <Route path="privacy-policy" element={<PrivacyPolicy />} />
         <Route path="terms-conditions" element={<TermsAndConditions />} />
+        <Route path="refund-policy" element={<RefundPolicy />} />
+        <Route path="features" element={<Features />} />
+        <Route path="gst-e-invoicing" element={<EInvoicingInfo />} />
+        <Route path="inventory-management" element={<InventoryInfo />} />
+        <Route path="about" element={<About />} />
+        <Route path="blog" element={<Blog />} />
+        <Route path="contact" element={<Contact />} />
 
         {/* Every child below requires auth (ProtectedRoute renders <Outlet/> or
             redirects to /login) AND gets the dashboard chrome (DashboardLayout).

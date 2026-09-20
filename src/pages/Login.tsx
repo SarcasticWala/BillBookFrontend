@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   FiShield,
   FiMail,
@@ -44,6 +44,7 @@ const WEAK_MSG = "Use 8+ characters with upper, lower and a number";
 
 export default function AuthPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { login, register, sendOtp, verifyOtp, resetPassword, logout } = useAuth();
 
   // In dev the backend returns the OTP (no SMS provider); surface it so the
@@ -54,7 +55,9 @@ export default function AuthPage() {
     toast.info(`Dev OTP: ${devCode}`, { autoClose: 8000 });
   };
 
-  const [mode, setMode] = useState<Mode>("login");
+  const [mode, setMode] = useState<Mode>(
+    searchParams.get("mode") === "signup" ? "signup" : "login"
+  );
   const [step, setStep] = useState<Step>("details");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

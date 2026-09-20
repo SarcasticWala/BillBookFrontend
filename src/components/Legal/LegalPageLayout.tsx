@@ -5,7 +5,8 @@ import { DotBackground } from "../UI/DotBackground";
 
 interface LegalPageLayoutProps {
   title: string;
-  lastUpdated: string;
+  lastUpdated?: string;
+  subtitle?: string;
   children: React.ReactNode;
 }
 
@@ -13,6 +14,7 @@ interface LegalPageLayoutProps {
 export const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({
   title,
   lastUpdated,
+  subtitle,
   children,
 }) => {
   return (
@@ -24,7 +26,12 @@ export const LegalPageLayout: React.FC<LegalPageLayoutProps> = ({
           <h1 className="primary-font text-3xl sm:text-4xl text-slate-900 tracking-tight">
             {title}
           </h1>
-          <p className="text-sm text-slate-500 mt-2">Last updated: {lastUpdated}</p>
+          {lastUpdated && (
+            <p className="text-sm text-slate-500 mt-2">Last updated: {lastUpdated}</p>
+          )}
+          {subtitle && (
+            <p className="text-base text-slate-500 mt-3 max-w-xl">{subtitle}</p>
+          )}
           <div className="mt-10 space-y-8 secondary-font text-slate-600 leading-relaxed">
             {children}
           </div>

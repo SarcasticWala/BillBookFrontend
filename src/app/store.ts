@@ -14,6 +14,7 @@ import { expenseApi } from "../features/expense/expenseApiSlice";
 import { posApi } from "../features/pos/posApiSlice";
 import { automatedBillApi } from "../features/automatedBills/automatedBillApiSlice";
 import { eInvoiceApi } from "../features/eInvoice/eInvoiceApiSlice";
+import { reportApi } from "../features/report/reportApiSlice";
 import { authErrorMiddleware } from "./authErrorMiddleware";
 
 export const store = configureStore({
@@ -32,6 +33,7 @@ export const store = configureStore({
     [posApi.reducerPath]: posApi.reducer,
     [automatedBillApi.reducerPath]: automatedBillApi.reducer,
     [eInvoiceApi.reducerPath]: eInvoiceApi.reducer,
+    [reportApi.reducerPath]: reportApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -49,6 +51,7 @@ export const store = configureStore({
       posApi.middleware,
       automatedBillApi.middleware,
       eInvoiceApi.middleware,
+      reportApi.middleware,
       authErrorMiddleware,
     ),
 });

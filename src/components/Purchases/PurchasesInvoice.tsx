@@ -35,7 +35,7 @@ type PurchaseInvoice = {
   partyName: string;
   dueIn: string;
   amount: string;
-  status: "Paid" | "Unpaid" | "Overdue" | "Void";
+  status: "Paid" | "Partial" | "Unpaid" | "Void";
 };
 
 const PurchasesInvoice = () => {
@@ -91,14 +91,16 @@ const PurchasesInvoice = () => {
         invoice.partyName || invoice.partyId?.partyName || invoice.party?.name || "-",
       dueIn: dueDate ? format(dueDate, "PPP") : "No Due Date",
       amount: `₹${invoice.totalPurchaseAmount ?? "-"}`,
+      // See SaleTable.tsx for why this uses the server-computed `status`
+      // field instead of the never-reliably-set `isFullyPaid` checkbox field.
       status:
         invoice.status === "VOID"
           ? "Void"
-          : invoice.isFullyPaid
-            ? "Paid"
-            : invoice.dueAmount > 0
-              ? "Unpaid"
-              : "Overdue",
+          : invoice.status === "PAID"
+          ? "Paid"
+          : invoice.status === "PARTIAL"
+          ? "Partial"
+          : "Unpaid",
     };
   });
 
@@ -115,7 +117,7 @@ const PurchasesInvoice = () => {
         const variant =
           value === "Paid"
             ? "success"
-            : value === "Unpaid"
+            : value === "Partial"
             ? "warning"
             : value === "Void"
             ? "neutral"

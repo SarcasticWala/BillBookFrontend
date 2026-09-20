@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Reveal } from "../UI/Reveal";
 import { Shimmer } from "../UI/Shimmer";
+import { getToken } from "../../config/api";
 
 type Billing = "monthly" | "yearly";
 
@@ -60,13 +61,16 @@ const Check = () => (
 const Pricing: React.FC = () => {
   const [billing, setBilling] = useState<Billing>("monthly");
   const [loading, setLoading] = useState(true);
+  // Already-logged-in visitors go straight to the dashboard instead of the
+  // login screen; logged-out ones land on the signup tab, not login.
+  const isAuthed = Boolean(getToken());
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 900);
     return () => clearTimeout(t);
   }, []);
 
   return (
-    <section className="w-full py-20 sm:py-24 bg-white/60">
+    <section id="pricing" className="w-full py-20 sm:py-24 bg-white/60">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <Reveal className="text-center max-w-2xl mx-auto mb-10">
           <span className="inline-flex items-center gap-2 px-3.5 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs font-semibold rounded-full mb-4">
@@ -158,7 +162,13 @@ const Pricing: React.FC = () => {
                   </p>
 
                   <a
-                    href="/login"
+                    href={
+                      tier.cta === "Contact Sales"
+                        ? "/contact"
+                        : isAuthed
+                        ? "/dashboard"
+                        : "/login?mode=signup"
+                    }
                     className={`block text-center w-full py-2.5 rounded-lg text-sm font-semibold transition-colors mb-6 ${
                       tier.popular
                         ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm"
