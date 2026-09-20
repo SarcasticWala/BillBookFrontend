@@ -13,7 +13,7 @@ const CreateCategory = lazy(
   () => import("./pages/dashboard/Items/CreateItems/CreateCategory")
 );
 const Home = lazy(() => import("./pages/Home/Home.tsx"));
-const Sidebar = lazy(() => import("./components/partial/Sidebar"));
+const DashboardLayout = lazy(() => import("./components/layout/DashboardLayout"));
 const Login = lazy(() => import("./pages/Login"));
 const Parties_Page = lazy(
   () => import("./pages/dashboard/parties/Parties_page")
@@ -38,7 +38,6 @@ const AutomatedBillsPage = lazy(
   () => import("./pages/dashboard/AutomatedBill/AutomatedBillsPage.tsx")
 );
 const DashboardPage = lazy(() => import("./pages/dashboard/DashboardPage"));
-const Footer = lazy(() => import("./components/Footer/Footer"));
 const CreatePurchaseForm = lazy(() => import("./pages/dashboard/Purchace/PurchaseCreate/PurchaseCreate"));
 const CreateSalesForm = lazy(() => import("./pages/dashboard/sales/SalesInvoice/CreateSalesInvoice/CreateSalesInvoices"));
 const ExpensesPage = lazy(() => import("./pages/dashboard/Expenss/ExpensesPage"));
@@ -46,6 +45,9 @@ const SettingsPage = lazy(() => import("./pages/dashboard/Settings/Settings"));
 const BookDemoPage = lazy(() => import("./pages/dashboard/BookDemo/BookDemoPage"));
 const PosBillingPage = lazy(() => import("./pages/dashboard/PosBilling/PosBillingPage"));
 const AdminDemoRequests = lazy(() => import("./pages/dashboard/Admin/AdminDemoRequests"));
+const PrivacyPolicy = lazy(() => import("./pages/Legal/PrivacyPolicy"));
+const TermsAndConditions = lazy(() => import("./pages/Legal/TermsAndConditions"));
+const NotFoundPage = lazy(() => import("./pages/NotFound"));
 function ScrollToTop() {
   const { pathname } = useLocation();
   useEffect(() => {
@@ -71,52 +73,48 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="login" element={<Login />} />
-        <Route
-          path="/*"
-          element={
-            <ProtectedRoute>
-            <div className="flex h-screen overflow-hidden">
-              <Sidebar />
-              <div className="flex-1 min-w-0 h-screen overflow-hidden sm:ml-60 flex flex-col bg-white">
-                <div className="app-content flex-1 overflow-y-auto p-4 sm:p-6 w-full max-w-9xl mx-auto">
-                  <Routes>
-                    <Route path="dashboard" element={<DashboardPage />} />
-                    <Route path="parties" element={<Parties_Page />} />
-                    <Route path="/party/:id" element={<PartyDetail />} />
-                    <Route path="parties/create-party" element={<CreateParty />} />
-                    <Route path="/parties/create-party/:id" element={<CreateParty />} />
-                    <Route path="items/*" element={<Items_page />} />
-                    <Route path="/items/inventory/:id" element={<ItemDetailsPage />} />
-                    <Route path="sales/*" element={<SalesPage />} />
-                    <Route path="purchases/*" element={<PurchasePage />} />
-                    <Route path="reports" element={<ReportsPage />} />
-                    <Route path="cash-bank" element={<CashAndBankPage />} />
-                    <Route path="cash-bank/account/:id" element={<AccountDetailPage />} />
-                    <Route path="e-invoicing" element={<EInvoicingPage />} />
-                     <Route path="automated-bills" element={<AutomatedBillsPage />} />
-                     <Route path="expenses" element={<ExpensesPage />} />
-                    <Route path="settings" element={<SettingsPage />} />
-                    <Route path="book-demo" element={<BookDemoPage />} />
-                    <Route path="pos-billing" element={<PosBillingPage />} />
-                    <Route path="admin/demo-requests" element={<AdminDemoRequests />} />
-                    <Route
-                      path="create-category"
-                      element={<CreateCategory />}
-                    />
-                    <Route path="purchase/create-invoice" element={<CreatePurchaseForm />} />
-                    <Route path="sales/create-invoice" element={<CreateSalesForm />} />
-                    <Route path="sales/invoice/:id" element={<InvoiceDetailPage type="SALE" />} />
-                    <Route path="purchases/invoice/:id" element={<InvoiceDetailPage type="PURCHASE" />} />
-                    <Route path="sales/invoice/:id/edit" element={<CreateSalesForm />} />
-                    <Route path="purchases/invoice/:id/edit" element={<CreatePurchaseForm />} />
-                  </Routes>
-                </div>
-                <Footer />
-              </div>
-            </div>
-            </ProtectedRoute>
-          }
-        />
+        <Route path="privacy-policy" element={<PrivacyPolicy />} />
+        <Route path="terms-conditions" element={<TermsAndConditions />} />
+
+        {/* Every child below requires auth (ProtectedRoute renders <Outlet/> or
+            redirects to /login) AND gets the dashboard chrome (DashboardLayout).
+            Because these are real sibling paths — not a "/*" wildcard — a URL
+            that matches none of them falls through to the top-level "*" route
+            below instead of ever reaching the auth check. */}
+        <Route element={<ProtectedRoute />}>
+          <Route element={<DashboardLayout />}>
+            <Route path="dashboard" element={<DashboardPage />} />
+            <Route path="parties" element={<Parties_Page />} />
+            <Route path="party/:id" element={<PartyDetail />} />
+            <Route path="parties/create-party" element={<CreateParty />} />
+            <Route path="parties/create-party/:id" element={<CreateParty />} />
+            <Route path="items/*" element={<Items_page />} />
+            <Route path="items/inventory/:id" element={<ItemDetailsPage />} />
+            <Route path="sales/*" element={<SalesPage />} />
+            <Route path="purchases/*" element={<PurchasePage />} />
+            <Route path="reports" element={<ReportsPage />} />
+            <Route path="cash-bank" element={<CashAndBankPage />} />
+            <Route path="cash-bank/account/:id" element={<AccountDetailPage />} />
+            <Route path="e-invoicing" element={<EInvoicingPage />} />
+            <Route path="automated-bills" element={<AutomatedBillsPage />} />
+            <Route path="expenses" element={<ExpensesPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="book-demo" element={<BookDemoPage />} />
+            <Route path="pos-billing" element={<PosBillingPage />} />
+            <Route path="admin/demo-requests" element={<AdminDemoRequests />} />
+            <Route path="create-category" element={<CreateCategory />} />
+            <Route path="purchase/create-invoice" element={<CreatePurchaseForm />} />
+            <Route path="sales/create-invoice" element={<CreateSalesForm />} />
+            <Route path="sales/invoice/:id" element={<InvoiceDetailPage type="SALE" />} />
+            <Route path="purchases/invoice/:id" element={<InvoiceDetailPage type="PURCHASE" />} />
+            <Route path="sales/invoice/:id/edit" element={<CreateSalesForm />} />
+            <Route path="purchases/invoice/:id/edit" element={<CreatePurchaseForm />} />
+          </Route>
+        </Route>
+
+        {/* Genuinely unmatched URL, logged in or not — shown directly, no
+            auth check, no dashboard chrome. */}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       </Suspense>
       </ErrorBoundary>

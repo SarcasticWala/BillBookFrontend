@@ -124,7 +124,9 @@ export const CreateItemModal = ({
       isOnlineVisible: !!it.isOnlineVisible,
       salePrice: it.salePrice != null ? String(it.salePrice) : "",
       salePriceTaxType: it.isSaleTaxApplicable ? "WITH_TAX" : "WITHOUT_TAX",
-      gstRate: String(it.gstRate?.value ?? it.gstRate ?? ""),
+      gstRate:
+        taxOptions.find((t: any) => t.value === (it.gstRate?.value ?? it.gstRate))
+          ?.id || "",
       unit: it.unit || "",
       itemCategory: catId,
       openingStock: it.openingStock != null ? String(it.openingStock) : "",
@@ -207,7 +209,10 @@ export const CreateItemModal = ({
         String(form.salePriceTaxType === "WITH_TAX")
       );
       formData.append("salePrice", form.salePrice);
-      formData.append("gstRate", form.gstRate);
+      // form.gstRate holds the selected Tax document's id (see the <select>
+      // below) — the backend stores a plain percentage, so resolve it here.
+      const selectedTax = taxOptions.find((t: any) => t.id === form.gstRate);
+      formData.append("gstRate", selectedTax ? String(selectedTax.value) : "0");
       formData.append("unit", form.unit);
       formData.append("itemCatagory", itemCategory);
       formData.append("itemProductType", form.itemProductType);

@@ -5,10 +5,14 @@ export const API_BASE_URL: string =
 
 const TOKEN_KEY = "billbook_token";
 
-export const getToken = (): string | null => localStorage.getItem(TOKEN_KEY);
+// sessionStorage, not localStorage: the token must stay scoped to one tab.
+// localStorage is shared across every tab/window on the origin, so two tabs
+// logged in as different accounts (or a shared/kiosk machine) would silently
+// clobber or leak each other's session.
+export const getToken = (): string | null => sessionStorage.getItem(TOKEN_KEY);
 export const setToken = (token: string): void =>
-  localStorage.setItem(TOKEN_KEY, token);
-export const clearToken = (): void => localStorage.removeItem(TOKEN_KEY);
+  sessionStorage.setItem(TOKEN_KEY, token);
+export const clearToken = (): void => sessionStorage.removeItem(TOKEN_KEY);
 
 /** Attach the backend JWT (if present) to an outgoing Headers object. */
 export const withAuth = (headers: Headers): Headers => {

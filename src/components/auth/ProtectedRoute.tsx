@@ -1,17 +1,20 @@
 import { useEffect } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { getToken, clearToken } from "../../config/api";
 import { useGetMeQuery } from "../../features/auth/authApiSlice";
 import { BrandLoader } from "../UI/BrandLoader";
 
 /**
- * Gate for authenticated areas. Requires a stored JWT AND validates it against
+ * Layout-route gate for authenticated areas — used as `<Route element={<ProtectedRoute />}>`
+ * wrapping real child routes (never a wildcard), so a URL that doesn't match any
+ * child never reaches this gate at all and instead falls through to the app's
+ * top-level 404 route. Requires a stored JWT AND validates it against
  * `/api/auth/me` on load:
  *  - no token, or token rejected (401/403) -> clear it and send to "/login".
  *  - transient errors (network/5xx) are tolerated so an outage doesn't log users out.
- * The protected path is never rendered unless the session is valid.
+ * A matched child route is never rendered unless the session is valid.
  */
-export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+export const ProtectedRoute = () => {
   const location = useLocation();
   const token = getToken();
 
@@ -36,5 +39,5 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     return <BrandLoader visible />;
   }
 
-  return <>{children}</>;
+  return <Outlet />;
 };

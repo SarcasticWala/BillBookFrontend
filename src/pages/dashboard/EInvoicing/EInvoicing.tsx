@@ -1,73 +1,105 @@
-import React from "react";
-import { FiHelpCircle } from "react-icons/fi";
+import { useState } from "react";
 import { toast } from "react-toastify";
-import { Button } from "../../../components/UI/Button";
+import { format } from "date-fns";
 import { Card } from "../../../components/UI/Card";
+import { Button } from "../../../components/UI/Button";
+import { Table, type Column } from "../../../components/Table/Table";
+import { useGetMeQuery } from "../../../features/auth/authApiSlice";
+import {
+  useSetEInvoicingEnabledMutation,
+  useGetGstr1SummaryQuery,
+} from "../../../features/eInvoice/eInvoiceApiSlice";
 
-const comingSoon = () =>
-  toast.info("e-Invoicing is coming soon — we'll notify you when it's ready.");
+const inr = (v: unknown) => `₹${Number(v || 0).toLocaleString("en-IN")}`;
 
 const EInvoicingPage = () => {
-    return (
-        <div className="secondary-font">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                <h1 className="text-xl primary-font text-gray-900">e-Invoicing</h1>
-                <Button
-                    variant="outline"
-                    size="sm"
-                    className="flex items-center gap-2"
-                >
-                    <FiHelpCircle className="text-lg" /> What is e-Invoicing
-                </Button>
-            </div>
+  const { data: meData, refetch: refetchMe } = useGetMeQuery();
+  const business = meData?.data || {};
+  const [setEnabled, { isLoading: toggling }] = useSetEInvoicingEnabledMutation();
 
-            <Card>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
-                    <FeatureCard
-                        title="Automatic e-invoice generation"
-                        imageSrc="/assets/e_invoicing_onboading_1.svg"
-                    />
-                    <FeatureCard
-                        title="Hassle e-way bill generation using IRN"
-                        imageSrc="/assets/e_invoicing_onboading_2.svg"
-                    />
-                    <FeatureCard
-                        title="Easy GSTR1 reconciliation"
-                        imageSrc="/assets/e_invoicing_onboading_3.svg"
-                    />
-                </div>
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
+  const { data: gstrData, isFetching, isUninitialized } = useGetGstr1SummaryQuery(month, {
+    skip: !business.eInvoicingEnabled,
+  });
+  const rows: any[] = gstrData?.data || [];
+  // Only block the view on the very first load — once data has arrived once,
+  // a background refetch (e.g. changing the month) shouldn't hide the table.
+  const loadingGstr = isUninitialized || (isFetching && !gstrData);
 
-                <div className="mt-8 sm:mt-10 text-center">
-                    <p className="text-gray-700 text-xl sm:text-2xl primary-font mb-4">
-                        Try India's easiest and fastest e-invoicing solution today
-                    </p>
-                    <Button size="lg" className="w-full sm:w-auto" onClick={comingSoon}>
-                        Start Generating e-Invoices
-                    </Button>
-                </div>
-            </Card>
+  const handleToggle = async () => {
+    try {
+      await setEnabled(!business.eInvoicingEnabled).unwrap();
+      toast.success(business.eInvoicingEnabled ? "e-Invoicing disabled" : "e-Invoicing enabled");
+      refetchMe();
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to update e-Invoicing setting");
+    }
+  };
+
+  const columns: Column<any>[] = [
+    { header: "Invoice No", accessor: "invioceNo" },
+    { header: "Date", render: (_v, r) => format(new Date(r.invioceDate), "dd MMM yyyy") },
+    { header: "Party", accessor: "partyName" },
+    { header: "Buyer GSTIN", accessor: "buyerGstin" },
+    { header: "Taxable Value", render: (_v, r) => <div className="text-right">{inr(r.taxableValue)}</div> },
+    { header: "Tax", render: (_v, r) => <div className="text-right">{inr(r.tax)}</div> },
+    { header: "IRN", render: (_v, r) => <span className="text-xs break-all">{r.irn}</span> },
+  ];
+
+  return (
+    <div className="secondary-font">
+      <h1 className="text-xl primary-font text-gray-900 mb-6">GST e-Invoicing</h1>
+
+      <Card className="p-4 sm:p-6 mb-5">
+        <div className="flex items-center justify-between flex-wrap gap-4">
+          <div>
+            <h2 className="text-lg primary-font text-gray-800">Enable e-Invoicing</h2>
+            <p className="text-sm text-gray-500 mt-1 max-w-lg">
+              Once enabled, eligible B2B/export/SEZ sales invoices automatically get an IRN + QR
+              from the government's IRP. B2C sales are never sent. Make sure your business GSTIN
+              is set in Settings first.
+            </p>
+            {!business.gstin && (
+              <p className="text-sm text-amber-600 mt-2">
+                No business GSTIN on file — add one in Settings before enabling.
+              </p>
+            )}
+          </div>
+          <Button
+            loading={toggling}
+            variant={business.eInvoicingEnabled ? "outline" : "primary"}
+            onClick={handleToggle}
+            disabled={!business.gstin && !business.eInvoicingEnabled}
+          >
+            {business.eInvoicingEnabled ? "Disable" : "Enable"} e-Invoicing
+          </Button>
         </div>
-    );
-};
+      </Card>
 
-interface FeatureCardProps {
-    title: string;
-    imageSrc: string;
-}
-
-const FeatureCard: React.FC<FeatureCardProps> = ({ title, imageSrc }) => {
-    return (
-        <div className="bg-slate-50 px-4 py-10 sm:px-6 sm:py-14 rounded-lg border border-gray-200 text-center hover:shadow-md transition-shadow">
-            <div className="flex justify-center mb-4">
-                <img
-                    src={imageSrc}
-                    alt={title}
-                    className="h-24 w-24 object-contain"
-                />
-            </div>
-            <div className="text-sm secondary-font text-gray-700">{title}</div>
-        </div>
-    );
+      {business.eInvoicingEnabled && (
+        <Card className="p-4 sm:p-6">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <h2 className="text-lg primary-font text-gray-800">GSTR-1 Data (this feeds your filing, it doesn't file it)</h2>
+            <input
+              type="month"
+              value={month}
+              onChange={(e) => setMonth(e.target.value)}
+              className="input-field w-auto"
+            />
+          </div>
+          {loadingGstr ? (
+            <p className="text-sm text-gray-500 py-6 text-center">Loading…</p>
+          ) : (
+            <Table
+              columns={columns}
+              data={rows}
+              emptyMessage="No e-invoiced sales for this month yet"
+            />
+          )}
+        </Card>
+      )}
+    </div>
+  );
 };
 
 export default EInvoicingPage;

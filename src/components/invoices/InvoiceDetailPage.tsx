@@ -1,7 +1,8 @@
+import { useState, lazy, Suspense } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 import { format } from "date-fns";
-import { MdEdit, MdDeleteOutline } from "react-icons/md";
+import { MdEdit, MdDeleteOutline, MdOutlinePictureAsPdf } from "react-icons/md";
 import {
   useGetSaleByIdQuery,
   useDeleteSaleMutation,
@@ -10,11 +11,23 @@ import {
   useGetPurchaseByIdQuery,
   useDeletePurchaseMutation,
 } from "../../features/purchase/purchaseApiSlice";
+import { useGetMeQuery } from "../../features/auth/authApiSlice";
+import {
+  useSubmitEInvoiceMutation,
+  useCancelEInvoiceMutation,
+} from "../../features/eInvoice/eInvoiceApiSlice";
+import { useQrDataUrl } from "../../hooks/useQrDataUrl";
 import { Badge } from "../UI/Badge";
 import { Button } from "../UI/Button";
 import { PageHeader } from "../UI/PageHeader";
 import { FormSection } from "../UI/FormSection";
 import { Table, type Column } from "../Table/Table";
+
+// @react-pdf/renderer is large — load it only when someone actually opens
+// the PDF preview, not on every invoice page view.
+const InvoicePdfPreviewModal = lazy(() =>
+  import("./InvoicePdfPreviewModal").then((m) => ({ default: m.InvoicePdfPreviewModal }))
+);
 
 type InvoiceType = "SALE" | "PURCHASE";
 
@@ -33,12 +46,26 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
 
   const saleQ = useGetSaleByIdQuery(id || "", { skip: !isSale || !id });
   const purchaseQ = useGetPurchaseByIdQuery(id || "", { skip: isSale || !id });
-  const { data, isLoading, isError } = isSale ? saleQ : purchaseQ;
+  const { data, isLoading, isError, refetch } = isSale ? saleQ : purchaseQ;
+
+  const [submitEInvoice, { isLoading: submittingEInvoice }] = useSubmitEInvoiceMutation();
+  const [cancelEInvoice, { isLoading: cancellingEInvoice }] = useCancelEInvoiceMutation();
 
   const [deleteSale, { isLoading: deletingSale }] = useDeleteSaleMutation();
   const [deletePurchase, { isLoading: deletingPurchase }] =
     useDeletePurchaseMutation();
   const deleting = deletingSale || deletingPurchase;
+
+  const { data: meData } = useGetMeQuery();
+  const [pdfOpen, setPdfOpen] = useState(false);
+
+  // Computed ahead of the loading/error early-returns below so this hook is
+  // always called in the same order, per the Rules of Hooks — `data` is
+  // simply undefined until the query resolves.
+  const eInvoicePreload = data?.data?.eInvoice;
+  const eInvoiceQr = useQrDataUrl(
+    eInvoicePreload?.status === "GENERATED" ? eInvoicePreload.signedQrCode : null
+  );
 
   const listPath = isSale ? "/sales/invoices" : "/purchases/purchaseInvoice";
   const editPath = isSale
@@ -107,6 +134,35 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
 
   const items: any[] = Array.isArray(inv.itemDetails) ? inv.itemDetails : [];
 
+  // GST e-Invoicing applies only to sales, never purchases.
+  const eInvoice = inv.eInvoice || { status: "NOT_APPLICABLE" };
+  const eInvoiceGenerated = eInvoice.status === "GENERATED";
+  const generatedAt = eInvoice.generatedAt ? new Date(eInvoice.generatedAt) : null;
+  const withinCancelWindow =
+    !!generatedAt && Date.now() - generatedAt.getTime() < 24 * 60 * 60 * 1000;
+
+  const handleGenerateEInvoice = async () => {
+    try {
+      await submitEInvoice(id!).unwrap();
+      toast.success("e-Invoice request submitted");
+      refetch();
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to generate e-Invoice");
+    }
+  };
+
+  const handleCancelEInvoice = async () => {
+    const reason = window.prompt("Reason for cancelling this e-Invoice:");
+    if (reason == null) return;
+    try {
+      await cancelEInvoice({ invoiceId: id!, reason }).unwrap();
+      toast.success("e-Invoice cancelled");
+      refetch();
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to cancel e-Invoice");
+    }
+  };
+
   const columns: Column<any>[] = [
     { header: "Item", accessor: "itemName" },
     { header: "HSN", accessor: "hsnCode" },
@@ -145,6 +201,14 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
         actions={
           <>
             <Badge variant={statusVariant as any}>{status}</Badge>
+            <Button
+              variant="outline"
+              size="sm"
+              type="button"
+              onClick={() => setPdfOpen(true)}
+            >
+              <MdOutlinePictureAsPdf /> Download PDF
+            </Button>
             {!isVoid && (
               <>
                 <Button
@@ -265,6 +329,71 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
           </FormSection>
         </div>
 
+        {/* GST e-Invoice — sales only; not shown at all for purchases */}
+        {isSale && !isVoid && (
+          <FormSection title="GST e-Invoice" layout="plain">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+              <div className="flex items-center gap-3">
+                <Badge
+                  variant={
+                    eInvoiceGenerated
+                      ? "success"
+                      : eInvoice.status === "FAILED"
+                      ? "danger"
+                      : eInvoice.status === "CANCELLED"
+                      ? "neutral"
+                      : "info"
+                  }
+                >
+                  {eInvoice.status.replace("_", " ")}
+                </Badge>
+                {eInvoiceGenerated && (
+                  <span className="text-xs text-gray-500 break-all max-w-md">
+                    IRN: {eInvoice.irn}
+                  </span>
+                )}
+                {eInvoice.status === "FAILED" && eInvoice.error && (
+                  <span className="text-xs text-red-500">{eInvoice.error}</span>
+                )}
+              </div>
+
+              {eInvoiceGenerated && eInvoiceQr && (
+                <img src={eInvoiceQr} alt="e-Invoice QR" className="h-16 w-16" />
+              )}
+
+              <div className="sm:ml-auto flex gap-2">
+                {(eInvoice.status === "NOT_APPLICABLE" || eInvoice.status === "FAILED") && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    loading={submittingEInvoice}
+                    onClick={handleGenerateEInvoice}
+                  >
+                    {eInvoice.status === "FAILED" ? "Retry e-Invoice" : "Generate e-Invoice"}
+                  </Button>
+                )}
+                {eInvoiceGenerated && withinCancelWindow && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    loading={cancellingEInvoice}
+                    className="!text-red-600 !border-red-200 hover:!bg-red-50"
+                    onClick={handleCancelEInvoice}
+                  >
+                    Cancel e-Invoice
+                  </Button>
+                )}
+              </div>
+            </div>
+            {eInvoiceGenerated && !withinCancelWindow && (
+              <p className="text-xs text-gray-400 mt-2">
+                The 24-hour cancellation window has passed — issue a credit note to reverse this
+                invoice instead.
+              </p>
+            )}
+          </FormSection>
+        )}
+
         {/* Notes & Terms */}
         {(inv.notes || inv.termsAndConditions) && (
           <FormSection title="Notes & Terms" layout="plain">
@@ -283,6 +412,35 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
           </FormSection>
         )}
       </div>
+
+      {pdfOpen && (
+        <Suspense fallback={null}>
+          <InvoicePdfPreviewModal
+            isOpen={pdfOpen}
+            onClose={() => setPdfOpen(false)}
+            type={type}
+            invoiceNo={inv.invioceNo || "-"}
+            invoiceDate={inv.invioceDate}
+            dueDate={inv.dueDate}
+            partyName={partyName}
+            partyMobile={partyMobile}
+            partyGst={partyGst}
+            items={items}
+            taxable={taxable}
+            tax={tax}
+            additionalCharges={additionalCharges}
+            discountAfterTax={discountAfterTax}
+            total={total}
+            paid={paid}
+            due={due}
+            status={status}
+            notes={inv.notes}
+            termsAndConditions={inv.termsAndConditions}
+            business={meData?.data || {}}
+            eInvoice={eInvoiceGenerated ? { irn: eInvoice.irn, qrDataUrl: eInvoiceQr } : undefined}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

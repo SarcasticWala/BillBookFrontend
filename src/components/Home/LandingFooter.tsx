@@ -23,8 +23,8 @@ const columns = [
   {
     title: "Legal",
     links: [
-      { label: "Privacy Policy", href: "#" },
-      { label: "Terms of Service", href: "#" },
+      { label: "Privacy Policy", href: "/privacy-policy" },
+      { label: "Terms of Service", href: "/terms-conditions" },
       { label: "Refund Policy", href: "#" },
     ],
   },

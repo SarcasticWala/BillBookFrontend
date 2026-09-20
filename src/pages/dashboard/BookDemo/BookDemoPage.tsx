@@ -95,7 +95,7 @@ const BookDemoPage: React.FC = () => {
     interest: "BILLING",
     preferredDate: "",
     preferredTime: timeSlots[0].value,
-    attendees: 1,
+    attendees: "1",
     message: "",
   });
 
@@ -122,10 +122,15 @@ const BookDemoPage: React.FC = () => {
     if (!form.name.trim()) return toast.error("Please enter your name");
     if (form.mobileNo.trim().length !== 10) return toast.error("Enter a valid 10-digit mobile number");
 
+    const attendeesNum = Number(form.attendees);
+    if (form.attendees !== "" && (!Number.isInteger(attendeesNum) || attendeesNum < 1)) {
+      return toast.error("Attendees must be a whole number of at least 1");
+    }
+
     try {
       await bookDemo({
         ...form,
-        attendees: Number(form.attendees) || 1,
+        attendees: attendeesNum || 1,
         __idempotencyKey: idempotencyKey.current,
       }).unwrap();
       toast.success("Demo booked! Our team will reach out to confirm.");
@@ -135,7 +140,12 @@ const BookDemoPage: React.FC = () => {
       // shows up in the "My Demo Requests" table below (auto-refetched).
       setForm((prev) => ({ ...prev, message: "" }));
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to book demo");
+      const details = err?.data?.details;
+      if (Array.isArray(details) && details.length) {
+        details.forEach((d: any) => toast.error(d.message || `${d.path}: invalid value`));
+      } else {
+        toast.error(err?.data?.message || "Failed to book demo");
+      }
     }
   };
 
@@ -234,7 +244,9 @@ const BookDemoPage: React.FC = () => {
               type="number"
               min={1}
               value={form.attendees}
-              onChange={update("attendees")}
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, attendees: e.target.value.replace(/[^\d]/g, "") }))
+              }
             />
             <Input
               label="Preferred Date"
