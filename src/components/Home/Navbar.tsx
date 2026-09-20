@@ -1,8 +1,14 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { getToken } from "../../config/api";
 
 const Navbar: React.FC = () => {
   const navigate = useNavigate();
+  // This navbar is shared by public pages (Home, Privacy, Terms) that an
+  // already-logged-in user can still land on (e.g. a footer link from inside
+  // the dashboard) — show "Dashboard" instead of "Login" so it doesn't look
+  // like they've been signed out.
+  const isAuthed = Boolean(getToken());
 
   return (
     <header className="sticky top-0 z-40 bg-white/80 backdrop-blur-md border-b border-slate-200/70">
@@ -26,20 +32,32 @@ const Navbar: React.FC = () => {
 
         {/* Right actions */}
         <div className="flex items-center gap-2 sm:gap-3 primary-font">
-          <button
-            type="button"
-            onClick={() => navigate("/login")}
-            className="hidden sm:inline-flex items-center px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
-          >
-            Book a demo
-          </button>
-          <button
-            type="button"
-            onClick={() => navigate("/login")}
-            className="inline-flex items-center justify-center rounded-[10px] bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-[0_1px_2px_rgba(79,70,229,0.3)] hover:bg-indigo-700 active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 focus-visible:ring-offset-1"
-          >
-            Login
-          </button>
+          {isAuthed ? (
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard")}
+              className="inline-flex items-center justify-center rounded-[10px] bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-[0_1px_2px_rgba(79,70,229,0.3)] hover:bg-indigo-700 active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 focus-visible:ring-offset-1"
+            >
+              Go to Dashboard
+            </button>
+          ) : (
+            <>
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="hidden sm:inline-flex items-center px-3.5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+              >
+                Book a demo
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/login")}
+                className="inline-flex items-center justify-center rounded-[10px] bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-[0_1px_2px_rgba(79,70,229,0.3)] hover:bg-indigo-700 active:scale-[0.98] transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500/60 focus-visible:ring-offset-1"
+              >
+                Login
+              </button>
+            </>
+          )}
         </div>
       </div>
     </header>
