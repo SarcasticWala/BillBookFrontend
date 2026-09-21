@@ -1,7 +1,12 @@
 import { Dialog } from "@headlessui/react";
 import { useState } from "react";
-import { useGetPartiesPagedQuery } from "../../../../../features/party/partyApiSlice";
-import { FaTimes, FaSearch } from "react-icons/fa";
+import { toast } from "react-toastify";
+import {
+  useGetPartiesPagedQuery,
+  useCreatePartyMutation,
+} from "../../../../../features/party/partyApiSlice";
+import { newIdempotencyKey } from "../../../../../lib/idempotency";
+import { FaTimes, FaSearch, FaPlus } from "react-icons/fa";
 import { useDebouncedValue } from "../../../../../hooks/useDebouncedValue";
 
 export const PartySelectorModal: React.FC<{
@@ -20,6 +25,25 @@ export const PartySelectorModal: React.FC<{
     search: debouncedSearch,
   });
   const parties = data?.data?.items || [];
+
+  const [createParty, { isLoading: isCreating }] = useCreatePartyMutation();
+
+  const handleCreateNew = async () => {
+    const partyName = search.trim();
+    if (!partyName) return;
+    try {
+      const res = await createParty({
+        partyName,
+        partyType: "CUSTOMER",
+        __idempotencyKey: newIdempotencyKey(),
+      }).unwrap();
+      toast.success(`Party "${partyName}" created`);
+      onSelect(res.data);
+      onClose();
+    } catch (err: any) {
+      toast.error(err?.data?.message || "Failed to create party");
+    }
+  };
 
   // Tolerant field readers — API returns the write shape (partyName/mobileNo/
   // billingAddressData).
@@ -64,11 +88,31 @@ export const PartySelectorModal: React.FC<{
             {isError && (
               <li className="py-3 px-2 text-red-600">Failed to load parties.</li>
             )}
-            {!isLoading && !isError && parties.length === 0 && (
+            {!isLoading && !isError && parties.length === 0 && !debouncedSearch && (
               <li className="py-3 px-2 text-gray-500">
-                {debouncedSearch
-                  ? "No parties match your search."
-                  : "No parties found. Create one from the Parties page first."}
+                No parties found. Type a name above to create one.
+              </li>
+            )}
+            {!isLoading && !isError && parties.length === 0 && debouncedSearch && (
+              <li className="py-3 px-2 text-gray-500">No parties match your search.</li>
+            )}
+            {/* Quick-add: create a party with this exact name and select it
+                immediately, instead of forcing a trip to the Parties page. */}
+            {debouncedSearch.trim() && (
+              <li className="border-b">
+                <button
+                  type="button"
+                  onClick={handleCreateNew}
+                  disabled={isCreating}
+                  className="w-full flex items-center gap-2 py-3 px-2 text-left text-primary hover:bg-primary/5 cursor-pointer disabled:opacity-60"
+                >
+                  <FaPlus className="text-xs shrink-0" />
+                  <span>
+                    {isCreating
+                      ? "Creating…"
+                      : `Create "${search.trim()}" as new party`}
+                  </span>
+                </button>
               </li>
             )}
             {parties.map((party: any) => (

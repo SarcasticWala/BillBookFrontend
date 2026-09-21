@@ -347,6 +347,23 @@ export const CreateSalesForm: React.FC = () => {
       formik.values.totalSaleAmount -
       Number(formik.values.receivedAmount || 0);
     formik.setFieldValue("dueAmount", parseFloat(due.toFixed(2)));
+
+    // Cash/Online is a breakdown of Received Amount, not independent of it.
+    // Unchecking "Mark as Fully Paid" (or just lowering Received afterwards)
+    // used to leave Cash stranded at its old, now-too-high value — e.g.
+    // Received drops to 1000 but Cash stays at 2000 — which only surfaced as
+    // a submit-time error requiring a manual fix. Clamp automatically instead.
+    const receivedNum = Number(formik.values.receivedAmount || 0);
+    const cashNum = Number(formik.values.cash || 0);
+    const onlineNum = Number(formik.values.online || 0);
+    if (cashNum + onlineNum > receivedNum + 0.01) {
+      if (cashNum > receivedNum) {
+        formik.setFieldValue("cash", Math.max(receivedNum, 0));
+        formik.setFieldValue("online", 0);
+      } else {
+        formik.setFieldValue("online", Math.max(receivedNum - cashNum, 0));
+      }
+    }
   }
 }, [
   formik.values.isFullyPaid,

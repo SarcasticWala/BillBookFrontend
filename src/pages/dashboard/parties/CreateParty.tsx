@@ -107,6 +107,13 @@ const CreateParty: React.FC = () => {
       toast.error("Enter a valid 10-digit mobile number");
       return;
     }
+    // Structural check only (15 chars, correct shape) — the backend does the
+    // full mod-36 checksum validation and is the source of truth; this just
+    // catches an obviously-wrong value (e.g. "INVALID123") before a round-trip.
+    if (gstNumber.trim() && !/^\d{2}[A-Za-z]{5}\d{4}[A-Za-z][1-9A-Za-z]Z[0-9A-Za-z]$/.test(gstNumber.trim())) {
+      toast.error("Enter a valid 15-character GSTIN, e.g. 27AAPFU0939F1ZV");
+      return;
+    }
 
     const payload = {
       partyName,
@@ -138,7 +145,12 @@ const CreateParty: React.FC = () => {
         else navigate("/parties");
       }
     } catch (err: any) {
-      toast.error(err?.data?.message || "Failed to save party");
+      const details = err?.data?.details;
+      if (Array.isArray(details) && details.length) {
+        details.forEach((d: any) => toast.error(d.message || `${d.path}: invalid value`));
+      } else {
+        toast.error(err?.data?.message || "Failed to save party");
+      }
     }
   };
 

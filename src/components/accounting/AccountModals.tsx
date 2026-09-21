@@ -35,6 +35,7 @@ export const AddAccountModal: React.FC<{
   );
   const [ifsc, setIfsc] = useState(accountToEdit?.ifsc || "");
   const [upiId, setUpiId] = useState(accountToEdit?.upiId || "");
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [createAccount, { isLoading: creating }] = useCreateAccountMutation();
   const [updateAccount, { isLoading: updating }] = useUpdateAccountMutation();
@@ -43,15 +44,22 @@ export const AddAccountModal: React.FC<{
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return toast.error("Account name is required");
-    if (Number.isNaN(Number(openingBalance || 0)))
-      return toast.error("Opening balance must be a number");
-    if (type === "BANK") {
-      if (accountNumber && !/^\d{9,18}$/.test(accountNumber))
-        return toast.error("Account number must be 9 to 18 digits");
-      if (ifsc && !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifsc))
-        return toast.error("Enter a valid IFSC code, e.g. HDFC0001234");
+    const nextErrors: Record<string, string> = {};
+    if (!name.trim()) nextErrors.name = "Account name is required";
+    if (Number.isNaN(Number(openingBalance || 0))) {
+      nextErrors.openingBalance = "Opening balance must be a number";
     }
+    if (type === "BANK") {
+      if (accountNumber && !/^\d{9,18}$/.test(accountNumber)) {
+        nextErrors.accountNumber = "Account number must be 9 to 18 digits";
+      }
+      if (ifsc && !/^[A-Za-z]{4}0[A-Za-z0-9]{6}$/.test(ifsc)) {
+        nextErrors.ifsc = "Enter a valid IFSC code, e.g. HDFC0001234";
+      }
+    }
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
     const payload = {
       name: name.trim(),
       type,
@@ -117,7 +125,11 @@ export const AddAccountModal: React.FC<{
           required
           placeholder={type === "BANK" ? "ex: HDFC Current A/c" : "ex: Petty Cash"}
           value={name}
-          onChange={(e) => setName(e.target.value)}
+          onChange={(e) => {
+            setName(e.target.value);
+            setErrors((prev) => (prev.name ? { ...prev, name: "" } : prev));
+          }}
+          error={errors.name}
           autoFocus
         />
         <Input
@@ -125,7 +137,11 @@ export const AddAccountModal: React.FC<{
           type="number"
           placeholder="0"
           value={openingBalance}
-          onChange={(e) => setOpeningBalance(e.target.value)}
+          onChange={(e) => {
+            setOpeningBalance(e.target.value);
+            setErrors((prev) => (prev.openingBalance ? { ...prev, openingBalance: "" } : prev));
+          }}
+          error={errors.openingBalance}
         />
 
         {type === "BANK" && (
@@ -142,7 +158,11 @@ export const AddAccountModal: React.FC<{
               inputMode="numeric"
               maxLength={18}
               value={accountNumber}
-              onChange={(e) => setAccountNumber(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => {
+                setAccountNumber(e.target.value.replace(/\D/g, ""));
+                setErrors((prev) => (prev.accountNumber ? { ...prev, accountNumber: "" } : prev));
+              }}
+              error={errors.accountNumber}
             />
             <Input
               label="IFSC Code"
@@ -150,9 +170,11 @@ export const AddAccountModal: React.FC<{
               maxLength={11}
               className="uppercase placeholder:normal-case"
               value={ifsc}
-              onChange={(e) =>
-                setIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))
-              }
+              onChange={(e) => {
+                setIfsc(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+                setErrors((prev) => (prev.ifsc ? { ...prev, ifsc: "" } : prev));
+              }}
+              error={errors.ifsc}
             />
             <Input
               label="UPI ID"

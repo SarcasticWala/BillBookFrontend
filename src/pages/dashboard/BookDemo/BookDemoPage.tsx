@@ -112,20 +112,33 @@ const BookDemoPage: React.FC = () => {
     }));
   }, [meData]);
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
   const update = (key: keyof typeof form) =>
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       setForm((prev) => ({ ...prev, [key]: e.target.value }));
+      setErrors((prev) => (prev[key] ? { ...prev, [key]: "" } : prev));
+    };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!form.name.trim()) return toast.error("Please enter your name");
-    if (form.mobileNo.trim().length !== 10) return toast.error("Enter a valid 10-digit mobile number");
+    const nextErrors: Record<string, string> = {};
+    if (!form.name.trim()) nextErrors.name = "Please enter your name";
+    if (form.mobileNo.trim().length !== 10) {
+      nextErrors.mobileNo = "Enter a valid 10-digit mobile number";
+    }
+    if (form.email.trim() && !/\S+@\S+\.\S+/.test(form.email.trim())) {
+      nextErrors.email = "Enter a valid email address";
+    }
 
     const attendeesNum = Number(form.attendees);
     if (form.attendees !== "" && (!Number.isInteger(attendeesNum) || attendeesNum < 1)) {
-      return toast.error("Attendees must be a whole number of at least 1");
+      nextErrors.attendees = "Attendees must be a whole number of at least 1";
     }
+
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
 
     try {
       await bookDemo({
@@ -134,6 +147,7 @@ const BookDemoPage: React.FC = () => {
         __idempotencyKey: idempotencyKey.current,
       }).unwrap();
       toast.success("Demo booked! Our team will reach out to confirm.");
+      setErrors({});
       // Fresh key for any subsequent booking attempt.
       idempotencyKey.current = newIdempotencyKey();
       // Stay on the page and clear the free-text field so the new request
@@ -142,7 +156,18 @@ const BookDemoPage: React.FC = () => {
     } catch (err: any) {
       const details = err?.data?.details;
       if (Array.isArray(details) && details.length) {
-        details.forEach((d: any) => toast.error(d.message || `${d.path}: invalid value`));
+        // Field-level errors go inline (consistent with client-side
+        // validation above); anything without a known field falls back to
+        // a toast so it isn't silently dropped.
+        const fieldErrors: Record<string, string> = {};
+        details.forEach((d: any) => {
+          if (d.path && d.path in form) {
+            fieldErrors[d.path] = d.message || "Invalid value";
+          } else {
+            toast.error(d.message || `${d.path}: invalid value`);
+          }
+        });
+        if (Object.keys(fieldErrors).length) setErrors((prev) => ({ ...prev, ...fieldErrors }));
       } else {
         toast.error(err?.data?.message || "Failed to book demo");
       }
@@ -192,7 +217,19 @@ const BookDemoPage: React.FC = () => {
         </Card>
 
         {/* Form */}
-        <form id="book-demo-form" onSubmit={handleSubmit} className="lg:col-span-2 space-y-5">
+        {/* noValidate: without it, the browser's own HTML5 constraint validation
+            (type="email", attendees' min=1) silently cancels the submit event
+            before it ever reaches handleSubmit — so an invalid email showed no
+            feedback at all, and an invalid attendees count showed the browser's
+            generic wording instead of our own message below. All validation is
+            handled explicitly in handleSubmit instead, consistent with the rest
+            of this form. */}
+        <form
+          id="book-demo-form"
+          onSubmit={handleSubmit}
+          noValidate
+          className="lg:col-span-2 space-y-5"
+        >
           <FormSection title="Your Details">
             <Input
               label="Full Name"
@@ -201,6 +238,7 @@ const BookDemoPage: React.FC = () => {
               placeholder="Enter your name"
               value={form.name}
               onChange={update("name")}
+              error={errors.name}
             />
             <Input
               label="Mobile Number"
@@ -209,9 +247,11 @@ const BookDemoPage: React.FC = () => {
               placeholder="10-digit mobile number"
               maxLength={10}
               value={form.mobileNo}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, mobileNo: e.target.value.replace(/\D/g, "") }))
-              }
+              onChange={(e) => {
+                setForm((prev) => ({ ...prev, mobileNo: e.target.value.replace(/\D/g, "") }));
+                setErrors((prev) => (prev.mobileNo ? { ...prev, mobileNo: "" } : prev));
+              }}
+              error={errors.mobileNo}
             />
             <Input
               label="Email"
@@ -220,6 +260,7 @@ const BookDemoPage: React.FC = () => {
               placeholder="you@company.com"
               value={form.email}
               onChange={update("email")}
+              error={errors.email}
             />
             <Input
               label="Business Name"
@@ -244,9 +285,11 @@ const BookDemoPage: React.FC = () => {
               type="number"
               min={1}
               value={form.attendees}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, attendees: e.target.value.replace(/[^\d]/g, "") }))
-              }
+              onChange={(e) => {
+                setForm((prev) => ({ ...prev, attendees: e.target.value.replace(/[^\d]/g, "") }));
+                setErrors((prev) => (prev.attendees ? { ...prev, attendees: "" } : prev));
+              }}
+              error={errors.attendees}
             />
             <Input
               label="Preferred Date"
