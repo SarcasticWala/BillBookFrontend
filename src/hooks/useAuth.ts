@@ -46,8 +46,12 @@ export const useAuth = () => {
    * SMTP is configured, the backend returns the code (`devCode`) so signup/reset
    * can be tested without sending real email.
    */
-  const sendOtp = async (email: string): Promise<{ devCode?: string }> => {
-    const res = await postJson("/api/auth/send-otp", { email });
+  const sendOtp = async (
+    email: string,
+    purpose?: "signup" | "reset",
+    phone?: string
+  ): Promise<{ devCode?: string }> => {
+    const res = await postJson("/api/auth/send-otp", { email, purpose, phone });
     return { devCode: res.devCode };
   };
 

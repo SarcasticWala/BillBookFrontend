@@ -12,6 +12,7 @@ import {
   useDeletePurchaseMutation,
 } from "../../features/purchase/purchaseApiSlice";
 import { useGetMeQuery } from "../../features/auth/authApiSlice";
+import { useGetAccountsQuery } from "../../features/account/accountApiSlice";
 import {
   useSubmitEInvoiceMutation,
   useCancelEInvoiceMutation,
@@ -57,6 +58,7 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
   const deleting = deletingSale || deletingPurchase;
 
   const { data: meData } = useGetMeQuery();
+  const { data: accountsData } = useGetAccountsQuery(undefined);
   const [pdfOpen, setPdfOpen] = useState(false);
 
   // Computed ahead of the loading/error early-returns below so this hook is
@@ -66,6 +68,22 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
   const eInvoiceQr = useQrDataUrl(
     eInvoicePreload?.status === "GENERATED" ? eInvoicePreload.signedQrCode : null
   );
+
+  // "Scan to Pay" on the invoice PDF: the first BANK account with a UPI ID —
+  // the auto-created default account is always type CASH (no bank details),
+  // so "default" here means the business's actual bank, not `isDefault`.
+  const bankAccounts: any[] = accountsData?.data || [];
+  const payoutAccount = bankAccounts.find((a) => a.type === "BANK" && a.upiId);
+  const businessName =
+    meData?.data?.businessName?.trim() || meData?.data?.name?.trim() || "BillBook";
+  const upiPayString = payoutAccount
+    ? `upi://pay?pa=${encodeURIComponent(payoutAccount.upiId)}&pn=${encodeURIComponent(
+        businessName
+      )}&am=${encodeURIComponent(String(Number(data?.data?.dueAmount ?? 0) || Number(data?.data?.totalSaleAmount ?? data?.data?.totalPurchaseAmount ?? 0)))}&cu=INR&tn=${encodeURIComponent(
+        `Invoice ${data?.data?.invioceNo || ""}`
+      )}`
+    : null;
+  const paymentQr = useQrDataUrl(upiPayString);
 
   const listPath = isSale ? "/sales/invoices" : "/purchases/purchaseInvoice";
   const editPath = isSale
@@ -438,6 +456,17 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
             termsAndConditions={inv.termsAndConditions}
             business={meData?.data || {}}
             eInvoice={eInvoiceGenerated ? { irn: eInvoice.irn, qrDataUrl: eInvoiceQr } : undefined}
+            bankAccount={
+              payoutAccount
+                ? {
+                    bankName: payoutAccount.bankName,
+                    accountNumber: payoutAccount.accountNumber,
+                    ifsc: payoutAccount.ifsc,
+                    upiId: payoutAccount.upiId,
+                  }
+                : undefined
+            }
+            paymentQrDataUrl={paymentQr}
           />
         </Suspense>
       )}

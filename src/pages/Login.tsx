@@ -135,12 +135,18 @@ export default function AuthPage() {
 
     try {
       setLoading(true);
-      const { devCode } = await sendOtp(form.email.trim());
+      const { devCode } = await sendOtp(form.email.trim(), "signup", form.mobile);
       setStep("verify");
       setOtpTimer(30);
       showDevCode(devCode);
     } catch (err: any) {
-      toast.error(err?.message || "Could not send code");
+      const msg = err?.message || "Could not send code";
+      if (/already exists/i.test(msg)) {
+        setErrors(/mobile/i.test(msg) ? { mobile: msg } : { email: msg });
+      } else {
+        setErrors({});
+      }
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -182,7 +188,7 @@ export default function AuthPage() {
 
     try {
       setLoading(true);
-      const { devCode } = await sendOtp(form.email.trim());
+      const { devCode } = await sendOtp(form.email.trim(), "reset");
       setStep("verify");
       setOtpTimer(30);
       showDevCode(devCode);
@@ -246,7 +252,11 @@ export default function AuthPage() {
   const handleResend = async () => {
     try {
       setLoading(true);
-      const { devCode } = await sendOtp(form.email.trim());
+      const { devCode } = await sendOtp(
+        form.email.trim(),
+        mode === "signup" ? "signup" : "reset",
+        mode === "signup" ? form.mobile : undefined
+      );
       setOtpTimer(30);
       toast.success("Code resent");
       showDevCode(devCode);
