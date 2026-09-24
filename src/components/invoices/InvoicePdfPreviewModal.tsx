@@ -1,4 +1,4 @@
-import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
+import { PDFViewer, PDFDownloadLink, usePDF } from "@react-pdf/renderer";
 import { Modal } from "../UI/Modal";
 import { Button } from "../UI/Button";
 import { InvoicePdfDocument, type InvoicePdfDocumentProps } from "../../pdf/InvoicePdfDocument";
@@ -22,6 +22,14 @@ export function InvoicePdfPreviewModal({
     doc.invoiceNo || "draft"
   }.pdf`;
 
+  // The in-modal PDFViewer runs with showToolbar={false} (its native toolbar
+  // is Chrome-only and looks out of place inline), which also hides the
+  // print button that toolbar would otherwise provide — so there was
+  // previously no way to print at all short of downloading first. Opening
+  // the rendered PDF in a new tab hands it to the browser's own PDF viewer,
+  // which has real print/zoom controls on every major browser.
+  const [printInstance] = usePDF({ document: <InvoicePdfDocument {...doc} /> });
+
   return (
     <Modal
       isOpen={isOpen}
@@ -32,6 +40,13 @@ export function InvoicePdfPreviewModal({
         <>
           <Button variant="outline" onClick={onClose}>
             Close
+          </Button>
+          <Button
+            variant="outline"
+            disabled={printInstance.loading || !printInstance.url}
+            onClick={() => printInstance.url && window.open(printInstance.url, "_blank")}
+          >
+            Print
           </Button>
           <PDFDownloadLink document={<InvoicePdfDocument {...doc} />} fileName={fileName}>
             {({ loading }) => (

@@ -648,7 +648,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
           value={row.pricePerItem}
           data-actual-value={row.actualPricePerItem}
           onChange={(e) => handlePriceChange(index, e.target.value)}
-          className="w-24 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
+          className="w-24 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-base xl:text-[13px]"
         />
       ),
     },
@@ -664,7 +664,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               type="number"
               value={row.discountBeforeTax}
               onChange={(e) => handleDiscountValueChange(index, e.target.value)}
-              className="w-full rounded px-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
+              className="w-full rounded px-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-base xl:text-[13px]"
               placeholder="0"
             />
           </div>
@@ -675,7 +675,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               onChange={(e) =>
                 handleDiscountPercentChange(index, e.target.value)
               }
-              className="w-full rounded pr-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
+              className="w-full rounded pr-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-base xl:text-[13px]"
               placeholder="0"
             />
             <span className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500">
@@ -697,7 +697,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               type="number"
               value={row.taxAmount}
               onChange={(e) => handleTaxValueChange(index, e.target.value)}
-              className="w-full rounded px-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
+              className="w-full rounded px-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-base xl:text-[13px]"
               placeholder="0"
             />
           </div>
@@ -706,7 +706,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
               type="number"
               value={row.taxPercentage}
               onChange={(e) => handleTaxPercentChange(index, e.target.value)}
-              className="w-full rounded pr-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
+              className="w-full rounded pr-4 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-base xl:text-[13px]"
               placeholder="0"
             />
             <span className="absolute right-1 top-1/2 -translate-y-1/2 text-gray-500">
@@ -734,7 +734,7 @@ const handleTaxPercentChange = (index: number, val: string) => {
             newItems.splice(index, 1);
             formik.setFieldValue("itemDetails", newItems);
           }}
-          className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
+          className="text-red-500 hover:text-red-700 p-2.5 xl:p-1 cursor-pointer"
         >
           <FaTrash size={14} />
         </button>

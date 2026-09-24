@@ -71,7 +71,7 @@ const DashboardPage = () => {
             <button
               key={i}
               type="button"
-              className="h-9 w-9 flex items-center justify-center rounded-lg text-gray-500 hover:bg-white hover:text-gray-800 hover:shadow-[var(--shadow-xs)] transition-all cursor-pointer"
+              className="h-11 w-11 xl:h-9 xl:w-9 flex items-center justify-center rounded-lg text-gray-500 hover:bg-white hover:text-gray-800 hover:shadow-[var(--shadow-xs)] transition-all cursor-pointer"
             >
               <Icon className="text-xl" />
             </button>

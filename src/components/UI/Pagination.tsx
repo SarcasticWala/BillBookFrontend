@@ -41,12 +41,12 @@ export const Pagination: React.FC<PaginationProps> = ({
       </span>
 
       {totalPages > 1 && (
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-center gap-1">
           <button
             type="button"
             onClick={() => onPageChange(page - 1)}
             disabled={page <= 1}
-            className="h-8 w-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="h-9 w-9 xl:h-8 xl:w-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             aria-label="Previous page"
           >
             <MdChevronLeft />
@@ -74,7 +74,7 @@ export const Pagination: React.FC<PaginationProps> = ({
             type="button"
             onClick={() => onPageChange(page + 1)}
             disabled={page >= totalPages}
-            className="h-8 w-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="h-9 w-9 xl:h-8 xl:w-8 flex items-center justify-center rounded-md border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             aria-label="Next page"
           >
             <MdChevronRight />
@@ -97,7 +97,7 @@ const PageBtn = ({
   <button
     type="button"
     onClick={() => onClick(p)}
-    className={`h-8 min-w-8 px-2 flex items-center justify-center rounded-md text-sm cursor-pointer transition-colors ${
+    className={`h-9 min-w-9 xl:h-8 xl:min-w-8 px-2 flex items-center justify-center rounded-md text-sm cursor-pointer transition-colors ${
       active
         ? "bg-primary text-white"
         : "border border-gray-200 text-gray-600 hover:bg-gray-50"

@@ -79,7 +79,7 @@ const BulkUploadModal = ({
     <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm animate-overlay-in z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl border border-slate-200/80 shadow-[var(--shadow-overlay)] animate-modal-in w-full max-w-lg p-4 sm:p-6 relative max-h-[90vh] overflow-y-auto mx-auto">
         <button
-          className="absolute top-2 right-2 sm:top-3 sm:right-4 text-gray-600 text-2xl leading-none hover:text-gray-900 flex items-center justify-center h-10 w-10"
+          className="absolute top-2 right-2 sm:top-3 sm:right-4 text-gray-600 text-2xl leading-none hover:text-gray-900 flex items-center justify-center h-11 w-11 xl:h-10 xl:w-10"
           onClick={onClose}
         >
           &times;

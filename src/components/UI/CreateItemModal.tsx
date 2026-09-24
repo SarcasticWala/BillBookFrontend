@@ -933,7 +933,7 @@ export const CreateItemModal = ({
                             />
                             <button
                               type="button"
-                              className="absolute top-1 right-1 bg-white text-red-500 rounded-full p-1 shadow hover:bg-red-100"
+                              className="absolute top-1 right-1 bg-white text-red-500 rounded-full p-2 xl:p-1 shadow hover:bg-red-100"
                               onClick={() =>
                                 setImages((prev) =>
                                   prev.filter((_, i) => i !== idx)

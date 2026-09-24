@@ -291,7 +291,7 @@ const handleTaxChange = (index: number, value: string) => {
           type="number"
           value={row.pricePerItem}
           onChange={(e) => handleValueChange(index, "pricePerItem", e.target.value)}
-          className="w-24 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
+          className="w-24 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-base xl:text-[13px]"
         />
       ),
     },
@@ -302,7 +302,7 @@ const handleTaxChange = (index: number, value: string) => {
           type="number"
           value={row.taxPercentage}
           onChange={(e) => handleTaxChange(index, e.target.value)}
-          className="w-20 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-[13px]"
+          className="w-20 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary focus:bg-white text-base xl:text-[13px]"
         />
       ),
     },
@@ -324,7 +324,7 @@ const handleTaxChange = (index: number, value: string) => {
             newItems.splice(index, 1);
             formik.setFieldValue("itemDetails", newItems);
           }}
-          className="text-red-500 hover:text-red-700 p-1 cursor-pointer"
+          className="text-red-500 hover:text-red-700 p-2.5 xl:p-1 cursor-pointer"
         >
           <FaTrash size={14} />
         </button>

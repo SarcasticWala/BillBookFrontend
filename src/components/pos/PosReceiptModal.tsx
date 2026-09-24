@@ -1,4 +1,4 @@
-import { PDFViewer, PDFDownloadLink } from "@react-pdf/renderer";
+import { PDFViewer, PDFDownloadLink, usePDF } from "@react-pdf/renderer";
 import { Modal } from "../UI/Modal";
 import { Button } from "../UI/Button";
 import { PosReceiptDocument, type PosReceiptDocumentProps } from "../../pdf/PosReceiptDocument";
@@ -10,6 +10,11 @@ interface PosReceiptModalProps extends PosReceiptDocumentProps {
 
 /** Same preview-before-download pattern as the invoice PDF modal. */
 export function PosReceiptModal({ isOpen, onClose, ...doc }: PosReceiptModalProps) {
+  // See InvoicePdfPreviewModal for why this needs its own print action:
+  // showToolbar={false} on the PDFViewer below hides the native toolbar
+  // (and its print button) that would otherwise come for free.
+  const [printInstance] = usePDF({ document: <PosReceiptDocument {...doc} /> });
+
   return (
     <Modal
       isOpen={isOpen}
@@ -21,12 +26,19 @@ export function PosReceiptModal({ isOpen, onClose, ...doc }: PosReceiptModalProp
           <Button variant="outline" onClick={onClose}>
             Close
           </Button>
+          <Button
+            variant="outline"
+            disabled={printInstance.loading || !printInstance.url}
+            onClick={() => printInstance.url && window.open(printInstance.url, "_blank")}
+          >
+            Print
+          </Button>
           <PDFDownloadLink
             document={<PosReceiptDocument {...doc} />}
             fileName={`receipt-${doc.invoiceNo}.pdf`}
           >
             {({ loading }) => (
-              <Button disabled={loading}>{loading ? "Preparing…" : "Download / Print"}</Button>
+              <Button disabled={loading}>{loading ? "Preparing…" : "Download"}</Button>
             )}
           </PDFDownloadLink>
         </>

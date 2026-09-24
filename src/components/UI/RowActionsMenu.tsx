@@ -81,7 +81,7 @@ export const RowActionsMenu = ({ actions }: { actions: RowAction[] }) => {
             openMenu();
           }
         }}
-        className="w-8 h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors cursor-pointer"
+        className="w-11 h-11 xl:w-8 xl:h-8 flex items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors cursor-pointer"
       >
         <BsThreeDotsVertical />
       </button>

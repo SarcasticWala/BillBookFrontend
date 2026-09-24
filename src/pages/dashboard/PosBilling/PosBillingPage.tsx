@@ -229,7 +229,7 @@ const PosBillingPage = () => {
           min={1}
           value={row.quantity}
           onChange={(e) => updateRow(index, Math.max(1, Number(e.target.value) || 1), row.pricePerItem)}
-          className="w-16 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary text-[13px]"
+          className="w-16 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary text-base xl:text-[13px]"
         />
       ),
     },
@@ -240,7 +240,7 @@ const PosBillingPage = () => {
           type="number"
           value={row.pricePerItem}
           onChange={(e) => updateRow(index, row.quantity, Number(e.target.value) || 0)}
-          className="w-24 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary text-[13px]"
+          className="w-24 rounded px-1 py-0.5 text-right bg-gray-50 border border-gray-200 focus:outline-none focus:border-primary text-base xl:text-[13px]"
         />
       ),
     },
@@ -263,7 +263,7 @@ const PosBillingPage = () => {
         <button
           type="button"
           onClick={() => removeRow(index)}
-          className="text-red-500 hover:text-red-700 p-1"
+          className="text-red-500 hover:text-red-700 p-2.5 xl:p-1"
         >
           <FaTrash size={13} />
         </button>
@@ -392,7 +392,7 @@ const PosBillingPage = () => {
                   <button
                     type="button"
                     onClick={() => setSplits((prev) => prev.filter((_, idx) => idx !== i))}
-                    className="text-red-500 hover:text-red-700 p-1"
+                    className="text-red-500 hover:text-red-700 p-2.5 xl:p-1"
                   >
                     <FaTrash size={13} />
                   </button>

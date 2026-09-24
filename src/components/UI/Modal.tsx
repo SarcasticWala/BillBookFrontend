@@ -50,7 +50,7 @@ export const Modal: React.FC<ModalProps> = ({
             </button>
           </div>
           {children}
-          {footer && <div className="mt-6 flex justify-end gap-3">{footer}</div>}
+          {footer && <div className="mt-6 flex flex-wrap justify-end gap-3">{footer}</div>}
         </Dialog.Panel>
       </div>
     </Dialog>

@@ -83,7 +83,9 @@ body {
     border-radius: 10px;
     padding: 0.575rem 0.8rem;
     background-color: #ffffff;
-    font-size: 0.875rem;
+    /* 16px below xl so iOS Safari doesn't auto-zoom on focus; restored to the
+       original 14px at xl+ (1280px) so desktop stays pixel-identical. */
+    font-size: 1rem;
     line-height: 1.35;
     color: #111827;
     outline: none;
@@ -93,7 +95,14 @@ body {
 
   .input-field::placeholder {
     color: #9ca3af;
-    font-size: 0.875rem;
+    font-size: 1rem;
+  }
+
+  @media (min-width: 1280px) {
+    .input-field,
+    .input-field::placeholder {
+      font-size: 0.875rem;
+    }
   }
 
   .input-field:hover:not(:disabled):not(:focus) {

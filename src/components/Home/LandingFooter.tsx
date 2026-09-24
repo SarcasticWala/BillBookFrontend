@@ -77,7 +77,7 @@ const LandingFooter: React.FC<LandingFooterProps> = ({ compact = false }) => {
                   href="#"
                   aria-label={label}
                   className={`rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-colors ${
-                    compact ? "w-7 h-7" : "w-9 h-9"
+                    compact ? "w-9 h-9 xl:w-7 xl:h-7" : "w-11 h-11 xl:w-9 xl:h-9"
                   }`}
                 >
                   <Icon className="w-4 h-4" />

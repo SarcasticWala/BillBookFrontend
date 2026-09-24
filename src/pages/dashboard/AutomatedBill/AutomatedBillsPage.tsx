@@ -87,7 +87,7 @@ const AutomatedBillsPage = () => {
             <button
               title="Pause"
               onClick={() => act(() => pauseTemplate(row.id).unwrap(), "Template paused")}
-              className="text-amber-600 hover:text-amber-700 p-1"
+              className="text-amber-600 hover:text-amber-700 p-2.5 xl:p-1"
             >
               <MdPauseCircleOutline size={20} />
             </button>
@@ -96,7 +96,7 @@ const AutomatedBillsPage = () => {
             <button
               title="Resume"
               onClick={() => act(() => resumeTemplate(row.id).unwrap(), "Template resumed")}
-              className="text-emerald-600 hover:text-emerald-700 p-1"
+              className="text-emerald-600 hover:text-emerald-700 p-2.5 xl:p-1"
             >
               <MdPlayCircleOutline size={20} />
             </button>
@@ -108,7 +108,7 @@ const AutomatedBillsPage = () => {
                 if (window.confirm("Cancel this recurring template? This can't be undone."))
                   act(() => cancelTemplate(row.id).unwrap(), "Template cancelled");
               }}
-              className="text-red-500 hover:text-red-700 p-1"
+              className="text-red-500 hover:text-red-700 p-2.5 xl:p-1"
             >
               <MdCancel size={20} />
             </button>

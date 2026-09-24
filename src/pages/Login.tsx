@@ -433,7 +433,7 @@ export default function AuthPage() {
                         set("mobile")(e.target.value.replace(/\D/g, "").slice(0, 10))
                       }
                       placeholder="Mobile number"
-                      className="w-full py-2.5 text-sm outline-none bg-transparent"
+                      className="w-full py-2.5 text-base xl:text-sm outline-none bg-transparent"
                     />
                   </div>
                   {errors.mobile && (
@@ -868,7 +868,7 @@ function Field({
         <input
           {...inputProps}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none bg-transparent"
+          className="w-full py-2.5 text-base xl:text-sm text-gray-900 placeholder:text-gray-400 outline-none bg-transparent"
         />
       </div>
       {error && <p className="mt-1 text-sm text-red-500">{error}</p>}
@@ -912,7 +912,7 @@ function PasswordField({
           onChange={(e) => onChange(e.target.value)}
           placeholder="••••••••"
           autoComplete={autoComplete}
-          className="w-full py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none bg-transparent"
+          className="w-full py-2.5 text-base xl:text-sm text-gray-900 placeholder:text-gray-400 outline-none bg-transparent"
         />
         <button
           type="button"

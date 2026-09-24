@@ -171,7 +171,7 @@ const Inventory = () => {
                 <button
                   onClick={() => handleCategoryRemove(id)}
                   aria-label="Remove filter"
-                  className="inline-flex items-center justify-center h-4 w-4 rounded-full text-blue-500 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer"
+                  className="inline-flex items-center justify-center h-6 w-6 xl:h-4 xl:w-4 rounded-full text-blue-500 hover:bg-blue-100 hover:text-blue-800 transition-colors cursor-pointer"
                 >
                   &times;
                 </button>

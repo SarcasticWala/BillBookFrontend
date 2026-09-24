@@ -88,7 +88,7 @@ const AdminDemoRequests: React.FC = () => {
           disabled={isUpdating}
           onClick={(e) => e.stopPropagation()}
           onChange={(e) => handleStatusChange(row.id, e.target.value)}
-          className="input-field bg-white !py-1.5 text-xs w-36"
+          className="input-field bg-white !py-1.5 text-base xl:text-xs w-36"
         >
           {statusOptions.map((s) => (
             <option key={s} value={s}>
