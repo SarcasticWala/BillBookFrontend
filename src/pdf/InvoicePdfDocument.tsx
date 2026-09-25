@@ -1,5 +1,6 @@
 import { Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
 import { format } from "date-fns";
+import { pdfEmbeddableImageSrc } from "./pdfImage";
 
 export interface InvoicePdfItemRow {
   itemName?: string;
@@ -224,6 +225,7 @@ const styles = StyleSheet.create({
 export function InvoicePdfDocument(props: InvoicePdfDocumentProps) {
   const { business } = props;
   const businessName = business.businessName?.trim() || business.name?.trim() || "Your Business";
+  const logoSrc = pdfEmbeddableImageSrc(business.logoUrl);
   const statusColor = STATUS_COLOR[props.status] || STATUS_COLOR.UNPAID;
 
   // Bottom-left slot: real payout details if we have a bank account with a
@@ -238,7 +240,7 @@ export function InvoicePdfDocument(props: InvoicePdfDocumentProps) {
         {/* Header */}
         <View style={styles.headerRow}>
           <View>
-            {business.logoUrl ? <Image src={business.logoUrl} style={styles.logo} /> : null}
+            {logoSrc ? <Image src={logoSrc} style={styles.logo} /> : null}
             <Text style={styles.businessName}>{businessName}</Text>
             {business.phone ? <Text style={styles.muted}>{business.phone}</Text> : null}
             {business.email ? <Text style={styles.muted}>{business.email}</Text> : null}
@@ -353,8 +355,8 @@ export function InvoicePdfDocument(props: InvoicePdfDocumentProps) {
                 </View>
               ) : null}
               <Text style={[styles.boxLabel, { marginTop: 8 }]}>Scan to Pay</Text>
-              {props.paymentQrDataUrl ? (
-                <Image src={props.paymentQrDataUrl} style={styles.qrImage} />
+              {pdfEmbeddableImageSrc(props.paymentQrDataUrl) ? (
+                <Image src={pdfEmbeddableImageSrc(props.paymentQrDataUrl)!} style={styles.qrImage} />
               ) : null}
             </View>
           )}
@@ -364,8 +366,8 @@ export function InvoicePdfDocument(props: InvoicePdfDocumentProps) {
               <Text style={[styles.footerText, { marginTop: 2 }]}>
                 IRN: {props.eInvoice!.irn}
               </Text>
-              {props.eInvoice!.qrDataUrl ? (
-                <Image src={props.eInvoice!.qrDataUrl} style={styles.qrImage} />
+              {pdfEmbeddableImageSrc(props.eInvoice!.qrDataUrl) ? (
+                <Image src={pdfEmbeddableImageSrc(props.eInvoice!.qrDataUrl)!} style={styles.qrImage} />
               ) : null}
             </View>
           )}

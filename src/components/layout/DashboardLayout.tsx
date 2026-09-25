@@ -8,6 +8,11 @@ import LandingFooter from "../Home/LandingFooter";
  * just the `compact` sizing — and it lives inside the scrollable area so it
  * only appears once a page is scrolled to the bottom instead of permanently
  * eating space on every screen.
+ *
+ * The per-route loading state lives on each route's own element (see
+ * `dashboardRoute` in App.tsx), not here — a boundary at this level stays
+ * mounted across navigations, and an already-mounted boundary does not show
+ * its fallback during a transition.
  */
 const DashboardLayout = () => (
   <div className="flex h-screen overflow-hidden">

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
-import { lazy, Suspense, useState, useEffect } from "react";
+import { lazy, Suspense, useState, useEffect, type ReactNode } from "react";
 import { BrandLoader } from "./components/UI/BrandLoader.tsx";
+import { PageSkeleton } from "./components/layout/PageSkeleton.tsx";
 import PartyDetail from "./components/Parties/PartyDetail.tsx";
 import { ItemDetailsPage } from "./components/items/ItemDetailsPage.tsx";
 import { InvoiceDetailPage } from "./components/invoices/InvoiceDetailPage.tsx";
@@ -83,6 +84,68 @@ function ScrollToTop() {
   return null;
 }
 
+/** Public marketing/auth pages — no auth check, no dashboard chrome. */
+const PUBLIC_ROUTES: Array<{ path: string; element: ReactNode }> = [
+  { path: "/", element: <Home /> },
+  { path: "login", element: <Login /> },
+  { path: "privacy-policy", element: <PrivacyPolicy /> },
+  { path: "terms-conditions", element: <TermsAndConditions /> },
+  { path: "refund-policy", element: <RefundPolicy /> },
+  { path: "features", element: <Features /> },
+  { path: "gst-e-invoicing", element: <EInvoicingInfo /> },
+  { path: "inventory-management", element: <InventoryInfo /> },
+  { path: "about", element: <About /> },
+  { path: "blog", element: <Blog /> },
+  { path: "contact", element: <Contact /> },
+];
+
+/**
+ * Every dashboard screen, each mounted inside its own keyed <Suspense>.
+ *
+ * React Router 7 runs navigations inside `startTransition`, and during a
+ * transition React deliberately keeps the *previously revealed* UI on screen
+ * rather than falling back to an already-mounted <Suspense> boundary. The URL
+ * and the Sidebar highlight are not suspended, so they update immediately:
+ * without a per-route boundary you get the new URL, the new sidebar highlight,
+ * and the *old page* still in the content area until the chunk lands — which
+ * reads as "the click did nothing". Locally the chunk is instant and this is
+ * invisible; over the network it is not.
+ *
+ * A *newly mounted* boundary does show its fallback mid-transition, hence the
+ * `key`: it is the route's own path, so a boundary is torn down and rebuilt
+ * exactly when the matched route changes. Wildcard sections (`items/*`,
+ * `sales/*`, `purchases/*`) keep one key across their whole subtree, so
+ * navigating inside them preserves the page's internal state.
+ */
+const DASHBOARD_ROUTES: Array<{ path: string; element: ReactNode }> = [
+  { path: "dashboard", element: <DashboardPage /> },
+  { path: "parties", element: <Parties_Page /> },
+  { path: "party/:id", element: <PartyDetail /> },
+  { path: "parties/create-party", element: <CreateParty /> },
+  { path: "parties/create-party/:id", element: <CreateParty /> },
+  { path: "items/*", element: <Items_page /> },
+  { path: "items/inventory/:id", element: <ItemDetailsPage /> },
+  { path: "sales/*", element: <SalesPage /> },
+  { path: "purchases/*", element: <PurchasePage /> },
+  { path: "reports", element: <ReportsPage /> },
+  { path: "cash-bank", element: <CashAndBankPage /> },
+  { path: "cash-bank/account/:id", element: <AccountDetailPage /> },
+  { path: "e-invoicing", element: <EInvoicingPage /> },
+  { path: "automated-bills", element: <AutomatedBillsPage /> },
+  { path: "expenses", element: <ExpensesPage /> },
+  { path: "settings", element: <SettingsPage /> },
+  { path: "book-demo", element: <BookDemoPage /> },
+  { path: "pos-billing", element: <PosBillingPage /> },
+  { path: "admin/demo-requests", element: <AdminDemoRequests /> },
+  { path: "create-category", element: <CreateCategory /> },
+  { path: "purchase/create-invoice", element: <CreatePurchaseForm /> },
+  { path: "sales/create-invoice", element: <CreateSalesForm /> },
+  { path: "sales/invoice/:id", element: <InvoiceDetailPage type="SALE" /> },
+  { path: "purchases/invoice/:id", element: <InvoiceDetailPage type="PURCHASE" /> },
+  { path: "sales/invoice/:id/edit", element: <CreateSalesForm /> },
+  { path: "purchases/invoice/:id/edit", element: <CreatePurchaseForm /> },
+];
+
 function App() {
   // Brief branded splash on initial app load, with a smooth fade-out.
   const [booting, setBooting] = useState(true);
@@ -98,17 +161,20 @@ function App() {
       <ErrorBoundary>
       <Suspense fallback={<BrandLoader visible />}>
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="login" element={<Login />} />
-        <Route path="privacy-policy" element={<PrivacyPolicy />} />
-        <Route path="terms-conditions" element={<TermsAndConditions />} />
-        <Route path="refund-policy" element={<RefundPolicy />} />
-        <Route path="features" element={<Features />} />
-        <Route path="gst-e-invoicing" element={<EInvoicingInfo />} />
-        <Route path="inventory-management" element={<InventoryInfo />} />
-        <Route path="about" element={<About />} />
-        <Route path="blog" element={<Blog />} />
-        <Route path="contact" element={<Contact />} />
+        {PUBLIC_ROUTES.map(({ path, element }) => (
+          <Route
+            key={path}
+            path={path}
+            element={
+              // Same keyed-boundary reasoning as DASHBOARD_ROUTES — these pages
+              // suspend on their own chunks too, so without this a click on
+              // "Features" leaves the Home page on screen until it arrives.
+              <Suspense key={path} fallback={<BrandLoader visible />}>
+                {element}
+              </Suspense>
+            }
+          />
+        ))}
 
         {/* Every child below requires auth (ProtectedRoute renders <Outlet/> or
             redirects to /login) AND gets the dashboard chrome (DashboardLayout).
@@ -116,39 +182,41 @@ function App() {
             that matches none of them falls through to the top-level "*" route
             below instead of ever reaching the auth check. */}
         <Route element={<ProtectedRoute />}>
-          <Route element={<DashboardLayout />}>
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="parties" element={<Parties_Page />} />
-            <Route path="party/:id" element={<PartyDetail />} />
-            <Route path="parties/create-party" element={<CreateParty />} />
-            <Route path="parties/create-party/:id" element={<CreateParty />} />
-            <Route path="items/*" element={<Items_page />} />
-            <Route path="items/inventory/:id" element={<ItemDetailsPage />} />
-            <Route path="sales/*" element={<SalesPage />} />
-            <Route path="purchases/*" element={<PurchasePage />} />
-            <Route path="reports" element={<ReportsPage />} />
-            <Route path="cash-bank" element={<CashAndBankPage />} />
-            <Route path="cash-bank/account/:id" element={<AccountDetailPage />} />
-            <Route path="e-invoicing" element={<EInvoicingPage />} />
-            <Route path="automated-bills" element={<AutomatedBillsPage />} />
-            <Route path="expenses" element={<ExpensesPage />} />
-            <Route path="settings" element={<SettingsPage />} />
-            <Route path="book-demo" element={<BookDemoPage />} />
-            <Route path="pos-billing" element={<PosBillingPage />} />
-            <Route path="admin/demo-requests" element={<AdminDemoRequests />} />
-            <Route path="create-category" element={<CreateCategory />} />
-            <Route path="purchase/create-invoice" element={<CreatePurchaseForm />} />
-            <Route path="sales/create-invoice" element={<CreateSalesForm />} />
-            <Route path="sales/invoice/:id" element={<InvoiceDetailPage type="SALE" />} />
-            <Route path="purchases/invoice/:id" element={<InvoiceDetailPage type="PURCHASE" />} />
-            <Route path="sales/invoice/:id/edit" element={<CreateSalesForm />} />
-            <Route path="purchases/invoice/:id/edit" element={<CreatePurchaseForm />} />
+          {/* The chrome is lazy too, so entering the dashboard from a public
+              page (e.g. straight after login) suspends here, one level above
+              the per-route boundaries below. Without its own boundary that
+              first entry leaves the previous public page on screen. */}
+          <Route
+            element={
+              <Suspense key="dashboard-chrome" fallback={<BrandLoader visible />}>
+                <DashboardLayout />
+              </Suspense>
+            }
+          >
+            {DASHBOARD_ROUTES.map(({ path, element }) => (
+              <Route
+                key={path}
+                path={path}
+                element={
+                  <Suspense key={path} fallback={<PageSkeleton />}>
+                    {element}
+                  </Suspense>
+                }
+              />
+            ))}
           </Route>
         </Route>
 
         {/* Genuinely unmatched URL, logged in or not — shown directly, no
             auth check, no dashboard chrome. */}
-        <Route path="*" element={<NotFoundPage />} />
+        <Route
+          path="*"
+          element={
+            <Suspense key="not-found" fallback={<BrandLoader visible />}>
+              <NotFoundPage />
+            </Suspense>
+          }
+        />
       </Routes>
       </Suspense>
       </ErrorBoundary>

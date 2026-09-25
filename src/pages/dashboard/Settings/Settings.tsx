@@ -35,7 +35,11 @@ const EMPTY: ProfileForm = {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 // Standard 15-char GSTIN format.
 const GSTIN_RE = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$/;
-const ALLOWED_LOGO_TYPES = ["image/png", "image/jpeg", "image/webp"];
+// PNG/JPEG only — deliberately *not* WebP. The logo is stored inline as a
+// data URI and re-embedded into every invoice PDF, and @react-pdf/renderer can
+// only embed JPG/PNG/SVG; a WebP logo made the whole PDF render throw, which
+// showed up as an invoice preview that never finished loading.
+const ALLOWED_LOGO_TYPES = ["image/png", "image/jpeg"];
 const MAX_LOGO_BYTES = 2 * 1024 * 1024;
 
 function validate(form: ProfileForm): FormErrors {
@@ -84,7 +88,7 @@ const SettingsPage: React.FC = () => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
-      toast.error("Only PNG, JPG, or WEBP images are allowed");
+      toast.error("Only PNG or JPG images are allowed");
       return;
     }
     if (file.size > MAX_LOGO_BYTES) {
@@ -206,7 +210,7 @@ const SettingsPage: React.FC = () => {
 
               <input
                 type="file"
-                accept="image/png,image/jpeg,image/webp"
+                accept="image/png,image/jpeg"
                 className="hidden"
                 onChange={handleLogoChange}
               />

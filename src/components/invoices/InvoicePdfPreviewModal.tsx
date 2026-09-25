@@ -26,7 +26,13 @@ export function InvoicePdfPreviewModal({
   }.pdf`;
 
   const [instance] = usePDF({ document: <InvoicePdfDocument {...doc} /> });
-  const ready = !instance.loading && !!instance.url;
+  // `usePDF` reports a failed render by setting `error` and leaving `url` null
+  // — it does NOT keep loading. Reading only `loading`/`url` therefore turned
+  // every render failure into a "Preparing preview…" that sat there forever
+  // with nothing said and nothing to do about it. Treat error as a distinct,
+  // visible state.
+  const failed = !!instance.error;
+  const ready = !instance.loading && !!instance.url && !failed;
 
   return (
     <Modal
@@ -47,7 +53,9 @@ export function InvoicePdfPreviewModal({
             Print
           </Button>
           <a href={instance.url || undefined} download={ready ? fileName : undefined}>
-            <Button disabled={!ready}>{ready ? "Download PDF" : "Preparing…"}</Button>
+            <Button disabled={!ready}>
+              {ready ? "Download PDF" : failed ? "Unavailable" : "Preparing…"}
+            </Button>
           </a>
         </>
       }
@@ -62,6 +70,16 @@ export function InvoicePdfPreviewModal({
             title={`Invoice ${doc.invoiceNo || ""}`}
             className="w-full h-full border-0"
           />
+        ) : failed ? (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2 px-6 text-center">
+            <div className="w-11 h-11 rounded-full bg-red-50 flex items-center justify-center text-xl">
+              ⚠️
+            </div>
+            <p className="text-sm text-gray-900">Couldn’t generate this PDF</p>
+            <p className="text-xs text-gray-500 max-w-md break-words">
+              {instance.error}
+            </p>
+          </div>
         ) : (
           <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
             Preparing preview…

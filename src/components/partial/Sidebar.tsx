@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useEffect, useMemo } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import BusinessInfo from "./BusinessInfo";
 import { useAuth } from "../../hooks/useAuth";
 import {
@@ -32,9 +32,12 @@ import {
   MdVerifiedUser,
 } from "react-icons/md";
 import { useGetMeQuery } from "../../features/auth/authApiSlice";
+import { matchNav } from "./sidebarNav";
 
 const Sidebar = () => {
-  const [active, setActive] = useState(() => localStorage.getItem("activeSidebar") || "");
+  const { pathname } = useLocation();
+  const activeNav = useMemo(() => matchNav(pathname), [pathname]);
+  const active = activeNav?.label ?? "";
   const [openItems, setOpenItems] = useState(false);
   const [openSales, setOpenSales] = useState(false);
   const [openPurchases, setOpenPurchases] = useState(false);
@@ -52,14 +55,7 @@ const Sidebar = () => {
   const handleLogout = () => {
     logout();
     closeMobile();
-    localStorage.removeItem("activeSidebar");
     navigate("/login", { replace: true });
-  };
-
-  const handleActive = (label: string) => {
-    setActive(label);
-    localStorage.setItem("activeSidebar", label);
-    closeMobile();
   };
 
   useEffect(() => {
@@ -67,22 +63,24 @@ const Sidebar = () => {
     return () => clearTimeout(timeout);
   }, []);
 
+  // Open the section the current route lives in. Only ever opens — a manual
+  // collapse stays collapsed until you navigate somewhere inside it.
   useEffect(() => {
-    if (["Inventory", "Godown"].includes(active)) setOpenItems(true);
-    if (
-      ["Sales Invoice", "Quotation / Estimate", "Payment In", "Sales Return", "Credit Note", "Proforma Invoice"].includes(active)
-    )
-      setOpenSales(true);
-    if (
-      ["Purchase Invoice", "Debit Note", "Purchase Return", "Payment Out", "Purchase Order"].includes(active)
-    )
-      setOpenPurchases(true);
-    if (
-      ["Cash & Bank", "E-Invoicing", "Automated Bills", "Expenses", "POS Billing"].includes(active)
-
-    )
-      setOpenAccounting(true);
-  }, [active]);
+    switch (activeNav?.group) {
+      case "Items":
+        setOpenItems(true);
+        break;
+      case "Sales":
+        setOpenSales(true);
+        break;
+      case "Purchases":
+        setOpenPurchases(true);
+        break;
+      case "Accounting":
+        setOpenAccounting(true);
+        break;
+    }
+  }, [activeNav]);
   const general = [
     { label: "Dashboard", icon: <MdDashboard />, path: "/dashboard" },
     { label: "Parties", icon: <MdGroups />, path: "/parties" },
@@ -110,7 +108,7 @@ const Sidebar = () => {
     <Link
       to={to}
       key={key}
-      onClick={() => handleActive(label)}
+      onClick={closeMobile}
       className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm cursor-pointer transition-colors ${active === label
         ? "bg-primary text-white font-medium shadow-sm"
         : "text-slate-300 hover:bg-slate-700/70 hover:text-white"
@@ -183,7 +181,7 @@ const Sidebar = () => {
         ) : (
         <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain px-4 pt-2 pb-10 space-y-6 hide-scrollbar">
           {/* Business Info Section — links to profile settings */}
-          <BusinessInfo onNavigate={() => handleActive("Settings")} />
+          <BusinessInfo onNavigate={closeMobile} />
 
           <Link
             to="/sales/create-invoice"
