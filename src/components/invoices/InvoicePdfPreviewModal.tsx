@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { usePDF } from "@react-pdf/renderer";
 import { Modal } from "../UI/Modal";
 import { Button } from "../UI/Button";
@@ -25,13 +26,67 @@ export function InvoicePdfPreviewModal({
     doc.invoiceNo || "draft"
   }.pdf`;
 
-  const [instance] = usePDF({ document: <InvoicePdfDocument {...doc} /> });
+  const [instance, update] = usePDF({ document: <InvoicePdfDocument {...doc} /> });
+
+  // A cheap signature of everything the document renders from. The two image
+  // fields can be megabytes of base64, so they contribute their *length*
+  // rather than their contents — enough to notice a change, cheap to compute
+  // every render.
+  const signature = JSON.stringify({
+    ...doc,
+    business: {
+      ...doc.business,
+      logoUrl: doc.business?.logoUrl?.length ?? 0,
+    },
+    paymentQrDataUrl: doc.paymentQrDataUrl?.length ?? 0,
+    eInvoice: doc.eInvoice
+      ? { irn: doc.eInvoice.irn, qr: doc.eInvoice.qrDataUrl?.length ?? 0 }
+      : null,
+  });
+
+  // `usePDF` builds its render pipeline in a `useEffect` with an EMPTY
+  // dependency array, so the document it captures at mount is the only one it
+  // ever renders — passing a new element on re-render does nothing. Anything
+  // that arrives after the modal opens (the business logo, the bank account
+  // behind the Scan-to-Pay QR, the profile itself) would silently never make
+  // it into the PDF. `update` is the library's escape hatch for exactly this;
+  // discarding it, as this component did, is what made the output stale.
+  const mounted = useRef(false);
+  useEffect(() => {
+    // Skip the first run: the mount effect inside usePDF has already queued
+    // this exact document, and re-queueing it just renders twice.
+    if (!mounted.current) {
+      mounted.current = true;
+      return;
+    }
+    update(<InvoicePdfDocument {...doc} />);
+    // `doc` is covered by `signature`; depending on it directly would re-fire
+    // on every render because the parent rebuilds `business` inline.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [signature, update]);
+
   // `usePDF` reports a failed render by setting `error` and leaving `url` null
   // — it does NOT keep loading. Reading only `loading`/`url` therefore turned
   // every render failure into a "Preparing preview…" that sat there forever
   // with nothing said and nothing to do about it. Treat error as a distinct,
   // visible state.
-  const failed = !!instance.error;
+  //
+  // The watchdog covers the other half: a render that neither resolves nor
+  // rejects. The library's success/error events come from an internal queue,
+  // and if one is never emitted `loading` stays true for good — an eternal
+  // spinner that tells the user nothing and leaves no trace to debug. After
+  // 20 seconds, say so.
+  const [timedOut, setTimedOut] = useState(false);
+  useEffect(() => {
+    if (!instance.loading) {
+      setTimedOut(false);
+      return;
+    }
+    const t = setTimeout(() => setTimedOut(true), 20_000);
+    return () => clearTimeout(t);
+  }, [instance.loading, signature]);
+
+  const failed = !!instance.error || timedOut;
   const ready = !instance.loading && !!instance.url && !failed;
 
   return (
@@ -77,7 +132,9 @@ export function InvoicePdfPreviewModal({
             </div>
             <p className="text-sm text-gray-900">Couldn’t generate this PDF</p>
             <p className="text-xs text-gray-500 max-w-md break-words">
-              {instance.error}
+              {instance.error
+                ? String(instance.error)
+                : "The preview didn’t finish rendering. Close and try again — if it keeps happening, the browser console will show why."}
             </p>
           </div>
         ) : (

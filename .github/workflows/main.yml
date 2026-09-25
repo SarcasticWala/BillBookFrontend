@@ -1,0 +1,52 @@
+name: CI
+
+# Runs on every push to main and on every PR targeting it, so a broken build
+# is caught when it is introduced rather than at deploy time.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  verify:
+    name: Typecheck, lint, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          # Matches the version this project is developed against.
+          node-version: '22'
+          # Needs package-lock.json, which this repo commits.
+          cache: 'npm'
+
+      # `npm ci` rather than `npm install`: it installs exactly what the
+      # lockfile pins and fails if package.json and the lockfile disagree,
+      # so CI can't silently drift from local.
+      - name: Install dependencies
+        run: npm ci
+
+      # Split out from `build` (which runs `tsc -b && vite build`) purely so a
+      # type error reports as "Typecheck" rather than as a build failure. The
+      # second `tsc -b` inside build is incremental, so this costs seconds.
+      - name: Typecheck
+        run: npx tsc -b
+
+      # NON-BLOCKING ON PURPOSE. The codebase currently has ~205 pre-existing
+      # ESLint errors, overwhelmingly `@typescript-eslint/no-explicit-any`.
+      # Making this blocking would paint CI permanently red, and a check that
+      # is always failing is one everybody learns to ignore — worse than no
+      # check at all. It runs so the count stays visible and can be burned
+      # down; once it reaches zero, delete `continue-on-error` and this comment
+      # so lint becomes a real gate.
+      - name: Lint (advisory — not yet blocking)
+        run: npm run lint
+        continue-on-error: true
+
+      - name: Build
+        run: npm run build
