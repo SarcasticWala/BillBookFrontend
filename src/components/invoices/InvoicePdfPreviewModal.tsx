@@ -1,4 +1,4 @@
-import { PDFViewer, PDFDownloadLink, usePDF } from "@react-pdf/renderer";
+import { usePDF } from "@react-pdf/renderer";
 import { Modal } from "../UI/Modal";
 import { Button } from "../UI/Button";
 import { InvoicePdfDocument, type InvoicePdfDocumentProps } from "../../pdf/InvoicePdfDocument";
@@ -9,9 +9,12 @@ interface InvoicePdfPreviewModalProps extends InvoicePdfDocumentProps {
 }
 
 /**
- * Preview-before-download: the same InvoicePdfDocument renders both the
- * on-screen preview (PDFViewer) and the actual downloaded file
- * (PDFDownloadLink), so what you see here is exactly what you get.
+ * Preview-before-download: a single shared render (`usePDF`) drives the
+ * on-screen preview, Print and Download — previously each of those used its
+ * own separate component (`PDFViewer`, a manual `usePDF`, `PDFDownloadLink`),
+ * which independently re-rendered the identical document three times in
+ * parallel and made every open of this modal three times slower than it
+ * needed to be for no benefit.
  */
 export function InvoicePdfPreviewModal({
   isOpen,
@@ -22,13 +25,8 @@ export function InvoicePdfPreviewModal({
     doc.invoiceNo || "draft"
   }.pdf`;
 
-  // The in-modal PDFViewer runs with showToolbar={false} (its native toolbar
-  // is Chrome-only and looks out of place inline), which also hides the
-  // print button that toolbar would otherwise provide — so there was
-  // previously no way to print at all short of downloading first. Opening
-  // the rendered PDF in a new tab hands it to the browser's own PDF viewer,
-  // which has real print/zoom controls on every major browser.
-  const [printInstance] = usePDF({ document: <InvoicePdfDocument {...doc} /> });
+  const [instance] = usePDF({ document: <InvoicePdfDocument {...doc} /> });
+  const ready = !instance.loading && !!instance.url;
 
   return (
     <Modal
@@ -43,23 +41,32 @@ export function InvoicePdfPreviewModal({
           </Button>
           <Button
             variant="outline"
-            disabled={printInstance.loading || !printInstance.url}
-            onClick={() => printInstance.url && window.open(printInstance.url, "_blank")}
+            disabled={!ready}
+            onClick={() => instance.url && window.open(instance.url, "_blank")}
           >
             Print
           </Button>
-          <PDFDownloadLink document={<InvoicePdfDocument {...doc} />} fileName={fileName}>
-            {({ loading }) => (
-              <Button disabled={loading}>{loading ? "Preparing…" : "Download PDF"}</Button>
-            )}
-          </PDFDownloadLink>
+          <a href={instance.url || undefined} download={ready ? fileName : undefined}>
+            <Button disabled={!ready}>{ready ? "Download PDF" : "Preparing…"}</Button>
+          </a>
         </>
       }
     >
       <div className="h-[70vh] rounded-lg overflow-hidden border border-slate-200/80">
-        <PDFViewer width="100%" height="100%" showToolbar={false}>
-          <InvoicePdfDocument {...doc} />
-        </PDFViewer>
+        {ready ? (
+          // Same technique PDFViewer uses internally (a blob: URL in an
+          // iframe) — just pointed at the one shared instance above instead
+          // of triggering its own independent render.
+          <iframe
+            src={`${instance.url}#toolbar=0`}
+            title={`Invoice ${doc.invoiceNo || ""}`}
+            className="w-full h-full border-0"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
+            Preparing preview…
+          </div>
+        )}
       </div>
     </Modal>
   );

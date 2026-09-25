@@ -1,4 +1,4 @@
-import { PDFViewer, PDFDownloadLink, usePDF } from "@react-pdf/renderer";
+import { usePDF } from "@react-pdf/renderer";
 import { Modal } from "../UI/Modal";
 import { Button } from "../UI/Button";
 import { PosReceiptDocument, type PosReceiptDocumentProps } from "../../pdf/PosReceiptDocument";
@@ -8,12 +8,13 @@ interface PosReceiptModalProps extends PosReceiptDocumentProps {
   onClose: () => void;
 }
 
-/** Same preview-before-download pattern as the invoice PDF modal. */
+/** Same single-shared-render pattern as InvoicePdfPreviewModal — see there
+ * for why (three independent renders of the same document was the actual
+ * cause of the modal being slow to open, not something to paper over). */
 export function PosReceiptModal({ isOpen, onClose, ...doc }: PosReceiptModalProps) {
-  // See InvoicePdfPreviewModal for why this needs its own print action:
-  // showToolbar={false} on the PDFViewer below hides the native toolbar
-  // (and its print button) that would otherwise come for free.
-  const [printInstance] = usePDF({ document: <PosReceiptDocument {...doc} /> });
+  const fileName = `receipt-${doc.invoiceNo}.pdf`;
+  const [instance] = usePDF({ document: <PosReceiptDocument {...doc} /> });
+  const ready = !instance.loading && !!instance.url;
 
   return (
     <Modal
@@ -28,26 +29,29 @@ export function PosReceiptModal({ isOpen, onClose, ...doc }: PosReceiptModalProp
           </Button>
           <Button
             variant="outline"
-            disabled={printInstance.loading || !printInstance.url}
-            onClick={() => printInstance.url && window.open(printInstance.url, "_blank")}
+            disabled={!ready}
+            onClick={() => instance.url && window.open(instance.url, "_blank")}
           >
             Print
           </Button>
-          <PDFDownloadLink
-            document={<PosReceiptDocument {...doc} />}
-            fileName={`receipt-${doc.invoiceNo}.pdf`}
-          >
-            {({ loading }) => (
-              <Button disabled={loading}>{loading ? "Preparing…" : "Download"}</Button>
-            )}
-          </PDFDownloadLink>
+          <a href={instance.url || undefined} download={ready ? fileName : undefined}>
+            <Button disabled={!ready}>{ready ? "Download" : "Preparing…"}</Button>
+          </a>
         </>
       }
     >
       <div className="h-[60vh] rounded-lg overflow-hidden border border-slate-200/80">
-        <PDFViewer width="100%" height="100%" showToolbar={false}>
-          <PosReceiptDocument {...doc} />
-        </PDFViewer>
+        {ready ? (
+          <iframe
+            src={`${instance.url}#toolbar=0`}
+            title={`Receipt ${doc.invoiceNo || ""}`}
+            className="w-full h-full border-0"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-sm text-gray-400">
+            Preparing receipt…
+          </div>
+        )}
       </div>
     </Modal>
   );
