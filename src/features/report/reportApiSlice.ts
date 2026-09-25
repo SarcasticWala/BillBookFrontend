@@ -35,6 +35,9 @@ export const reportApi = createApi({
     getStockSummary: builder.query<any, { lowStockOnly?: boolean }>({
       query: ({ lowStockOnly }) => `/stock-summary${qs({ lowStockOnly: lowStockOnly ? "true" : undefined })}`,
     }),
+    getReceivablesAging: builder.query<any, { asOf?: string } | void>({
+      query: (args) => `/receivables-aging${qs({ asOf: (args || {}).asOf })}`,
+    }),
   }),
 });
 
@@ -45,4 +48,5 @@ export const {
   useGetPartyOutstandingQuery,
   useGetPartyLedgerQuery,
   useGetStockSummaryQuery,
+  useGetReceivablesAgingQuery,
 } = reportApi;

@@ -16,6 +16,7 @@ import {
   useGetPartyOutstandingQuery,
   useGetPartyLedgerQuery,
   useGetStockSummaryQuery,
+  useGetReceivablesAgingQuery,
 } from "../../../../features/report/reportApiSlice";
 
 const inr = (v: unknown) => `₹${Number(v || 0).toLocaleString("en-IN")}`;
@@ -27,10 +28,11 @@ type ReportKey =
   | "partyOutstanding"
   | "partyLedger"
   | "stockSummary"
-  | "daybook";
+  | "daybook"
+  | "receivablesAging";
 
-// Only these six report labels are backed by real data right now — everything
-// else in `sections` below is a placeholder that shows a "coming soon" toast.
+// Only these labels are backed by real data right now — everything else in
+// `sections` below is a placeholder that shows a "coming soon" toast.
 const REPORT_KEYS: Record<string, ReportKey> = {
   "Sales Summary": "salesSummary",
   "Purchase Summary": "purchaseSummary",
@@ -38,6 +40,7 @@ const REPORT_KEYS: Record<string, ReportKey> = {
   "Party Statement (Ledger)": "partyLedger",
   "Stock Summary": "stockSummary",
   Daybook: "daybook",
+  "Receivable Aging Report": "receivablesAging",
 };
 
 const REPORT_TITLES: Record<ReportKey, string> = {
@@ -47,6 +50,7 @@ const REPORT_TITLES: Record<ReportKey, string> = {
   partyLedger: "Party Statement (Ledger)",
   stockSummary: "Stock Summary",
   daybook: "Daybook",
+  receivablesAging: "Receivable Aging Report",
 };
 
 const categories = ["Party", "Category", "Payment Collection", "Item", "Invoice Details", "Summary"];
@@ -433,6 +437,87 @@ const StockSummaryView: React.FC = () => {
   );
 };
 
+
+interface AgingRow {
+  partyId: string;
+  partyName: string;
+  mobileNo?: string;
+  notDue: number;
+  d0_30: number;
+  d31_60: number;
+  d61_90: number;
+  d90plus: number;
+  total: number;
+}
+
+const agingColumns: Column<AgingRow>[] = [
+  { header: "Party", accessor: "partyName" },
+  { header: "Not yet due", render: (_v, r) => inr(r.notDue) },
+  { header: "0-30", render: (_v, r) => inr(r.d0_30) },
+  { header: "31-60", render: (_v, r) => inr(r.d31_60) },
+  { header: "61-90", render: (_v, r) => inr(r.d61_90) },
+  {
+    header: "90+",
+    // The bucket that actually needs chasing, so it reads as a warning rather
+    // than as one more number in a row of five.
+    render: (_v, r) => (
+      <span className={r.d90plus > 0 ? "text-red-700 font-medium" : undefined}>
+        {inr(r.d90plus)}
+      </span>
+    ),
+  },
+  { header: "Total", render: (_v, r) => <strong>{inr(r.total)}</strong> },
+];
+
+const ReceivablesAgingView: React.FC = () => {
+  const { data, isFetching } = useGetReceivablesAgingQuery();
+  const res = data?.data;
+  const rows: AgingRow[] = res?.rows || [];
+  const openingNotAged = Number(res?.reconciliation?.openingBalancesNotAged || 0);
+
+  return (
+    <>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+        <StatCard label="Total Receivable" tone="primary" icon={<MdAttachMoney />} value={inr(res?.totals?.outstanding)} loading={isFetching} />
+        <StatCard label="Overdue" tone="warning" colorValue icon={<MdMoneyOff />} value={inr(res?.totals?.overdue)} loading={isFetching} />
+        <StatCard label="Parties" tone="neutral" icon={<MdReceiptLong />} value={res?.totals?.parties ?? 0} loading={isFetching} />
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-6">
+        {(res?.buckets || []).map((b: { key: string; label: string; amount: number }) => (
+          <Card key={b.key}>
+            <p className="text-xs light-font text-gray-600 uppercase tracking-wide">{b.label}</p>
+            <p
+              className={`text-lg primary-font mt-1 ${
+                b.key === "d90plus" && b.amount > 0 ? "text-red-700" : "text-gray-900"
+              }`}
+            >
+              {inr(b.amount)}
+            </p>
+          </Card>
+        ))}
+      </div>
+
+      <Card>
+        <Table
+          columns={agingColumns}
+          data={rows}
+          emptyMessage={isFetching ? "Loading..." : "Nothing outstanding - every customer is settled"}
+        />
+      </Card>
+
+      {openingNotAged > 0 && (
+        // Opening balances carry no date, so they cannot be aged. Saying so is
+        // the difference between a total that looks wrong and one that is
+        // explained -- see report.service.receivablesAging.
+        <p className="text-xs light-font text-gray-600 mt-3">
+          Excludes {inr(openingNotAged)} of opening balances, which carry no date and cannot be aged.
+        </p>
+      )}
+    </>
+  );
+};
+
 const ReportDetail: React.FC<{ reportKey: ReportKey; onBack: () => void }> = ({ reportKey, onBack }) => (
   <div>
     <PageHeader title={REPORT_TITLES[reportKey]} onBack={onBack} sticky={false} />
@@ -442,6 +527,7 @@ const ReportDetail: React.FC<{ reportKey: ReportKey; onBack: () => void }> = ({ 
     {reportKey === "partyOutstanding" && <PartyOutstandingView />}
     {reportKey === "partyLedger" && <PartyLedgerView />}
     {reportKey === "stockSummary" && <StockSummaryView />}
+    {reportKey === "receivablesAging" && <ReceivablesAgingView />}
   </div>
 );
 
