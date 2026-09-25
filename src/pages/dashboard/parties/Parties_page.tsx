@@ -40,8 +40,8 @@ export const Parties_Page = () => {
   return (
     <div className="secondary-font space-y-6">
       <div>
-        <h1 className="text-xl primary-font text-gray-900">Parties</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+        <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Parties</h1>
+        <p className="text-sm light-font text-gray-500 mt-0.5">
           Manage your customers and suppliers
         </p>
       </div>

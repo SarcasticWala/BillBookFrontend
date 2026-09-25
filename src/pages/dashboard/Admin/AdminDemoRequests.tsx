@@ -101,7 +101,7 @@ const AdminDemoRequests: React.FC = () => {
   ];
 
   return (
-    <div className="p-4 sm:p-6 secondary-font">
+    <div className="secondary-font">
       <div className="flex items-center gap-3 mb-1">
         <span className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center text-primary text-xl">
           <MdOutlineOndemandVideo />

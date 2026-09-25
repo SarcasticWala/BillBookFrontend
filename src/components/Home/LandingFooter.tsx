@@ -89,13 +89,16 @@ const LandingFooter: React.FC<LandingFooterProps> = ({ compact = false }) => {
           {/* Link columns */}
           {columns.map((col) => (
             <div key={col.title}>
-              <h4
+              {/* h3, not h4: this footer sits under pages whose deepest
+                  heading is the h2 in the page body, so an h4 skipped a level.
+                  The size is carried by the classes, not the tag. */}
+              <h3
                 className={`text-xs font-semibold uppercase tracking-wider text-slate-900 ${
                   compact ? "mb-2" : "mb-4"
                 }`}
               >
                 {col.title}
-              </h4>
+              </h3>
               <ul className={compact ? "space-y-1.5" : "space-y-3"}>
                 {col.links.map((l) => (
                   <li key={l.label}>

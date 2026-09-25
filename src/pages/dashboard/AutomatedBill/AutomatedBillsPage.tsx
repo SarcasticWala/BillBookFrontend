@@ -169,7 +169,7 @@ const AutomatedBillsPage = () => {
   return (
     <div className="secondary-font">
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-xl primary-font text-gray-900">Automated Bills</h1>
+        <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Automated Bills</h1>
         {!creating && (
           <Button onClick={() => setCreating(true)}>
             <FiPlus /> New Template

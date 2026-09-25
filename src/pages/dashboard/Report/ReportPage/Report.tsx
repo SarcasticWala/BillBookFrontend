@@ -464,14 +464,14 @@ const ReportPage = () => {
 
   if (selectedReport) {
     return (
-      <div className="p-4 sm:p-6 min-h-full secondary-font">
+      <div className="min-h-full secondary-font">
         <ReportDetail reportKey={selectedReport} onBack={() => setSelectedReport(null)} />
       </div>
     );
   }
 
   return (
-    <div className="p-4 sm:p-6 min-h-full secondary-font">
+    <div className="min-h-full secondary-font">
       {/* Page header */}
       <div className="mb-6 pr-10 sm:pr-0">
         <h1 className="text-xl sm:text-2xl primary-font text-gray-900">Reports</h1>

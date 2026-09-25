@@ -13,6 +13,15 @@ export const authApi = createApi({
       query: () => "/me",
       providesTags: ["Auth"],
     }),
+    // The business logo lives on its own endpoint because it is an inline
+    // base64 data URI: bundling it into /me made every authenticated page load
+    // block on a ~1.6 MB response. Only the three screens that actually render
+    // it (sidebar avatar, Settings preview, invoice PDF) pull it, and RTK Query
+    // shares one cached copy between them.
+    getLogo: builder.query<any, void>({
+      query: () => "/logo",
+      providesTags: ["Auth"],
+    }),
     updateProfile: builder.mutation<any, FormData | Record<string, unknown>>({
       query: (body) => ({ url: "/profile", method: "PUT", body }),
       invalidatesTags: ["Auth"],
@@ -20,4 +29,4 @@ export const authApi = createApi({
   }),
 });
 
-export const { useGetMeQuery, useUpdateProfileMutation } = authApi;
+export const { useGetMeQuery, useGetLogoQuery, useUpdateProfileMutation } = authApi;

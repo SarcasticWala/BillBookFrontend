@@ -287,7 +287,7 @@ const PosBillingPage = () => {
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
           <MdPointOfSale className="text-2xl text-primary" />
-          <h1 className="text-xl primary-font text-gray-900">POS Billing</h1>
+          <h1 className="text-xl sm:text-2xl primary-font text-gray-900">POS Billing</h1>
         </div>
         <div>
           {party ? (

@@ -55,8 +55,11 @@ const DashboardPage = () => {
     minute: "2-digit",
   });
 
+  // No page-level padding here: DashboardLayout's <main> already applies
+  // `p-4 sm:p-6`. Repeating it double-padded the page, which is why this title
+  // sat lower and further right than the ones on pages that don't.
   return (
-    <div className="secondary-font min-h-full bg-slate-50 p-4 sm:p-6 space-y-6">
+    <div className="secondary-font min-h-full bg-slate-50 space-y-6">
       {/* HEADER */}
       <div className="flex flex-wrap justify-between items-center gap-4">
         <div className="pr-10 sm:pr-0">

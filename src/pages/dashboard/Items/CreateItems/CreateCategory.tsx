@@ -7,7 +7,7 @@ const CreateCategoryPage: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <div className="secondary-font p-4 sm:p-6">
+    <div className="secondary-font">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-lg sm:text-xl primary-font text-gray-900">Manage Categories</h1>

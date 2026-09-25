@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { MdSettings } from "react-icons/md";
-import { useGetMeQuery } from "../../features/auth/authApiSlice";
+import { useGetMeQuery, useGetLogoQuery } from "../../features/auth/authApiSlice";
 
 interface BusinessInfoProps {
   /** Called when the block is clicked (e.g. to mark active / close mobile nav). */
@@ -10,13 +10,19 @@ interface BusinessInfoProps {
 /** Sidebar account header — shows the logged-in business profile and links to Settings. */
 const BusinessInfo: React.FC<BusinessInfoProps> = ({ onNavigate }) => {
   const { data: meData } = useGetMeQuery();
+  // Fetched separately from the profile so a large logo can't hold up the
+  // sidebar (or, via /me, the whole dashboard) — the initial shows until it
+  // arrives. `user.hasLogo` says whether one exists without downloading it.
+  const { data: logoData } = useGetLogoQuery(undefined, {
+    skip: !meData?.data?.hasLogo,
+  });
   const user = meData?.data;
 
   const businessName =
     user?.businessName?.trim() || user?.name?.trim() || "Business Name";
   const phone = user?.phone || "";
   const initial = businessName.charAt(0).toUpperCase() || "B";
-  const logoUrl = user?.logoUrl || "";
+  const logoUrl = logoData?.data?.logoUrl || "";
 
   return (
     <div className="pb-4 border-b border-slate-700/70">

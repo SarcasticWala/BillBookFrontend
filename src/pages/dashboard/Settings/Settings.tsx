@@ -4,8 +4,10 @@ import { toast } from "react-toastify";
 import { MdPhotoCamera } from "react-icons/md";
 import {
   useGetMeQuery,
+  useGetLogoQuery,
   useUpdateProfileMutation,
 } from "../../../features/auth/authApiSlice";
+import { downscaleImageFile } from "../../../lib/downscaleImage";
 import { Card } from "../../../components/UI/Card";
 import { Input } from "../../../components/UI/Input";
 import { Textarea } from "../../../components/UI/Textarea";
@@ -61,6 +63,7 @@ function validate(form: ProfileForm): FormErrors {
 const SettingsPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: meData, isLoading } = useGetMeQuery();
+  const { data: logoData } = useGetLogoQuery();
   const [updateProfile, { isLoading: isSaving }] = useUpdateProfileMutation();
   const [form, setForm] = useState<ProfileForm>(EMPTY);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -80,11 +83,16 @@ const SettingsPage: React.FC = () => {
         state: user.state || "",
         address: user.address || "",
       });
-      setLogoPreview(user.logoUrl || "");
     }
   }, [user]);
 
-  const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // The logo is no longer part of /me (it is a multi-megabyte data URI) — it
+  // comes from its own endpoint, so hydrate the preview separately.
+  useEffect(() => {
+    if (logoData?.data?.logoUrl) setLogoPreview(logoData.data.logoUrl);
+  }, [logoData]);
+
+  const handleLogoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (!ALLOWED_LOGO_TYPES.includes(file.type)) {
@@ -95,8 +103,12 @@ const SettingsPage: React.FC = () => {
       toast.error("Image must be under 2MB");
       return;
     }
-    setLogoFile(file);
-    setLogoPreview(URL.createObjectURL(file));
+    // Downscale before it ever reaches the server: the logo is stored inline
+    // as base64 and re-embedded in every invoice PDF, so a full-resolution
+    // upload is paid on every page load forever after.
+    const resized = await downscaleImageFile(file);
+    setLogoFile(resized);
+    setLogoPreview(URL.createObjectURL(resized));
   };
 
   const setField =
@@ -137,7 +149,7 @@ const SettingsPage: React.FC = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 w-full secondary-font">
+    <div className="w-full secondary-font">
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
         <div>
           <h1 className="text-2xl primary-font text-gray-900 tracking-tight">Settings</h1>

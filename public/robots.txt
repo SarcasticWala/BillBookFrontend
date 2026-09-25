@@ -1,0 +1,32 @@
+User-agent: *
+Allow: /$
+Allow: /features
+Allow: /gst-e-invoicing
+Allow: /inventory-management
+Allow: /about
+Allow: /blog
+Allow: /contact
+Allow: /privacy-policy
+Allow: /terms-conditions
+Allow: /refund-policy
+
+# Everything below the sign-in wall. These return the SPA shell to a crawler,
+# never real data, but there is nothing here worth indexing.
+Disallow: /dashboard
+Disallow: /parties
+Disallow: /party/
+Disallow: /items
+Disallow: /sales
+Disallow: /purchase
+Disallow: /purchases
+Disallow: /reports
+Disallow: /cash-bank
+Disallow: /e-invoicing
+Disallow: /automated-bills
+Disallow: /expenses
+Disallow: /settings
+Disallow: /book-demo
+Disallow: /pos-billing
+Disallow: /create-category
+Disallow: /admin/
+Disallow: /login

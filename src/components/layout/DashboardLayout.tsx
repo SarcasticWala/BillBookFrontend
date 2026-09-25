@@ -19,9 +19,11 @@ const DashboardLayout = () => (
     <Sidebar />
     <div className="flex-1 min-w-0 h-screen overflow-hidden sm:ml-60 flex flex-col bg-white">
       <div className="app-content flex-1 overflow-y-auto flex flex-col">
-        <div className="p-4 sm:p-6 w-full max-w-9xl mx-auto flex-1">
+        {/* <main> so screen-reader users can jump past the sidebar to the
+            page body — the document previously had no main landmark at all. */}
+        <main className="p-4 sm:p-6 w-full max-w-9xl mx-auto flex-1">
           <Outlet />
-        </div>
+        </main>
         <LandingFooter compact />
       </div>
     </div>

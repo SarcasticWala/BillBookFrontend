@@ -4,9 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vecteezy_bill-vector-icon-design_20783125.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="BillBook is GST billing, invoicing and inventory software for Indian small businesses — create GST-correct invoices, track stock, run a POS counter and see who owes you."
+    />
+
+    <!-- The font CSS is render-blocking and the font files it pulls sit on a
+         second origin, so without these the browser only starts the DNS/TLS
+         handshake for fonts.gstatic.com after the CSS has already arrived.
+         crossorigin is required on the gstatic hint: fonts are fetched in CORS
+         mode, and a hint without it opens a connection that can't be reused. -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Keep the full 100..900 axis even though only 400/500/600/700 are used:
+         Google serves that as ONE variable file per family per subset, but a
+         narrowed range (e.g. 400..700) downgrades to static instances — a
+         separate file per weight, i.e. four downloads per family instead of
+         one. Verified against the live CSS endpoint. -->
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Inter:wght@100..900&display=swap" rel="stylesheet">
 
-     
     <title>Bill Book</title>
   </head>
   <body>

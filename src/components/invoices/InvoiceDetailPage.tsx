@@ -11,7 +11,7 @@ import {
   useGetPurchaseByIdQuery,
   useDeletePurchaseMutation,
 } from "../../features/purchase/purchaseApiSlice";
-import { useGetMeQuery } from "../../features/auth/authApiSlice";
+import { useGetMeQuery, useGetLogoQuery } from "../../features/auth/authApiSlice";
 import { useGetAccountsQuery } from "../../features/account/accountApiSlice";
 import {
   useSubmitEInvoiceMutation,
@@ -21,6 +21,7 @@ import { useQrDataUrl } from "../../hooks/useQrDataUrl";
 import { Badge } from "../UI/Badge";
 import { Button } from "../UI/Button";
 import { PageHeader } from "../UI/PageHeader";
+import { Shimmer } from "../UI/Shimmer";
 import { FormSection } from "../UI/FormSection";
 import { Table, type Column } from "../Table/Table";
 
@@ -58,6 +59,11 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
   const deleting = deletingSale || deletingPurchase;
 
   const { data: meData } = useGetMeQuery();
+  // The logo is no longer on /me; the PDF needs it, so pull it from its own
+  // (shared, cached) endpoint and merge it back into `business` below.
+  const { data: logoData } = useGetLogoQuery(undefined, {
+    skip: !meData?.data?.hasLogo,
+  });
   const { data: accountsData } = useGetAccountsQuery(undefined);
   const [pdfOpen, setPdfOpen] = useState(false);
 
@@ -108,9 +114,29 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
   };
 
   if (isLoading) {
+    // Mirrors the real layout below rather than a short centred spinner. The
+    // old h-64 box was ~256px tall and the loaded invoice runs well past
+    // 1000px, so swapping one for the other shoved the page footer down the
+    // screen — that single swap was the page's entire Cumulative Layout Shift
+    // (0.676, its only failing Core Web Vital). Reserving the space up front
+    // costs nothing and removes the jump.
     return (
-      <div className="flex justify-center items-center h-64 text-gray-500 secondary-font">
-        Loading invoice…
+      <div className="secondary-font" aria-busy="true" aria-label="Loading invoice">
+        <Shimmer className="h-10 w-64 rounded-lg" />
+        <section className="mt-5 bg-white rounded-xl border border-slate-200/80 shadow-[var(--shadow-card)] p-4 sm:p-5">
+          <Shimmer className="h-5 w-40 rounded" />
+          <Shimmer className="mt-3 h-4 w-56 rounded" />
+          <div className="mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[0, 1, 2, 3].map((i) => (
+              <Shimmer key={i} className="h-[72px] rounded-xl" />
+            ))}
+          </div>
+        </section>
+        <div className="mt-5 grid grid-cols-1 lg:grid-cols-2 gap-5">
+          <Shimmer className="h-72 rounded-xl" />
+          <Shimmer className="h-72 rounded-xl" />
+        </div>
+        <Shimmer className="mt-5 h-56 rounded-xl" />
       </div>
     );
   }
@@ -454,7 +480,7 @@ export const InvoiceDetailPage = ({ type }: { type: InvoiceType }) => {
             status={status}
             notes={inv.notes}
             termsAndConditions={inv.termsAndConditions}
-            business={meData?.data || {}}
+            business={{ ...(meData?.data || {}), logoUrl: logoData?.data?.logoUrl }}
             eInvoice={eInvoiceGenerated ? { irn: eInvoice.irn, qrDataUrl: eInvoiceQr } : undefined}
             bankAccount={
               payoutAccount
@@ -494,12 +520,15 @@ const Metric = ({
         : "border-slate-200/80 bg-slate-50"
     }`}
   >
-    <span className="block text-xs secondary-font text-gray-500 uppercase tracking-wide">
+    {/* gray-600 over gray-500, and red-700 over red-600: at this size and on
+        the tinted tile backgrounds the lighter pair fell under the 4.5:1
+        contrast minimum. */}
+    <span className="block text-xs secondary-font text-gray-600 uppercase tracking-wide">
       {label}
     </span>
     <span
       className={`block text-base primary-font mt-1 ${
-        danger ? "text-red-600" : accent ? "text-primary" : "text-gray-900"
+        danger ? "text-red-700" : accent ? "text-primary" : "text-gray-900"
       }`}
     >
       {value}
